@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F5C842">
+<title>Hatch &amp; Batch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --yolk:#F5C842;--yolk-deep:#E6B020;--yolk-pale:#FEF3C0;--yolk-soft:#FDF6D8;
+  --cream:#FFFBEE;--cream2:#FDF3D0;--beige:#F5E6C0;--beige2:#EDD89A;
+  --brown:#8B6914;--brown-light:#C4980A;
+  --text:#3D2C00;--text-mid:#7A5C1E;--text-light:#B8924A;
+  --white:#FFFFFF;--border:#EDD89A;--border-light:#F5E6C0;
+  --shadow:rgba(139,105,20,0.12);--danger:#E05C3A;--danger-pale:#FDE8E0;
+}
+html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:var(--text)}
+.app{width:100%;max-width:430px;margin:0 auto;background:var(--cream);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;position:relative}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:hidden;flex-shrink:0}
+.tb-blob1{position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.15);border-radius:50%;pointer-events:none}
+.tb-blob2{position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:50%;pointer-events:none}
+.logo-row{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
+.logo-svg{width:76px;height:76px;margin-bottom:6px;filter:drop-shadow(0 3px 8px rgba(139,105,20,0.2))}
+.brand-name{font-family:'Fredoka',sans-serif;font-size:26px;font-weight:700;color:var(--text);letter-spacing:0.3px;line-height:1}
+.brand-tag{font-size:11px;font-weight:600;color:var(--brown);letter-spacing:0.8px;margin-top:3px;margin-bottom:14px}
+.search-wrap{background:rgba(255,255,255,0.55);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:16px;border:1.5px solid rgba(255,255,255,0.7);position:relative;z-index:1}
+.search-wrap input{background:transparent;border:none;outline:none;color:var(--text);font-size:14px;flex:1;font-family:'Nunito',sans-serif;font-weight:600}
+.search-wrap input::placeholder{color:var(--brown-light)}
+.s-icon{color:var(--brown);font-size:16px;flex-shrink:0}
+.clear-btn{background:none;border:none;color:var(--brown);font-size:18px;cursor:pointer;line-height:1;padding:0;display:none}
+
+/* ── STATS ── */
+.stats-row{display:flex;gap:8px;padding:14px 16px 6px;flex-shrink:0}
+.stat-card{flex:1;background:var(--white);border-radius:14px;padding:10px 12px;border:1.5px solid var(--border-light);text-align:center}
+.stat-num{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.stat-label{font-size:10px;font-weight:700;color:var(--text-light);letter-spacing:0.8px;margin-top:2px}
+
+/* ── TAG CLOUD ── */
+.tag-cloud{padding:8px 16px 4px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.tc{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--text-mid);background:var(--white);cursor:pointer;transition:all 0.15s;letter-spacing:0.2px;user-select:none}
+.tc.active{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
+
+.sec-lbl{padding:10px 18px 6px;font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.8px;flex-shrink:0}
+
+/* ── LIST ── */
+.list{flex:1;padding:0 14px 10px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch}
+
+/* ── CARD ── */
+.card{background:var(--white);border-radius:18px;border:1.5px solid var(--border-light);overflow:hidden;cursor:pointer;transition:border-color 0.18s,box-shadow 0.18s;box-shadow:0 2px 8px var(--shadow);flex-shrink:0}
+.card.selected{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.3)}
+.vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden}
+.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--cream2))}
+.vp-play{width:36px;height:36px;background:var(--yolk);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--yolk-deep)}
+.vp-tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid var(--brown);margin-left:3px}
+.vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
+.drive-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:4px}
+.db-dot{width:6px;height:6px;border-radius:50%;background:var(--yolk-deep)}
+.card-body{padding:12px 14px 14px}
+.card-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:7px;letter-spacing:0.1px}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:50px 20px;color:var(--text-light)}
+.empty-icon{font-size:46px;margin-bottom:12px}
+.empty-t{font-family:'Fredoka',sans-serif;font-size:18px;color:var(--text-mid);margin-bottom:4px}
+.empty-s{font-size:13px;font-weight:600}
+
+/* ── DETAIL PANEL ── */
+.detail-panel{background:var(--cream2);border-top:2px solid var(--border);padding:14px 16px 16px;flex-shrink:0}
+.dp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
+.dp-title{font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;color:var(--text);line-height:1.25;flex:1}
+.dp-open{background:var(--yolk);color:var(--text);font-size:11px;font-weight:700;padding:7px 13px;border-radius:10px;border:1.5px solid var(--yolk-deep);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0;text-decoration:none;display:inline-block}
+.dp-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.dp-tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--beige);color:var(--brown);border:1px solid var(--beige2)}
+.nlabel{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:5px}
+.nbox{width:100%;border:1.5px solid var(--border);border-radius:12px;padding:10px 12px;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);background:var(--white);resize:none;min-height:58px;outline:none;font-weight:600;line-height:1.5;transition:border-color 0.15s}
+.nbox:focus{border-color:var(--yolk-deep)}
+.dp-btns{display:flex;gap:8px;margin-top:9px}
+.btn-sv{padding:9px 20px;font-size:13px;font-weight:700;border-radius:10px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);cursor:pointer;font-family:'Nunito',sans-serif;transition:opacity 0.15s}
+.btn-sv:active{opacity:0.8}
+.btn-dl{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-light);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s}
+.btn-dl:hover{border-color:var(--danger);color:var(--danger)}
+.ai-btn{width:100%;margin-top:9px;padding:10px;font-size:13px;font-weight:700;border-radius:12px;border:1.5px solid var(--beige2);background:var(--white);color:var(--brown);cursor:pointer;font-family:'Nunito',sans-serif;transition:background 0.15s}
+.ai-btn:hover{background:var(--yolk-soft)}
+
+/* ── TOAST ── */
+.toast-wrap{padding:0 16px 4px;flex-shrink:0}
+.toast{background:var(--brown);color:var(--white);font-size:12px;font-weight:700;padding:10px 18px;border-radius:12px;text-align:center;display:none;letter-spacing:0.3px}
+.toast.show{display:block}
+.toast.error{background:var(--danger)}
+
+/* ── FAB ── */
+.fab-area{padding:10px 18px 24px;display:flex;justify-content:flex-end;flex-shrink:0}
+.fab{width:56px;height:56px;border-radius:50%;background:var(--yolk);border:2.5px solid var(--yolk-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(230,176,32,0.45);transition:transform 0.15s;font-size:28px;font-weight:700;color:var(--text);line-height:1;font-family:'Nunito',sans-serif}
+.fab:active{transform:scale(0.92)}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+.modal{background:var(--cream);border-radius:24px 24px 0 0;padding:0 0 env(safe-area-inset-bottom,24px);width:100%;max-width:430px;max-height:92dvh;display:flex;flex-direction:column}
+.modal-header{padding:16px 18px 0;flex-shrink:0}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:var(--text)}
+.modal-sub{font-size:12px;font-weight:600;color:var(--text-light);margin-top:2px;margin-bottom:16px}
+.modal-body{overflow-y:auto;padding:0 18px;flex:1;-webkit-overflow-scrolling:touch}
+.modal-footer{padding:14px 18px 20px;flex-shrink:0}
+
+.upload-zone{border:2px dashed var(--beige2);border-radius:18px;padding:22px;text-align:center;cursor:pointer;margin-bottom:14px;background:var(--yolk-soft);transition:all 0.18s;user-select:none}
+.upload-zone:hover,.upload-zone:active{border-color:var(--yolk-deep);background:var(--yolk-pale)}
+.uz-icon{font-size:30px;margin-bottom:6px}
+.uz-label{font-size:13px;font-weight:700;color:var(--brown);margin-bottom:2px}
+.uz-hint{font-size:11px;color:var(--text-light);font-weight:600}
+.uz-success{color:var(--brown);font-size:13px;font-weight:700;margin-top:4px}
+
+.div-or{display:flex;align-items:center;gap:10px;margin:12px 0}
+.div-or span{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px}
+.div-or hr{flex:1;border:none;border-top:1.5px solid var(--border)}
+
+.drive-row{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.drive-ico{width:32px;height:32px;background:var(--yolk-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
+.drive-row input{flex:1;border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);font-weight:600;background:transparent;min-width:0}
+.drive-row input::placeholder{color:var(--text-light)}
+.paste-btn{padding:6px 12px;border-radius:8px;background:var(--yolk-pale);border:1.5px solid var(--beige2);font-size:11px;font-weight:700;color:var(--brown);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0}
+
+.field{margin-bottom:14px}
+.field label{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;display:block;margin-bottom:5px}
+.field input{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:12px 13px;font-size:14px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s;-webkit-appearance:none}
+.field input:focus{border-color:var(--yolk-deep)}
+.field input::placeholder{color:var(--text-light)}
+
+.tiw{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color 0.15s;min-height:46px}
+.tiw:focus-within{border-color:var(--yolk-deep)}
+.ti-tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2);display:flex;align-items:center;gap:5px;user-select:none}
+.ti-rm{cursor:pointer;color:var(--yolk-deep);font-size:16px;line-height:1;font-weight:700;padding:0 2px}
+.tiw input{border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);background:transparent;min-width:90px;flex:1;font-weight:600}
+.tsug-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;margin-bottom:4px}
+.tsug{font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:var(--white);color:var(--text-mid);border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;user-select:none}
+.tsug:hover,.tsug:active{background:var(--yolk-pale);color:var(--brown);border-color:var(--beige2)}
+
+.prev-vid{width:100%;border-radius:12px;max-height:130px;object-fit:cover;margin-bottom:12px;display:block}
+.m-btns{display:flex;gap:8px}
+.m-cancel{flex:1;padding:14px;border-radius:14px;border:1.5px solid var(--border);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
+.m-save{flex:2;padding:14px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.m-save:active{opacity:0.85}
+
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
+.confirm-box{background:var(--cream);border-radius:20px;padding:24px 20px;width:100%;max-width:320px;text-align:center}
+.confirm-icon{font-size:36px;margin-bottom:10px}
+.confirm-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
+.confirm-msg{font-size:13px;font-weight:600;color:var(--text-mid);margin-bottom:18px;line-height:1.5}
+.confirm-btns{display:flex;gap:8px}
+.c-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
+.c-del{flex:1;padding:12px;border-radius:12px;border:none;background:var(--danger);color:var(--white);font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="tb-blob1"></div>
+    <div class="tb-blob2"></div>
+    <div class="logo-row">
+      <svg class="logo-svg" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Egg shell bottom -->
+        <ellipse cx="38" cy="56" rx="23" ry="14" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5"/>
+        <!-- Left shell piece -->
+        <path d="M15 56 Q15 44 24 39 L28 41 L23 48 L18 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Right shell piece -->
+        <path d="M61 56 Q61 44 52 39 L48 41 L53 48 L58 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+        <!-- Crack line -->
+        <path d="M28 41 L32 36 L36 41 L40 35 L44 41 L48 41" stroke="#C4980A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <!-- Chick body -->
+        <ellipse cx="38" cy="44" rx="13" ry="13" fill="#F5C842"/>
+        <!-- Chick head -->
+        <ellipse cx="38" cy="29" rx="10.5" ry="10.5" fill="#F5C842"/>
+        <!-- Eyes -->
+        <circle cx="34" cy="27" r="2.3" fill="#3D2C00"/>
+        <circle cx="34.7" cy="26.3" r="0.75" fill="white"/>
+        <circle cx="42" cy="27" r="2.3" fill="#3D2C00"/>
+        <circle cx="42.7" cy="26.3" r="0.75" fill="white"/>
+        <!-- Beak -->
+        <path d="M36 31 L38 34.5 L40 31 Z" fill="#E6B020"/>
+        <!-- Wings -->
+        <ellipse cx="26" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(-18 26 46)"/>
+        <ellipse cx="50" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(18 50 46)"/>
+        <!-- Blush -->
+        <ellipse cx="30.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+        <ellipse cx="45.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+        <!-- Feather tuft -->
+        <path d="M35 19.5 Q38 13.5 41 19.5" stroke="#E6B020" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <!-- Egg rim -->
+        <ellipse cx="38" cy="56" rx="23" ry="14" fill="none" stroke="#C4980A" stroke-width="1.5"/>
+      </svg>
+      <div class="brand-name">Hatch &amp; Batch</div>
+      <div class="brand-tag">koleksi video resepi kau ✨</div>
+    </div>
+    <div class="search-wrap">
+      <span class="s-icon">🔍</span>
+      <input type="text" id="search" placeholder="Cari nama masakan atau tag..." autocomplete="off">
+      <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">RESEPI</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-tags">0</div><div class="stat-label">TAG</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-drive">0</div><div class="stat-label">DI DRIVE</div></div>
+  </div>
+
+  <!-- TAG CLOUD -->
+  <div id="tag-cloud" class="tag-cloud"></div>
+  <div class="sec-lbl" id="sec-lbl">SEMUA RESEPI</div>
+
+  <!-- LIST -->
+  <div class="list" id="list"></div>
+
+  <!-- DETAIL PANEL -->
+  <div id="detail-panel" class="detail-panel" style="display:none"></div>
+
+  <!-- TOAST -->
+  <div class="toast-wrap"><div class="toast" id="toast"></div></div>
+
+  <!-- FAB -->
+  <div class="fab-area"><button class="fab" id="fab" aria-label="Tambah resepi baru">+</button></div>
+</div>
+
+<!-- MODAL & CONFIRM rendered here -->
+<div id="portal"></div>
+
+<script>
+// ── DATA ──
+const STORE_KEY = 'hatchbatch_v2';
+
+function loadData() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return [
+    {id:1, title:'Rendang Tok Perak', tags:['daging lembu','rempah','santan'], notes:'Masak 3 jam baru kering betul', driveUrl:'https://drive.google.com', videoData:null, videoName:null},
+    {id:2, title:'Gulai Ikan Kembung', tags:['ikan kembung','santan','kunyit'], notes:'', driveUrl:'https://drive.google.com', videoData:null, videoName:null},
+    {id:3, title:'Tumis Sayur Kobis', tags:['sayur kobis','sos tiram','bawang putih'], notes:'Jangan masak lama sangat', driveUrl:'', videoData:null, videoName:'kobis.mp4'},
+    {id:4, title:'Ayam Goreng Berempah', tags:['ayam','rempah','kunyit'], notes:'Garing luar, lembut dalam', driveUrl:'', videoData:null, videoName:'ayam_goreng.mp4'},
+    {id:5, title:'Sup Tulang Merah', tags:['tulang','rempah','tomato'], notes:'Tambah kentang lagi sedap', driveUrl:'https://drive.google.com', videoData:null, videoName:null},
+  ];
+}
+
+function saveData() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(recipes)); } catch(e) {
+    showToast('Storage penuh! Cuba padam resepi lama.', true);
+  }
+}
+
+let recipes = loadData();
+let nextId = recipes.reduce((m, r) => Math.max(m, r.id), 0) + 1;
+let selId = null, searchQ = '', activeTag = '';
+let pTags = [], pVideo = null;
+
+// ── HELPERS ──
+function allTags() {
+  const c = {};
+  recipes.forEach(r => r.tags.forEach(t => { c[t] = (c[t]||0)+1; }));
+  return Object.entries(c).sort((a,b) => b[1]-a[1]).map(e => e[0]);
+}
+
+function filtered() {
+  const q = searchQ.toLowerCase().trim();
+  return recipes.filter(r => {
+    const mq = !q || r.title.toLowerCase().includes(q) || r.tags.some(t => t.toLowerCase().includes(q));
+    const mt = !activeTag || r.tags.includes(activeTag);
+    return mq && mt;
+  });
+}
+
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => { t.className = 'toast'; }, 2200);
+}
+
+function clearSearch() {
+  document.getElementById('search').value = '';
+  searchQ = ''; activeTag = '';
+  document.getElementById('clear-btn').style.display = 'none';
+  document.getElementById('sec-lbl').textContent = 'SEMUA RESEPI';
+  renderCloud(); renderList();
+}
+
+// ── RENDER STATS ──
+function renderStats() {
+  document.getElementById('s-total').textContent = recipes.length;
+  document.getElementById('s-tags').textContent = allTags().length;
+  document.getElementById('s-drive').textContent = recipes.filter(r => r.driveUrl && r.driveUrl.trim()).length;
+}
+
+// ── RENDER TAG CLOUD ──
+function renderCloud() {
+  const tags = allTags().slice(0, 14);
+  const el = document.getElementById('tag-cloud');
+  if (!tags.length) { el.innerHTML = ''; return; }
+  el.innerHTML = `<span class="tc${!activeTag?' active':''}" data-tag="">Semua</span>`
+    + tags.map(t => `<span class="tc${activeTag===t?' active':''}" data-tag="${escHtml(t)}">${escHtml(t)}</span>`).join('');
+  el.querySelectorAll('.tc').forEach(c => c.addEventListener('click', function() {
+    activeTag = this.dataset.tag;
+    document.getElementById('sec-lbl').textContent = activeTag ? activeTag.toUpperCase() : 'SEMUA RESEPI';
+    renderCloud(); renderList();
+  }));
+}
+
+// ── RENDER LIST ──
+function renderList() {
+  renderStats();
+  const items = filtered();
+  const el = document.getElementById('list');
+  if (!items.length) {
+    el.innerHTML = `<div class="empty"><div class="empty-icon">🐣</div><div class="empty-t">Takde resepi jumpa</div><div class="empty-s">Cuba keyword atau tag lain</div></div>`;
+    return;
+  }
+  el.innerHTML = items.map(r => {
+    const sel = selId === r.id ? ' selected' : '';
+    const hasDrive = r.driveUrl && r.driveUrl.trim();
+    let vidEl;
+    if (r.videoData) {
+      vidEl = `<div class="vid-wrap"><video src="${r.videoData}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video></div>`;
+    } else {
+      vidEl = `<div class="vid-wrap"><div class="vid-placeholder">
+        ${hasDrive ? `<div class="drive-badge"><div class="db-dot"></div>Google Drive</div>` : ''}
+        <div class="vp-play"><div class="vp-tri"></div></div>
+        <div class="vp-label">${r.videoName ? escHtml(r.videoName) : (hasDrive ? 'Tap untuk buka Drive' : 'Tiada video')}</div>
+      </div></div>`;
+    }
+    return `<div class="card${sel}" onclick="selCard(${r.id})">
+      ${vidEl}
+      <div class="card-body">
+        <div class="card-title">${escHtml(r.title)}</div>
+        <div class="tag-row">${r.tags.map(t => `<span class="tag">${escHtml(t)}</span>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ── SELECT CARD ──
+function selCard(id) {
+  selId = selId === id ? null : id;
+  renderList();
+  renderDetail();
+}
+
+// ── RENDER DETAIL ──
+function renderDetail() {
+  const dp = document.getElementById('detail-panel');
+  if (!selId) { dp.style.display = 'none'; return; }
+  const r = recipes.find(x => x.id === selId);
+  if (!r) { dp.style.display = 'none'; return; }
+  dp.style.display = 'block';
+  const openBtn = r.driveUrl && r.driveUrl.trim()
+    ? `<a class="dp-open" href="${escAttr(r.driveUrl)}" target="_blank" rel="noopener">Buka Drive ↗</a>`
+    : '';
+  dp.innerHTML = `
+    <div class="dp-head">
+      <div class="dp-title">${escHtml(r.title)}</div>
+      ${openBtn}
+    </div>
+    <div class="dp-tags">${r.tags.map(t => `<span class="dp-tag">${escHtml(t)}</span>`).join('')}</div>
+    <div class="nlabel">NOTA PERIBADI</div>
+    <textarea class="nbox" id="nta" placeholder="Tips, ubahsuai, masa masak...">${escHtml(r.notes)}</textarea>
+    <div class="dp-btns">
+      <button class="btn-sv" onclick="saveNote(${r.id})">💾 Simpan</button>
+      <button class="btn-dl" onclick="confirmDelete(${r.id})">Padam</button>
+    </div>
+    <button class="ai-btn" onclick="askAI(${r.id})">✨ Suggest resepi guna bahan yang sama</button>`;
+  dp.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── SAVE NOTE ──
+function saveNote(id) {
+  const r = recipes.find(x => x.id === id);
+  const ta = document.getElementById('nta');
+  if (!r || !ta) return;
+  r.notes = ta.value;
+  saveData();
+  showToast('✓ Nota disimpan!');
+}
+
+// ── CONFIRM DELETE ──
+function confirmDelete(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+  const portal = document.getElementById('portal');
+  portal.innerHTML = `<div class="confirm-overlay" id="conf-overlay">
+    <div class="confirm-box">
+      <div class="confirm-icon">🗑️</div>
+      <div class="confirm-title">Padam Resepi?</div>
+      <div class="confirm-msg">"${escHtml(r.title)}" akan dipadam. Tak boleh undo.</div>
+      <div class="confirm-btns">
+        <button class="c-cancel" onclick="closeConfirm()">Batal</button>
+        <button class="c-del" onclick="doDelete(${id})">Padam</button>
+      </div>
+    </div>
+  </div>`;
+}
+function closeConfirm() { document.getElementById('portal').innerHTML = ''; }
+function doDelete(id) {
+  recipes = recipes.filter(x => x.id !== id);
+  selId = null;
+  saveData(); closeConfirm();
+  document.getElementById('detail-panel').style.display = 'none';
+  renderCloud(); renderList();
+  showToast('Resepi dipadam.');
+}
+
+// ── AI SUGGEST ──
+function askAI(id) {
+  const r = recipes.find(x => x.id === id);
+  if (r && typeof sendPrompt === 'function') {
+    sendPrompt('Aku ada bahan/tag: ' + r.tags.join(', ') + '. Boleh suggest resepi lain yang sesuai?');
+  }
+}
+
+// ── SEARCH ──
+document.getElementById('search').addEventListener('input', function() {
+  searchQ = this.value;
+  activeTag = '';
+  document.getElementById('clear-btn').style.display = this.value ? 'block' : 'none';
+  document.getElementById('sec-lbl').textContent = searchQ ? 'HASIL CARIAN' : 'SEMUA RESEPI';
+  renderCloud(); renderList();
+});
+
+// ── FAB → OPEN MODAL ──
+document.getElementById('fab').addEventListener('click', showModal);
+
+// ── SHOW MODAL ──
+function showModal(editId=null) {
+  pTags = []; pVideo = null;
+  const isEdit = editId !== null;
+  const r = isEdit ? recipes.find(x => x.id === editId) : null;
+  if (isEdit && r) { pTags = [...r.tags]; }
+
+  const portal = document.getElementById('portal');
+  portal.innerHTML = `<div class="modal-overlay" id="m-overlay">
+    <div class="modal" id="modal">
+      <div class="modal-header">
+        <div class="modal-handle"></div>
+        <div class="modal-title">${isEdit ? 'Edit Resepi' : 'Tambah Resepi'}</div>
+        <div class="modal-sub">Upload video atau paste link Google Drive</div>
+      </div>
+      <div class="modal-body" id="modal-body">
+        <div class="upload-zone" id="uzone" onclick="document.getElementById('vin').click()">
+          <div class="uz-icon">🎬</div>
+          <div class="uz-label">Upload dari peranti</div>
+          <div class="uz-hint">Tap untuk pilih video (MP4, MOV)</div>
+        </div>
+        <input type="file" id="vin" accept="video/*" style="display:none">
+        <div id="vprev"></div>
+        <div class="div-or"><hr><span>ATAU</span><hr></div>
+        <div class="drive-row">
+          <div class="drive-ico">💾</div>
+          <input id="m-url" type="url" placeholder="Paste link Google Drive video..." value="${isEdit && r ? escAttr(r.driveUrl||'') : ''}" inputmode="url">
+          <button class="paste-btn" onclick="doPaste()">Paste</button>
+        </div>
+        <div class="field">
+          <label>NAMA MASAKAN *</label>
+          <input id="m-title" placeholder="cth: Gulai Ikan Kembung" value="${isEdit && r ? escAttr(r.title) : ''}" maxlength="80">
+        </div>
+        <div class="field">
+          <label>TAG — Enter atau koma untuk tambah</label>
+          <div class="tiw" id="tiw" onclick="document.getElementById('tin').focus()">
+            <div id="tchips"></div>
+            <input id="tin" placeholder="ayam, santan, rempah..." autocomplete="off" autocorrect="off">
+          </div>
+          <div id="tsugs" class="tsug-row"></div>
+        </div>
+        ${isEdit && r ? `<div class="field"><label>NOTA</label><textarea class="nbox" id="m-notes" style="margin-top:0" placeholder="Tips, ubahsuai...">${escHtml(r.notes)}</textarea></div>` : ''}
+      </div>
+      <div class="modal-footer">
+        <div class="m-btns">
+          <button class="m-cancel" onclick="closeModal()">Batal</button>
+          <button class="m-save" onclick="doSave(${editId||'null'})">${isEdit ? 'Kemaskini' : 'Simpan Resepi'}</button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  renderMTags(); renderSugs('');
+
+  // Close on overlay tap
+  document.getElementById('m-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  const tin = document.getElementById('tin');
+  tin.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      addTag(tin.value); tin.value = '';
+      renderSugs('');
+    } else if (e.key === 'Backspace' && !tin.value && pTags.length) {
+      pTags.pop(); renderMTags();
+    }
+  });
+  tin.addEventListener('input', () => renderSugs(tin.value));
+
+  document.getElementById('vin').addEventListener('change', function() {
+    const f = this.files[0]; if (!f) return;
+    // Check file size (warn if > 100MB)
+    if (f.size > 100 * 1024 * 1024) {
+      showToast('Video besar (>100MB). Mungkin lambat sikit.', true);
+    }
+    document.getElementById('uzone').innerHTML = `<div class="uz-icon">✅</div><div class="uz-label">${escHtml(f.name)}</div><div class="uz-hint">Video berjaya dipilih</div>`;
+    const reader = new FileReader();
+    reader.onload = e => {
+      pVideo = { name: f.name, data: e.target.result };
+      document.getElementById('vprev').innerHTML = `<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`;
+    };
+    reader.onerror = () => showToast('Gagal baca video. Cuba lagi.', true);
+    reader.readAsDataURL(f);
+    const t = document.getElementById('m-title');
+    if (!t.value) t.value = f.name.replace(/\.[^.]+$/, '').replace(/[_\-]/g, ' ').trim();
+  });
+}
+
+// ── TAG HELPERS ──
+function addTag(v) {
+  const t = v.trim().replace(/,+$/, '').toLowerCase().trim();
+  if (t && !pTags.includes(t) && pTags.length < 20) pTags.push(t);
+  renderMTags();
+}
+function renderMTags() {
+  const el = document.getElementById('tchips'); if (!el) return;
+  el.innerHTML = pTags.map((t, i) =>
+    `<span class="ti-tag">${escHtml(t)}<span class="ti-rm" onclick="rmTag(${i})">×</span></span>`
+  ).join('');
+}
+function rmTag(i) { pTags.splice(i, 1); renderMTags(); }
+function renderSugs(q) {
+  const el = document.getElementById('tsugs'); if (!el) return;
+  const ex = allTags().filter(t => !pTags.includes(t) && (!q || t.includes(q.toLowerCase()))).slice(0, 10);
+  el.innerHTML = ex.map(t => `<span class="tsug" onclick="addSug('${escAttr(t)}')">${escHtml(t)}</span>`).join('');
+}
+function addSug(t) {
+  if (!pTags.includes(t)) pTags.push(t);
+  renderMTags();
+  renderSugs(document.getElementById('tin')?.value || '');
+}
+
+// ── PASTE URL ──
+async function doPaste() {
+  try {
+    const t = await navigator.clipboard.readText();
+    const el = document.getElementById('m-url');
+    if (el) el.value = t;
+  } catch(e) {
+    showToast('Clipboard tidak accessible. Paste manual ya.', true);
+  }
+}
+
+// ── CLOSE MODAL ──
+function closeModal() {
+  document.getElementById('portal').innerHTML = '';
+  pTags = []; pVideo = null;
+}
+
+// ── SAVE / UPDATE RECIPE ──
+function doSave(editId) {
+  const title = document.getElementById('m-title').value.trim();
+  if (!title) { showToast('Isi nama masakan dulu!', true); return; }
+
+  const raw = document.getElementById('tin').value.trim();
+  if (raw) addTag(raw);
+
+  const url = (document.getElementById('m-url').value || '').trim();
+  const notesEl = document.getElementById('m-notes');
+  const notes = notesEl ? notesEl.value : '';
+
+  if (editId !== null && editId !== 'null') {
+    // UPDATE existing
+    const r = recipes.find(x => x.id === editId);
+    if (r) {
+      r.title = title;
+      r.tags = [...pTags];
+      r.driveUrl = url;
+      r.notes = notes;
+      if (pVideo) { r.videoData = pVideo.data; r.videoName = pVideo.name; }
+    }
+    showToast('✓ Resepi dikemaskini!');
+  } else {
+    // CREATE new
+    recipes.unshift({
+      id: nextId++, title, tags: [...pTags], notes,
+      driveUrl: url,
+      videoData: pVideo ? pVideo.data : null,
+      videoName: pVideo ? pVideo.name : null
+    });
+    showToast('✓ Resepi baru disimpan!');
+  }
+
+  saveData(); closeModal();
+  renderCloud(); renderList();
+}
+
+// ── XSS PROTECTION ──
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+function escAttr(s) {
+  if (!s) return '';
+  return String(s).replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
+
+// ── INIT ──
+renderCloud();
+renderList();
+</script>
+</body>
+</html>
