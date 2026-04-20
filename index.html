@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="theme-color" content="#F5C842">
 <title>Hatch &amp; Batch</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -17,12 +16,13 @@
   --brown:#8B6914;--brown-light:#C4980A;
   --text:#3D2C00;--text-mid:#7A5C1E;--text-light:#B8924A;
   --white:#FFFFFF;--border:#EDD89A;--border-light:#F5E6C0;
-  --shadow:rgba(139,105,20,0.12);--danger:#E05C3A;
+  --shadow:rgba(139,105,20,0.12);--danger:#E05C3A;--danger-pale:#FDE8E0;
+  --green:#52B788;--green-pale:#D8F3DC;
 }
 html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:var(--text)}
 .app{width:100%;max-width:430px;margin:0 auto;background:var(--cream);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 
-/* ── TOPBAR ── */
+/* TOPBAR */
 .topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:hidden;flex-shrink:0}
 .tb-blob1{position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.15);border-radius:50%;pointer-events:none}
 .tb-blob2{position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:50%;pointer-events:none}
@@ -30,62 +30,82 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .logo-svg{width:76px;height:76px;margin-bottom:6px;filter:drop-shadow(0 3px 8px rgba(139,105,20,0.2))}
 .brand-name{font-family:'Fredoka',sans-serif;font-size:26px;font-weight:700;color:var(--text);letter-spacing:0.3px;line-height:1}
 .brand-tag{font-size:11px;font-weight:600;color:var(--brown);letter-spacing:0.8px;margin-top:3px;margin-bottom:14px}
-.topbar-actions{position:absolute;top:20px;right:18px;z-index:2;display:flex;gap:8px}
-.icon-btn{background:rgba(255,255,255,0.3);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background 0.15s}
-.icon-btn:hover{background:rgba(255,255,255,0.5)}
+.topbar-actions{position:absolute;top:20px;right:18px;z-index:2}
+.icon-btn{background:rgba(255,255,255,0.3);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
 .search-wrap{background:rgba(255,255,255,0.55);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:16px;border:1.5px solid rgba(255,255,255,0.7);position:relative;z-index:1}
 .search-wrap input{background:transparent;border:none;outline:none;color:var(--text);font-size:14px;flex:1;font-family:'Nunito',sans-serif;font-weight:600}
 .search-wrap input::placeholder{color:var(--brown-light)}
 .clear-btn{background:none;border:none;color:var(--brown);font-size:20px;cursor:pointer;line-height:1;padding:0;display:none}
 
-/* ── SYNC STATUS BAR ── */
+/* SYNC BAR */
 .sync-bar{background:var(--cream2);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-mid);flex-shrink:0}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--beige2);flex-shrink:0;transition:background 0.3s}
-.sync-dot.ok{background:#52B788}
-.sync-dot.syncing{background:var(--yolk-deep);animation:pulse 1s infinite}
+.sync-dot.ok{background:var(--green)}
+.sync-dot.syncing{background:var(--yolk-deep);animation:blink 1s infinite}
 .sync-dot.err{background:var(--danger)}
-.sync-dot.local{background:var(--beige2)}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
 .sync-btn{margin-left:auto;background:none;border:1.5px solid var(--border);border-radius:8px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif}
 
-/* ── STATS ── */
+/* STATS */
 .stats-row{display:flex;gap:8px;padding:14px 16px 6px;flex-shrink:0}
 .stat-card{flex:1;background:var(--white);border-radius:14px;padding:10px 12px;border:1.5px solid var(--border-light);text-align:center}
 .stat-num{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:var(--text);line-height:1}
 .stat-label{font-size:10px;font-weight:700;color:var(--text-light);letter-spacing:0.8px;margin-top:2px}
 
-/* ── TAG CLOUD ── */
+/* TAG CLOUD */
 .tag-cloud{padding:8px 16px 4px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
 .tc{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--text-mid);background:var(--white);cursor:pointer;transition:all 0.15s;user-select:none}
 .tc.active{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
 .sec-lbl{padding:10px 18px 6px;font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.8px;flex-shrink:0}
 
-/* ── LIST ── */
+/* LIST */
 .list{flex:1;padding:0 14px 10px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-/* ── CARD ── */
-.card{background:var(--white);border-radius:18px;border:1.5px solid var(--border-light);overflow:hidden;cursor:pointer;transition:border-color 0.18s,box-shadow 0.18s;box-shadow:0 2px 8px var(--shadow);flex-shrink:0}
+/* ── SWIPEABLE CARD ── */
+.card-outer{position:relative;border-radius:18px;overflow:hidden;flex-shrink:0}
+/* action buttons behind card */
+.card-actions{position:absolute;inset:0;display:flex;align-items:stretch;border-radius:18px;overflow:hidden}
+.ca-edit{flex:1;background:#4A90D9;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:none;font-family:'Nunito',sans-serif}
+.ca-del{flex:1;background:var(--danger);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;border:none;font-family:'Nunito',sans-serif}
+.ca-icon{font-size:22px}
+.ca-label{font-size:11px;font-weight:700;color:#fff;letter-spacing:0.3px}
+/* actual card sits on top, slides to reveal actions */
+.card{background:var(--white);border-radius:18px;border:1.5px solid var(--border-light);overflow:hidden;cursor:pointer;box-shadow:0 2px 8px var(--shadow);position:relative;z-index:1;transform:translateX(0);transition:transform 0.25s cubic-bezier(0.25,0.46,0.45,0.94);will-change:transform;touch-action:pan-y}
 .card.selected{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.3)}
+.card.swiped{transform:translateX(-140px)}
+
+/* card inner */
 .vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden}
-.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.vid-wrap img,.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block}
 .vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--cream2))}
 .vp-play{width:36px;height:36px;background:var(--yolk);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--yolk-deep)}
 .vp-tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid var(--brown);margin-left:3px}
 .vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
 .drive-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:4px}
 .db-dot{width:6px;height:6px;border-radius:50%;background:var(--yolk-deep)}
+.swipe-hint{position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.85);border-radius:6px;padding:2px 7px;font-size:9px;font-weight:700;color:var(--text-light)}
 .card-body{padding:12px 14px 14px}
 .card-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:7px}
 .tag-row{display:flex;gap:5px;flex-wrap:wrap}
 .tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2)}
 
-/* ── EMPTY ── */
+/* EMPTY */
 .empty{text-align:center;padding:50px 20px;color:var(--text-light)}
 .empty-icon{font-size:46px;margin-bottom:12px}
 .empty-t{font-family:'Fredoka',sans-serif;font-size:18px;color:var(--text-mid);margin-bottom:4px}
 .empty-s{font-size:13px;font-weight:600}
 
-/* ── DETAIL PANEL ── */
+/* ── PAGINATION ── */
+.pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px 4px;flex-shrink:0}
+.pg-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-mid);transition:all 0.15s}
+.pg-btn:disabled{opacity:0.35;cursor:not-allowed}
+.pg-btn:not(:disabled):hover{border-color:var(--yolk-deep);background:var(--yolk-pale)}
+.pg-info{font-size:12px;font-weight:700;color:var(--text-mid);padding:0 8px;min-width:80px;text-align:center}
+.pg-dot-row{display:flex;gap:5px;align-items:center}
+.pg-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all 0.2s}
+.pg-dot.active{background:var(--yolk-deep);width:18px;border-radius:4px}
+
+/* DETAIL PANEL */
 .detail-panel{background:var(--cream2);border-top:2px solid var(--border);padding:14px 16px 16px;flex-shrink:0}
 .dp-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px}
 .dp-title{font-family:'Fredoka',sans-serif;font-size:17px;font-weight:600;color:var(--text);line-height:1.25;flex:1}
@@ -100,19 +120,20 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .btn-dl{padding:9px 16px;font-size:13px;font-weight:700;border-radius:10px;border:1.5px solid var(--border);background:transparent;color:var(--text-light);cursor:pointer;font-family:'Nunito',sans-serif}
 .ai-btn{width:100%;margin-top:9px;padding:10px;font-size:13px;font-weight:700;border-radius:12px;border:1.5px solid var(--beige2);background:var(--white);color:var(--brown);cursor:pointer;font-family:'Nunito',sans-serif}
 
-/* ── TOAST ── */
+/* TOAST */
 .toast-wrap{padding:0 16px 4px;flex-shrink:0}
 .toast{font-size:12px;font-weight:700;padding:10px 18px;border-radius:12px;text-align:center;display:none;letter-spacing:0.3px;background:var(--brown);color:var(--white)}
 .toast.show{display:block}
 .toast.err{background:var(--danger)}
 .toast.warn{background:var(--brown-light)}
+.toast.ok{background:var(--green)}
 
-/* ── FAB ── */
+/* FAB */
 .fab-area{padding:10px 18px 24px;display:flex;justify-content:flex-end;flex-shrink:0}
-.fab{width:56px;height:56px;border-radius:50%;background:var(--yolk);border:2.5px solid var(--yolk-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(230,176,32,0.45);font-size:28px;font-weight:700;color:var(--text);line-height:1;font-family:'Nunito',sans-serif;transition:transform 0.15s}
+.fab{width:56px;height:56px;border-radius:50%;background:var(--yolk);border:2.5px solid var(--yolk-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(230,176,32,0.45);font-size:28px;font-weight:700;color:var(--text);font-family:'Nunito',sans-serif;transition:transform 0.15s}
 .fab:active{transform:scale(0.92)}
 
-/* ── MODAL ── */
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:100;display:flex;align-items:flex-end;justify-content:center}
 .modal{background:var(--cream);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:92dvh;display:flex;flex-direction:column}
 .modal-header{padding:16px 18px 0;flex-shrink:0}
@@ -121,6 +142,19 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .modal-sub{font-size:12px;font-weight:600;color:var(--text-light);margin-top:2px;margin-bottom:16px}
 .modal-body{overflow-y:auto;padding:0 18px;flex:1;-webkit-overflow-scrolling:touch}
 .modal-footer{padding:14px 18px 24px;flex-shrink:0}
+
+/* thumbnail section */
+.thumb-section{margin-bottom:14px}
+.thumb-label{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:8px}
+.thumb-preview{width:100%;height:120px;border-radius:14px;object-fit:cover;display:block;margin-bottom:8px;background:var(--yolk-soft)}
+.thumb-status{font-size:11px;font-weight:700;margin-bottom:8px;padding:7px 12px;border-radius:8px}
+.thumb-status.loading{background:var(--yolk-pale);color:var(--brown)}
+.thumb-status.found{background:var(--green-pale);color:#2D6A4F}
+.thumb-status.manual{background:var(--beige);color:var(--brown)}
+.thumb-actions{display:flex;gap:8px}
+.thumb-btn{flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;text-align:center}
+.thumb-btn.active{background:var(--yolk-pale);border-color:var(--yolk-deep);color:var(--brown)}
+
 .upload-zone{border:2px dashed var(--beige2);border-radius:18px;padding:22px;text-align:center;cursor:pointer;margin-bottom:14px;background:var(--yolk-soft);transition:all 0.18s;user-select:none}
 .upload-zone:hover{border-color:var(--yolk-deep);background:var(--yolk-pale)}
 .uz-icon{font-size:30px;margin-bottom:6px}
@@ -152,8 +186,9 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .m-cancel{flex:1;padding:14px;border-radius:14px;border:1.5px solid var(--border);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
 .m-save{flex:2;padding:14px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 
-/* ── SETTINGS SCREEN ── */
-.settings-screen{position:fixed;inset:0;background:var(--cream);z-index:200;display:flex;flex-direction:column;max-width:430px;margin:0 auto}
+/* SETTINGS */
+.settings-screen{position:fixed;inset:0;background:var(--cream);z-index:200;display:none;flex-direction:column;max-width:430px;margin:0 auto}
+.settings-screen.open{display:flex}
 .settings-header{background:var(--yolk);padding:20px 18px 18px;flex-shrink:0}
 .settings-back{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif}
 .settings-back span{font-size:18px}
@@ -173,17 +208,15 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .settings-row-btn{padding:7px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream2);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
 .settings-row-btn.primary{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
 .settings-row-btn.danger{background:var(--white);color:var(--danger);border-color:#FFB8A8}
-
-/* API URL input inside settings */
 .api-input-wrap{padding:14px 16px}
-.api-input{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;font-size:12px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s;word-break:break-all}
+.api-input{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;font-size:12px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s}
 .api-input:focus{border-color:var(--yolk-deep)}
 .api-input::placeholder{color:var(--text-light)}
 .api-save-btn{width:100%;margin-top:10px;padding:13px;border-radius:12px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
-.connected-pill{display:inline-flex;align-items:center;gap:5px;background:#D8F3DC;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:#2D6A4F}
-.connected-dot{width:7px;height:7px;border-radius:50%;background:#52B788}
+.connected-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:#2D6A4F}
+.connected-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
 
-/* ── CONFIRM ── */
+/* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
 .confirm-box{background:var(--cream);border-radius:20px;padding:24px 20px;width:100%;max-width:320px;text-align:center}
 .confirm-icon{font-size:36px;margin-bottom:10px}
@@ -196,12 +229,11 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 </head>
 <body>
 
-<!-- MAIN APP -->
 <div class="app" id="app">
   <div class="topbar">
     <div class="tb-blob1"></div><div class="tb-blob2"></div>
     <div class="topbar-actions">
-      <button class="icon-btn" onclick="openSettings()" title="Settings">⚙️</button>
+      <button class="icon-btn" onclick="openSettings()">⚙️</button>
     </div>
     <div class="logo-row">
       <svg class="logo-svg" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -231,11 +263,10 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
     </div>
   </div>
 
-  <!-- SYNC STATUS BAR -->
-  <div class="sync-bar" id="sync-bar">
+  <div class="sync-bar">
     <div class="sync-dot local" id="sync-dot"></div>
-    <span id="sync-text">Local sahaja — setup Google Sheets untuk sync</span>
-    <button class="sync-btn" id="sync-btn" onclick="syncNow()">↻ Sync</button>
+    <span id="sync-text">Local sahaja</span>
+    <button class="sync-btn" onclick="syncNow()">↻ Sync</button>
   </div>
 
   <div class="stats-row">
@@ -247,22 +278,26 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
   <div id="tag-cloud" class="tag-cloud"></div>
   <div class="sec-lbl" id="sec-lbl">SEMUA RESEPI</div>
   <div class="list" id="list"></div>
+
+  <!-- PAGINATION -->
+  <div class="pagination" id="pagination" style="display:none">
+    <button class="pg-btn" id="pg-prev" onclick="changePage(-1)">‹</button>
+    <div class="pg-dot-row" id="pg-dots"></div>
+    <button class="pg-btn" id="pg-next" onclick="changePage(1)">›</button>
+  </div>
+
   <div id="detail-panel" class="detail-panel" style="display:none"></div>
   <div class="toast-wrap"><div class="toast" id="toast"></div></div>
-  <div class="fab-area"><button class="fab" id="fab" aria-label="Tambah resepi baru">+</button></div>
+  <div class="fab-area"><button class="fab" id="fab">+</button></div>
 </div>
 
-<!-- SETTINGS SCREEN (hidden by default) -->
-<div class="settings-screen" id="settings-screen" style="display:none">
+<!-- SETTINGS -->
+<div class="settings-screen" id="settings-screen">
   <div class="settings-header">
-    <button class="settings-back" onclick="closeSettings()">
-      <span>←</span><p>Balik ke apps</p>
-    </button>
+    <button class="settings-back" onclick="closeSettings()"><span>←</span><p>Balik ke apps</p></button>
     <div class="settings-title">Settings ⚙️</div>
   </div>
   <div class="settings-body">
-
-    <!-- GOOGLE SHEETS SYNC -->
     <div class="settings-section">
       <div class="settings-section-title">GOOGLE SHEETS SYNC</div>
       <div class="settings-card">
@@ -276,100 +311,83 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
         </div>
         <div class="api-input-wrap">
           <div style="font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:6px">GOOGLE APPS SCRIPT URL</div>
-          <input class="api-input" type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/..." autocomplete="off" autocorrect="off" spellcheck="false">
-          <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-top:8px;line-height:1.6">
-            Paste URL dari Google Apps Script deploy kau di sini. Data akan sync automatically cross-device.
-          </div>
+          <input class="api-input" type="url" id="api-url-input" placeholder="https://script.google.com/macros/s/..." autocomplete="off" spellcheck="false">
+          <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-top:8px;line-height:1.6">Paste URL dari Google Apps Script deploy kau.</div>
           <button class="api-save-btn" onclick="saveApiUrl()">💾 Simpan &amp; Test Sambungan</button>
         </div>
         <div class="settings-row" style="border-top:1px solid var(--border-light)">
           <div class="settings-row-icon">↻</div>
           <div class="settings-row-body">
-            <div class="settings-row-title">Manual sync sekarang</div>
+            <div class="settings-row-title">Manual sync</div>
             <div class="settings-row-sub" id="last-sync-text">Belum pernah sync</div>
           </div>
-          <div class="settings-row-action">
-            <button class="settings-row-btn primary" onclick="syncNow()">Sync</button>
-          </div>
+          <div class="settings-row-action"><button class="settings-row-btn primary" onclick="syncNow()">Sync</button></div>
         </div>
       </div>
     </div>
-
-    <!-- DATA -->
     <div class="settings-section">
       <div class="settings-section-title">DATA</div>
       <div class="settings-card">
         <div class="settings-row">
           <div class="settings-row-icon">📦</div>
           <div class="settings-row-body">
-            <div class="settings-row-title">Total resepi tersimpan</div>
-            <div class="settings-row-sub" id="data-count-text">0 resepi, 0 tag unik</div>
+            <div class="settings-row-title">Total resepi</div>
+            <div class="settings-row-sub" id="data-count-text">0 resepi</div>
           </div>
         </div>
         <div class="settings-row">
           <div class="settings-row-icon">🗑️</div>
           <div class="settings-row-body">
             <div class="settings-row-title">Clear local data</div>
-            <div class="settings-row-sub">Padam semua data dalam browser ni je</div>
+            <div class="settings-row-sub">Padam data dalam browser ni je</div>
           </div>
-          <div class="settings-row-action">
-            <button class="settings-row-btn danger" onclick="confirmClearLocal()">Clear</button>
-          </div>
+          <div class="settings-row-action"><button class="settings-row-btn danger" onclick="confirmClearLocal()">Clear</button></div>
         </div>
       </div>
     </div>
-
-    <!-- ABOUT -->
     <div class="settings-section">
-      <div class="settings-section-title">TENTANG APPS</div>
+      <div class="settings-section-title">TENTANG</div>
       <div class="settings-card">
         <div class="settings-row">
           <div class="settings-row-icon">🐣</div>
           <div class="settings-row-body">
             <div class="settings-row-title">Hatch &amp; Batch</div>
-            <div class="settings-row-sub">v2.0 — Google Sheets sync edition</div>
-          </div>
-        </div>
-        <div class="settings-row">
-          <div class="settings-row-icon">💾</div>
-          <div class="settings-row-body">
-            <div class="settings-row-title">Storage</div>
-            <div class="settings-row-sub">Video: Google Drive · Data: Google Sheets</div>
+            <div class="settings-row-sub">v3.0 — Swipe edit · Pagination · Auto-thumbnail</div>
           </div>
         </div>
       </div>
     </div>
-
   </div>
 </div>
 
-<!-- PORTAL for modals/confirms -->
 <div id="portal"></div>
 
 <script>
 // ── CONSTANTS ──
-const STORE_KEY = 'hatchbatch_v2';
+const STORE_KEY = 'hatchbatch_v3';
 const API_KEY   = 'hatchbatch_api_url';
 const SYNC_KEY  = 'hatchbatch_last_sync';
+const PER_PAGE  = 5;
 
 // ── STATE ──
-let recipes  = [];
-let nextId   = 1;
-let selId    = null;
-let searchQ  = '';
-let activeTag= '';
-let pTags    = [];
-let pVideo   = null;
-let apiUrl   = localStorage.getItem(API_KEY) || '';
-let isSyncing= false;
+let recipes   = [];
+let nextId    = 1;
+let selId     = null;
+let searchQ   = '';
+let activeTag = '';
+let curPage   = 1;
+let pTags     = [];
+let pVideo    = null;
+let pThumb    = null; // { data: base64, source: 'auto'|'manual' }
+let apiUrl    = localStorage.getItem(API_KEY) || '';
+let isSyncing = false;
+let swipedCardId = null;
 
 // ── INIT ──
 function init() {
   loadLocal();
-  renderCloud();
-  renderList();
-  updateSyncBar();
-  updateSettingsStatus();
+  renderCloud(); renderList();
+  updateSyncBar(); updateSettingsStatus();
   if (apiUrl) syncNow();
 }
 
@@ -377,268 +395,281 @@ function init() {
 function loadLocal() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
-    if (raw) {
-      recipes = JSON.parse(raw);
-      nextId  = recipes.reduce((m, r) => Math.max(m, Number(r.id)||0), 0) + 1;
-      return;
-    }
+    if (raw) { recipes = JSON.parse(raw); nextId = recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1; return; }
   } catch(e) {}
-  // sample data for first launch
   recipes = [
-    {id:1,title:'Rendang Tok Perak',tags:['daging lembu','rempah','santan'],notes:'Masak 3 jam baru kering betul',driveUrl:'https://drive.google.com',videoData:null,videoName:null,createdAt:new Date().toISOString()},
-    {id:2,title:'Gulai Ikan Kembung',tags:['ikan kembung','santan','kunyit'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,createdAt:new Date().toISOString()},
-    {id:3,title:'Tumis Sayur Kobis',tags:['sayur kobis','sos tiram','bawang putih'],notes:'Jangan masak lama sangat',driveUrl:'',videoData:null,videoName:'kobis.mp4',createdAt:new Date().toISOString()},
-    {id:4,title:'Ayam Goreng Berempah',tags:['ayam','rempah','kunyit'],notes:'Garing luar lembut dalam',driveUrl:'',videoData:null,videoName:'ayam_goreng.mp4',createdAt:new Date().toISOString()},
-    {id:5,title:'Sup Tulang Merah',tags:['tulang','rempah','tomato'],notes:'Tambah kentang lagi sedap',driveUrl:'https://drive.google.com',videoData:null,videoName:null,createdAt:new Date().toISOString()},
+    {id:1,title:'Rendang Tok Perak',tags:['daging lembu','rempah','santan'],notes:'Masak 3 jam baru kering',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
+    {id:2,title:'Gulai Ikan Kembung',tags:['ikan kembung','santan','kunyit'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
+    {id:3,title:'Tumis Sayur Kobis',tags:['sayur kobis','sos tiram','bawang putih'],notes:'Jangan masak lama',driveUrl:'',videoData:null,videoName:'kobis.mp4',thumbData:null,createdAt:new Date().toISOString()},
+    {id:4,title:'Ayam Goreng Berempah',tags:['ayam','rempah','kunyit'],notes:'Garing luar lembut dalam',driveUrl:'',videoData:null,videoName:'ayam_goreng.mp4',thumbData:null,createdAt:new Date().toISOString()},
+    {id:5,title:'Sup Tulang Merah',tags:['tulang','rempah','tomato'],notes:'Tambah kentang lagi sedap',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
+    {id:6,title:'Nasi Goreng Kampung',tags:['nasi','telur','ikan bilis'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
+    {id:7,title:'Sambal Udang Petai',tags:['udang','petai','cili'],notes:'Beli udang segar',driveUrl:'',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
   ];
-  nextId = 6;
+  nextId = 8;
+}
+function saveLocal() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(recipes)); }
+  catch(e) { showToast('Storage penuh!','err'); }
 }
 
-function saveLocal() {
-  try {
-    // strip videoData before saving to sheets-synced records (too large)
-    localStorage.setItem(STORE_KEY, JSON.stringify(recipes));
-  } catch(e) {
-    showToast('Storage penuh! Cuba padam resepi lama.', 'err');
-  }
+// ── THUMBNAIL AUTO-EXTRACT ──
+function extractThumbFromUrl(url) {
+  if (!url) return null;
+  // YouTube
+  const ytMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+  // TikTok — no direct thumb API without auth, return null
+  return null;
 }
 
 // ── GOOGLE SHEETS SYNC ──
 async function syncNow() {
-  if (!apiUrl) {
-    showToast('Setup Google Sheets dulu dalam Settings ⚙️', 'warn');
-    return;
-  }
+  if (!apiUrl) { showToast('Setup Google Sheets dulu dalam Settings ⚙️','warn'); return; }
   if (isSyncing) return;
   isSyncing = true;
-  setSyncState('syncing', 'Syncing...');
-
+  setSyncState('syncing','Syncing...');
   try {
-    // PULL from Sheets
-    const res = await fetch(apiUrl + '?action=getAll', { method:'GET' });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const res  = await fetch(apiUrl+'?action=getAll');
+    if (!res.ok) throw new Error('HTTP '+res.status);
     const json = await res.json();
-    if (!json.ok) throw new Error(json.error || 'Sheets error');
-
-    // Merge: sheet data wins for metadata, keep local videoData
-    const sheetMap = {};
-    (json.data || []).forEach(r => { if (r.id) sheetMap[String(r.id)] = r; });
-
-    const localMap = {};
-    recipes.forEach(r => { localMap[String(r.id)] = r; });
-
-    // Build merged list
-    const allIds = new Set([...Object.keys(sheetMap), ...Object.keys(localMap)]);
+    if (!json.ok) throw new Error(json.error||'Sheets error');
+    const sheetMap = {}, localMap = {};
+    (json.data||[]).forEach(r=>{ if(r.id) sheetMap[String(r.id)]=r; });
+    recipes.forEach(r=>{ localMap[String(r.id)]=r; });
+    const allIds = new Set([...Object.keys(sheetMap),...Object.keys(localMap)]);
     const merged = [];
-    allIds.forEach(id => {
-      const s = sheetMap[id];
-      const l = localMap[id];
-      if (s && l) {
-        // both exist — sheet wins for text, local keeps videoData
-        merged.push({ ...s, id: Number(id)||id, videoData: l.videoData||null, videoName: l.videoName||s.videoName||null });
-      } else if (s) {
-        merged.push({ ...s, id: Number(id)||id, videoData: null });
-      } else {
-        // local only — push to sheet
-        merged.push(l);
-        pushToSheet(l);
-      }
+    allIds.forEach(id=>{
+      const s=sheetMap[id], l=localMap[id];
+      if(s&&l) merged.push({...s,id:Number(id)||id,videoData:l.videoData||null,thumbData:l.thumbData||s.thumbData||null,videoName:l.videoName||s.videoName||null});
+      else if(s) merged.push({...s,id:Number(id)||id,videoData:null,thumbData:s.thumbData||null});
+      else { merged.push(l); pushToSheet(l); }
     });
-
-    merged.sort((a,b) => new Date(b.createdAt||0) - new Date(a.createdAt||0));
-    recipes = merged;
-    nextId  = recipes.reduce((m, r) => Math.max(m, Number(r.id)||0), 0) + 1;
+    merged.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+    recipes=merged; nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;
     saveLocal();
-
-    const now = new Date().toLocaleTimeString('ms-MY', {hour:'2-digit',minute:'2-digit'});
-    localStorage.setItem(SYNC_KEY, now);
-    setSyncState('ok', 'Sync berjaya · ' + now);
-    showToast('✓ Sync berjaya!');
-    renderCloud(); renderList(); renderDetail();
-    updateSettingsStatus();
-
+    const now=new Date().toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
+    localStorage.setItem(SYNC_KEY,now);
+    setSyncState('ok','Sync berjaya · '+now);
+    showToast('✓ Sync berjaya!','ok');
+    renderCloud(); renderList(); renderDetail(); updateSettingsStatus();
   } catch(err) {
-    setSyncState('err', 'Sync gagal — semak URL dalam Settings');
-    showToast('Sync gagal: ' + err.message, 'err');
+    setSyncState('err','Sync gagal — semak URL dalam Settings');
+    showToast('Sync gagal: '+err.message,'err');
   }
-  isSyncing = false;
+  isSyncing=false;
 }
-
-async function pushToSheet(recipe) {
+async function pushToSheet(r) {
   if (!apiUrl) return;
-  try {
-    const payload = { action: 'save', recipe: { ...recipe, videoData: undefined } };
-    await fetch(apiUrl, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch(e) {}
+  try { await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'save',recipe:{...r,videoData:undefined}}),headers:{'Content-Type':'application/json'}}); } catch(e){}
 }
-
 async function deleteFromSheet(id) {
   if (!apiUrl) return;
-  try {
-    await fetch(apiUrl, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'delete', id: String(id) }),
-      headers: { 'Content-Type': 'application/json' }
-    });
-  } catch(e) {}
+  try { await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'delete',id:String(id)}),headers:{'Content-Type':'application/json'}}); } catch(e){}
 }
-
-function setSyncState(state, text) {
-  const dot  = document.getElementById('sync-dot');
-  const txt  = document.getElementById('sync-text');
-  dot.className = 'sync-dot ' + state;
-  txt.textContent = text;
-}
-
-function updateSyncBar() {
-  if (!apiUrl) {
-    setSyncState('local', 'Local sahaja — setup Google Sheets untuk sync');
-  } else {
-    const last = localStorage.getItem(SYNC_KEY);
-    setSyncState(last ? 'ok' : 'syncing', last ? 'Terakhir sync: ' + last : 'Menyambung...');
-  }
-}
+function setSyncState(state,text){ document.getElementById('sync-dot').className='sync-dot '+state; document.getElementById('sync-text').textContent=text; }
+function updateSyncBar(){ if(!apiUrl){setSyncState('local','Local sahaja — setup Sheets di Settings');}else{const l=localStorage.getItem(SYNC_KEY);setSyncState(l?'ok':'syncing',l?'Terakhir sync: '+l:'Menyambung...');} }
 
 // ── SETTINGS ──
-function openSettings() {
-  updateSettingsStatus();
-  document.getElementById('settings-screen').style.display = 'flex';
-  document.getElementById('api-url-input').value = apiUrl;
+function openSettings(){ updateSettingsStatus(); document.getElementById('settings-screen').classList.add('open'); document.getElementById('api-url-input').value=apiUrl; }
+function closeSettings(){ document.getElementById('settings-screen').classList.remove('open'); }
+function updateSettingsStatus(){
+  const pill=document.getElementById('conn-status-pill'), txt=document.getElementById('conn-status-text');
+  const last=localStorage.getItem(SYNC_KEY), ls=document.getElementById('last-sync-text');
+  const dc=document.getElementById('data-count-text');
+  if(apiUrl){ txt.textContent=apiUrl.length>50?apiUrl.slice(0,47)+'...':apiUrl; pill.innerHTML=`<div class="connected-pill"><div class="connected-dot"></div>Connected</div>`; }
+  else{ txt.textContent='Belum disambung'; pill.innerHTML=''; }
+  if(dc) dc.textContent=recipes.length+' resepi, '+allTags().length+' tag unik';
+  if(ls) ls.textContent=last?'Terakhir: '+last:'Belum pernah sync';
 }
-function closeSettings() {
-  document.getElementById('settings-screen').style.display = 'none';
+async function saveApiUrl(){
+  const val=(document.getElementById('api-url-input').value||'').trim();
+  if(!val){showToast('Paste URL dulu!','err');return;}
+  if(!val.startsWith('https://script.google.com')){showToast('URL mesti start dengan https://script.google.com','err');return;}
+  apiUrl=val; localStorage.setItem(API_KEY,apiUrl);
+  showToast('URL disimpan! Testing...'); updateSyncBar();
+  await syncNow(); updateSettingsStatus();
 }
-
-function updateSettingsStatus() {
-  const pill = document.getElementById('conn-status-pill');
-  const txt  = document.getElementById('conn-status-text');
-  const dc   = document.getElementById('data-count-text');
-  const last = localStorage.getItem(SYNC_KEY);
-  const ls   = document.getElementById('last-sync-text');
-
-  if (apiUrl) {
-    txt.textContent  = apiUrl.length > 50 ? apiUrl.slice(0,47)+'...' : apiUrl;
-    pill.innerHTML   = `<div class="connected-pill"><div class="connected-dot"></div>Connected</div>`;
-  } else {
-    txt.textContent  = 'Belum disambung';
-    pill.innerHTML   = '';
-  }
-  if (dc) dc.textContent = recipes.length + ' resepi, ' + allTags().length + ' tag unik';
-  if (ls) ls.textContent = last ? 'Terakhir: ' + last : 'Belum pernah sync';
-}
-
-async function saveApiUrl() {
-  const val = document.getElementById('api-url-input').value.trim();
-  if (!val) { showToast('Paste URL dulu!', 'err'); return; }
-  if (!val.startsWith('https://script.google.com')) {
-    showToast('URL kena start dengan https://script.google.com', 'err');
-    return;
-  }
-  apiUrl = val;
-  localStorage.setItem(API_KEY, apiUrl);
-  showToast('URL disimpan! Testing sambungan...');
-  updateSyncBar();
-  await syncNow();
-  updateSettingsStatus();
-}
-
-function confirmClearLocal() {
-  showConfirm(
-    '🗑️', 'Clear Local Data?',
-    'Semua data dalam browser ni akan dipadam. Data dalam Google Sheets masih selamat.',
-    'Clear', () => {
-      localStorage.removeItem(STORE_KEY);
-      loadLocal();
-      renderCloud(); renderList();
-      document.getElementById('detail-panel').style.display = 'none';
-      showToast('Local data cleared.');
-    }
-  );
+function confirmClearLocal(){
+  showConfirm('🗑️','Clear Local Data?','Data dalam browser ni akan dipadam. Sheets masih selamat.','Clear',()=>{
+    localStorage.removeItem(STORE_KEY); loadLocal(); renderCloud(); renderList();
+    document.getElementById('detail-panel').style.display='none';
+    showToast('Local data cleared.');
+  });
 }
 
 // ── HELPERS ──
-function allTags() {
-  const c = {};
-  recipes.forEach(r => (r.tags||[]).forEach(t => { c[t]=(c[t]||0)+1; }));
-  return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);
-}
-function filtered() {
-  const q = searchQ.toLowerCase().trim();
-  return recipes.filter(r => {
-    const mq = !q || r.title.toLowerCase().includes(q) || (r.tags||[]).some(t=>t.toLowerCase().includes(q));
-    return mq && (!activeTag || (r.tags||[]).includes(activeTag));
-  });
-}
+function allTags(){ const c={}; recipes.forEach(r=>(r.tags||[]).forEach(t=>{c[t]=(c[t]||0)+1;})); return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(e=>e[0]); }
+function filtered(){ const q=searchQ.toLowerCase().trim(); return recipes.filter(r=>{ const mq=!q||r.title.toLowerCase().includes(q)||(r.tags||[]).some(t=>t.toLowerCase().includes(q)); return mq&&(!activeTag||(r.tags||[]).includes(activeTag)); }); }
 function escH(s){ if(!s)return''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
 function escA(s){ if(!s)return''; return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;'); }
-function showToast(msg, type='') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className   = 'toast show' + (type ? ' '+type : '');
-  clearTimeout(t._t);
-  t._t = setTimeout(() => t.className='toast', 2400);
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast show'+(type?' '+type:'');
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='toast',2400);
+}
+
+// ── PAGINATION HELPERS ──
+function totalPages(){ return Math.max(1,Math.ceil(filtered().length/PER_PAGE)); }
+function pageItems(){ const f=filtered(); const s=(curPage-1)*PER_PAGE; return f.slice(s,s+PER_PAGE); }
+function changePage(dir){
+  const tp=totalPages();
+  curPage=Math.max(1,Math.min(tp,curPage+dir));
+  selId=null; swipedCardId=null;
+  document.getElementById('detail-panel').style.display='none';
+  renderList();
 }
 
 // ── RENDER ──
-function renderStats() {
-  document.getElementById('s-total').textContent = recipes.length;
-  document.getElementById('s-tags').textContent  = allTags().length;
-  document.getElementById('s-drive').textContent = recipes.filter(r=>r.driveUrl&&r.driveUrl.trim()).length;
+function renderStats(){
+  document.getElementById('s-total').textContent=recipes.length;
+  document.getElementById('s-tags').textContent=allTags().length;
+  document.getElementById('s-drive').textContent=recipes.filter(r=>r.driveUrl&&r.driveUrl.trim()).length;
 }
-function renderCloud() {
-  const tags = allTags().slice(0,14);
-  const el   = document.getElementById('tag-cloud');
-  if (!tags.length) { el.innerHTML=''; return; }
-  el.innerHTML = `<span class="tc${!activeTag?' active':''}" data-tag="">Semua</span>`
-    + tags.map(t=>`<span class="tc${activeTag===t?' active':''}" data-tag="${escA(t)}">${escH(t)}</span>`).join('');
+function renderCloud(){
+  const tags=allTags().slice(0,14), el=document.getElementById('tag-cloud');
+  if(!tags.length){el.innerHTML='';return;}
+  el.innerHTML=`<span class="tc${!activeTag?' active':''}" data-tag="">Semua</span>`+tags.map(t=>`<span class="tc${activeTag===t?' active':''}" data-tag="${escA(t)}">${escH(t)}</span>`).join('');
   el.querySelectorAll('.tc').forEach(c=>c.addEventListener('click',function(){
-    activeTag = this.dataset.tag;
-    document.getElementById('sec-lbl').textContent = activeTag ? activeTag.toUpperCase() : 'SEMUA RESEPI';
+    activeTag=this.dataset.tag; curPage=1;
+    document.getElementById('sec-lbl').textContent=activeTag?activeTag.toUpperCase():'SEMUA RESEPI';
     renderCloud(); renderList();
   }));
 }
-function renderList() {
+
+function renderList(){
   renderStats();
-  const items = filtered();
-  const el    = document.getElementById('list');
-  if (!items.length) {
+  const items=pageItems(), el=document.getElementById('list');
+  const tp=totalPages(), pg=document.getElementById('pagination');
+
+  // Pagination controls
+  if(filtered().length>PER_PAGE){
+    pg.style.display='flex';
+    document.getElementById('pg-prev').disabled=curPage<=1;
+    document.getElementById('pg-next').disabled=curPage>=tp;
+    const dots=document.getElementById('pg-dots');
+    dots.innerHTML=Array.from({length:tp},(_,i)=>`<div class="pg-dot${i+1===curPage?' active':''}"></div>`).join('');
+  } else {
+    pg.style.display='none';
+  }
+
+  if(!items.length){
     el.innerHTML=`<div class="empty"><div class="empty-icon">🐣</div><div class="empty-t">Takde resepi jumpa</div><div class="empty-s">Cuba keyword atau tag lain</div></div>`;
     return;
   }
-  el.innerHTML = items.map(r => {
-    const sel      = selId===r.id?' selected':'';
-    const hasDrive = r.driveUrl&&r.driveUrl.trim();
-    const vidEl    = r.videoData
-      ? `<div class="vid-wrap"><video src="${r.videoData}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video></div>`
-      : `<div class="vid-wrap"><div class="vid-placeholder">
-          ${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Google Drive</div>`:''}
-          <div class="vp-play"><div class="vp-tri"></div></div>
-          <div class="vp-label">${r.videoName?escH(r.videoName):(hasDrive?'Tap untuk buka Drive':'Tiada video')}</div>
-        </div></div>`;
-    return `<div class="card${sel}" onclick="selCard(${r.id})">
-      ${vidEl}
-      <div class="card-body">
-        <div class="card-title">${escH(r.title)}</div>
-        <div class="tag-row">${(r.tags||[]).map(t=>`<span class="tag">${escH(t)}</span>`).join('')}</div>
+
+  el.innerHTML=items.map(r=>{
+    const sel=selId===r.id?' selected':'';
+    const hasDrive=r.driveUrl&&r.driveUrl.trim();
+    // thumbnail priority: manual/auto thumb > local video > placeholder
+    let mediaEl='';
+    if(r.thumbData){
+      mediaEl=`<div class="vid-wrap"><img src="${r.thumbData}" alt="${escA(r.title)}" loading="lazy">${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}</div>`;
+    } else if(r.videoData){
+      mediaEl=`<div class="vid-wrap"><video src="${r.videoData}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video></div>`;
+    } else {
+      mediaEl=`<div class="vid-wrap"><div class="vid-placeholder">${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}<div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasDrive?'Tap buka Drive':'Tiada video')}</div></div></div>`;
+    }
+    return`<div class="card-outer" id="co-${r.id}">
+      <div class="card-actions">
+        <button class="ca-edit" onclick="openEdit(${r.id})"><span class="ca-icon">✏️</span><span class="ca-label">Edit</span></button>
+        <button class="ca-del" onclick="confirmDel(${r.id})"><span class="ca-icon">🗑️</span><span class="ca-label">Padam</span></button>
+      </div>
+      <div class="card${sel}" id="card-${r.id}" data-id="${r.id}">
+        ${mediaEl}
+        <div class="card-body">
+          <div class="card-title">${escH(r.title)}</div>
+          <div class="tag-row">${(r.tags||[]).map(t=>`<span class="tag">${escH(t)}</span>`).join('')}</div>
+        </div>
       </div>
     </div>`;
   }).join('');
+
+  // Attach swipe + tap to each card
+  items.forEach(r=>attachCardEvents(r.id));
 }
-function selCard(id) {
-  selId = selId===id ? null : id;
+
+// ── SWIPE TO REVEAL EDIT/DELETE ──
+function attachCardEvents(id){
+  const card=document.getElementById('card-'+id);
+  if(!card) return;
+  let startX=0, startY=0, isDragging=false, hasSwiped=false;
+
+  card.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    startY=e.touches[0].clientY;
+    isDragging=false; hasSwiped=card.classList.contains('swiped');
+  },{passive:true});
+
+  card.addEventListener('touchmove',e=>{
+    const dx=e.touches[0].clientX-startX;
+    const dy=e.touches[0].clientY-startY;
+    if(!isDragging && Math.abs(dx)>Math.abs(dy) && Math.abs(dx)>8){ isDragging=true; }
+    if(isDragging){
+      const offset=hasSwiped?dx-140:dx;
+      const clamped=Math.max(-140,Math.min(0,offset));
+      card.style.transform=`translateX(${clamped}px)`;
+      card.style.transition='none';
+    }
+  },{passive:true});
+
+  card.addEventListener('touchend',e=>{
+    card.style.transition='';
+    const dx=e.changedTouches[0].clientX-startX;
+    if(!isDragging){
+      // It's a tap
+      if(swipedCardId && swipedCardId!==id){ closeSwipe(swipedCardId); swipedCardId=null; return; }
+      if(card.classList.contains('swiped')){ closeSwipe(id); swipedCardId=null; }
+      else { selCard(id); }
+      return;
+    }
+    // Was a swipe
+    const shouldOpen=hasSwiped?(dx>-80):(dx<-60);
+    if(hasSwiped){ if(dx>40){ closeSwipe(id); swipedCardId=null; } else { openSwipe(id); } }
+    else { if(dx<-60){ openSwipe(id); if(swipedCardId&&swipedCardId!==id)closeSwipe(swipedCardId); swipedCardId=id; } else { closeSwipe(id); } }
+  },{passive:true});
+
+  // Mouse support for desktop
+  let mStartX=0, mDragging=false;
+  card.addEventListener('mousedown',e=>{mStartX=e.clientX;mDragging=false;});
+  card.addEventListener('mousemove',e=>{if(e.buttons&&Math.abs(e.clientX-mStartX)>8)mDragging=true;});
+  card.addEventListener('mouseup',e=>{
+    if(!mDragging){
+      if(swipedCardId&&swipedCardId!==id){closeSwipe(swipedCardId);swipedCardId=null;return;}
+      if(card.classList.contains('swiped')){closeSwipe(id);swipedCardId=null;}
+      else{selCard(id);}
+    }
+  });
+}
+
+function openSwipe(id){
+  const c=document.getElementById('card-'+id);
+  if(c){ c.classList.add('swiped'); c.style.transform=''; swipedCardId=id; }
+}
+function closeSwipe(id){
+  const c=document.getElementById('card-'+id);
+  if(c){ c.classList.remove('swiped'); c.style.transform=''; }
+  if(swipedCardId===id) swipedCardId=null;
+}
+function closeAllSwipes(){
+  recipes.forEach(r=>{ const c=document.getElementById('card-'+r.id); if(c){c.classList.remove('swiped');c.style.transform='';} });
+  swipedCardId=null;
+}
+
+function selCard(id){
+  closeAllSwipes();
+  selId=selId===id?null:id;
   renderList(); renderDetail();
 }
-function renderDetail() {
-  const dp = document.getElementById('detail-panel');
-  if (!selId) { dp.style.display='none'; return; }
-  const r  = recipes.find(x=>x.id===selId);
-  if (!r)   { dp.style.display='none'; return; }
-  dp.style.display = 'block';
-  dp.innerHTML = `
+
+// ── RENDER DETAIL ──
+function renderDetail(){
+  const dp=document.getElementById('detail-panel');
+  if(!selId){dp.style.display='none';return;}
+  const r=recipes.find(x=>x.id===selId);
+  if(!r){dp.style.display='none';return;}
+  dp.style.display='block';
+  dp.innerHTML=`
     <div class="dp-head">
       <div class="dp-title">${escH(r.title)}</div>
       ${r.driveUrl&&r.driveUrl.trim()?`<a class="dp-open" href="${escA(r.driveUrl)}" target="_blank" rel="noopener">Buka Drive ↗</a>`:''}
@@ -647,7 +678,7 @@ function renderDetail() {
     <div class="nlabel">NOTA PERIBADI</div>
     <textarea class="nbox" id="nta" placeholder="Tips, ubahsuai, masa masak...">${escH(r.notes||'')}</textarea>
     <div class="dp-btns">
-      <button class="btn-sv" onclick="saveNote(${r.id})">💾 Simpan</button>
+      <button class="btn-sv" onclick="saveNote(${r.id})">💾 Simpan nota</button>
       <button class="btn-dl" onclick="confirmDel(${r.id})">Padam</button>
     </div>
     <button class="ai-btn" onclick="askAI(${r.id})">✨ Suggest resepi guna bahan yang sama</button>`;
@@ -655,78 +686,83 @@ function renderDetail() {
 }
 
 // ── ACTIONS ──
-async function saveNote(id) {
-  const r  = recipes.find(x=>x.id===id);
-  const ta = document.getElementById('nta');
-  if (!r||!ta) return;
-  r.notes = ta.value;
-  saveLocal();
-  await pushToSheet(r);
-  showToast('✓ Nota disimpan & synced!');
+async function saveNote(id){
+  const r=recipes.find(x=>x.id===id), ta=document.getElementById('nta');
+  if(!r||!ta) return;
+  r.notes=ta.value; saveLocal(); await pushToSheet(r);
+  showToast('✓ Nota disimpan!','ok');
 }
-
-function confirmDel(id) {
-  const r = recipes.find(x=>x.id===id);
-  if (!r) return;
-  showConfirm('🗑️','Padam Resepi?',`"${escH(r.title)}" akan dipadam dari apps dan Sheets.`,'Padam',()=>doDelete(id));
+function confirmDel(id){
+  closeAllSwipes();
+  const r=recipes.find(x=>x.id===id); if(!r) return;
+  showConfirm('🗑️','Padam Resepi?',`"${escH(r.title)}" akan dipadam.`,'Padam',()=>doDelete(id));
 }
-async function doDelete(id) {
-  recipes = recipes.filter(x=>x.id!==id);
-  selId   = null;
-  saveLocal();
-  deleteFromSheet(id);
+async function doDelete(id){
+  recipes=recipes.filter(x=>x.id!==id); selId=null;
+  if(pageItems().length===0&&curPage>1) curPage--;
+  saveLocal(); deleteFromSheet(id);
   document.getElementById('detail-panel').style.display='none';
-  renderCloud(); renderList();
-  showToast('Resepi dipadam.');
+  renderCloud(); renderList(); showToast('Resepi dipadam.');
 }
-
-function askAI(id) {
-  const r = recipes.find(x=>x.id===id);
-  if (r && typeof sendPrompt==='function') sendPrompt('Aku ada bahan/tag: '+r.tags.join(', ')+'. Boleh suggest resepi lain yang sesuai?');
+function askAI(id){
+  const r=recipes.find(x=>x.id===id);
+  if(r&&typeof sendPrompt==='function') sendPrompt('Aku ada bahan/tag: '+r.tags.join(', ')+'. Boleh suggest resepi lain?');
 }
-
-function clearSearch() {
-  document.getElementById('search').value='';
-  searchQ=''; activeTag='';
+function clearSearch(){
+  document.getElementById('search').value=''; searchQ=''; activeTag=''; curPage=1;
   document.getElementById('clear-btn').style.display='none';
   document.getElementById('sec-lbl').textContent='SEMUA RESEPI';
   renderCloud(); renderList();
 }
-
-// ── SEARCH ──
 document.getElementById('search').addEventListener('input',function(){
-  searchQ = this.value; activeTag='';
-  document.getElementById('clear-btn').style.display = this.value?'block':'none';
-  document.getElementById('sec-lbl').textContent = searchQ?'HASIL CARIAN':'SEMUA RESEPI';
+  searchQ=this.value; activeTag=''; curPage=1;
+  document.getElementById('clear-btn').style.display=this.value?'block':'none';
+  document.getElementById('sec-lbl').textContent=searchQ?'HASIL CARIAN':'SEMUA RESEPI';
   renderCloud(); renderList();
 });
-
-// ── FAB ──
 document.getElementById('fab').addEventListener('click',()=>showModal());
 
-// ── SHOW MODAL ──
-function showModal() {
-  pTags=[]; pVideo=null;
+// ── MODAL (add/edit) ──
+function showModal(editId=null){
+  pTags=[]; pVideo=null; pThumb=null;
+  const isEdit=editId!==null;
+  const r=isEdit?recipes.find(x=>x.id===editId):null;
+  if(r){ pTags=[...r.tags]; if(r.thumbData) pThumb={data:r.thumbData,source:'existing'}; }
+
   document.getElementById('portal').innerHTML=`<div class="modal-overlay" id="m-ov">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-handle"></div>
-        <div class="modal-title">Tambah Resepi</div>
+        <div class="modal-title">${isEdit?'Edit Resepi':'Tambah Resepi'}</div>
         <div class="modal-sub">Upload video atau paste link Google Drive</div>
       </div>
       <div class="modal-body">
+
+        <!-- VIDEO UPLOAD -->
         <div class="upload-zone" id="uzone" onclick="document.getElementById('vin').click()">
-          <div class="uz-icon">🎬</div><div class="uz-label">Upload dari peranti</div><div class="uz-hint">Tap untuk pilih video (MP4, MOV)</div>
+          <div class="uz-icon">🎬</div>
+          <div class="uz-label">${isEdit&&r&&r.videoName?r.videoName:'Upload dari peranti'}</div>
+          <div class="uz-hint">${isEdit&&r&&r.videoName?'Tap untuk tukar video':'Tap untuk pilih video (MP4, MOV)'}</div>
         </div>
         <input type="file" id="vin" accept="video/*" style="display:none">
         <div id="vprev"></div>
+
         <div class="div-or"><hr><span>ATAU</span><hr></div>
+
+        <!-- DRIVE URL -->
         <div class="drive-row">
           <div class="drive-ico">💾</div>
-          <input id="m-url" type="url" placeholder="Paste link Google Drive video..." inputmode="url">
-          <button class="paste-btn" onclick="doPaste()">Paste</button>
+          <input id="m-url" type="url" placeholder="Paste link Google Drive video..." value="${isEdit&&r?escA(r.driveUrl||''):''}">
+          <button class="paste-btn" onclick="doPaste('m-url')">Paste</button>
         </div>
-        <div class="field"><label>NAMA MASAKAN *</label><input id="m-title" placeholder="cth: Gulai Ikan Kembung" maxlength="80"></div>
+
+        <!-- NAME -->
+        <div class="field">
+          <label>NAMA MASAKAN *</label>
+          <input id="m-title" placeholder="cth: Gulai Ikan Kembung" value="${isEdit&&r?escA(r.title):''}" maxlength="80">
+        </div>
+
+        <!-- TAGS -->
         <div class="field">
           <label>TAG — Enter atau koma untuk tambah</label>
           <div class="tiw" id="tiw" onclick="document.getElementById('tin').focus()">
@@ -735,36 +771,126 @@ function showModal() {
           </div>
           <div id="tsugs" class="tsug-row"></div>
         </div>
+
+        <!-- THUMBNAIL SECTION -->
+        <div class="thumb-section">
+          <div class="thumb-label">THUMBNAIL</div>
+          ${pThumb||isEdit&&r&&r.thumbData?`<img id="thumb-preview" class="thumb-preview" src="${isEdit&&r&&r.thumbData?r.thumbData:''}">`:
+          `<div id="thumb-preview" style="display:none"></div>`}
+          <div id="thumb-status" class="thumb-status ${pThumb?'found':'manual'}">${pThumb?'✓ Thumbnail sedia':'Paste link atau upload thumbnail'}</div>
+          <div class="thumb-actions">
+            <button class="thumb-btn active" id="tab-auto" onclick="switchThumbTab('auto')">🔗 Auto dari URL</button>
+            <button class="thumb-btn" id="tab-manual" onclick="switchThumbTab('manual')">📷 Upload gambar</button>
+          </div>
+          <div id="thumb-auto-section" style="margin-top:10px">
+            <div class="drive-row" style="margin-bottom:0">
+              <div class="drive-ico">🔗</div>
+              <input id="thumb-url" type="url" placeholder="Paste YouTube/TikTok URL untuk auto-thumbnail..." ${isEdit&&r?`value="${escA(r.driveUrl||'')}"`:''}>
+              <button class="paste-btn" onclick="fetchThumb()">Extract</button>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-top:6px;line-height:1.5">✅ YouTube auto-extract · TikTok/Facebook/Instagram kena upload manual</div>
+          </div>
+          <div id="thumb-manual-section" style="margin-top:10px;display:none">
+            <div class="upload-zone" style="padding:14px;margin-bottom:0" onclick="document.getElementById('thumb-file').click()">
+              <div class="uz-icon">🖼️</div>
+              <div class="uz-label">Upload thumbnail</div>
+              <div class="uz-hint">JPG, PNG, WEBP</div>
+            </div>
+            <input type="file" id="thumb-file" accept="image/*" style="display:none">
+          </div>
+        </div>
+
+        <!-- NOTES (edit mode) -->
+        ${isEdit&&r?`<div class="field"><label>NOTA</label><textarea class="nbox" id="m-notes" placeholder="Tips, ubahsuai...">${escH(r.notes||'')}</textarea></div>`:''}
+
       </div>
       <div class="modal-footer">
         <div class="m-btns">
           <button class="m-cancel" onclick="closeModal()">Batal</button>
-          <button class="m-save" onclick="doSave()">Simpan Resepi</button>
+          <button class="m-save" onclick="doSave(${editId||'null'})">${isEdit?'Kemaskini':'Simpan Resepi'}</button>
         </div>
       </div>
     </div>
   </div>`;
 
   document.getElementById('m-ov').addEventListener('click',e=>{ if(e.target===e.currentTarget)closeModal(); });
-  const tin = document.getElementById('tin');
   renderMTags(); renderSugs('');
+
+  const tin=document.getElementById('tin');
   tin.addEventListener('keydown',e=>{
     if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(tin.value);tin.value='';renderSugs('');}
     else if(e.key==='Backspace'&&!tin.value&&pTags.length){pTags.pop();renderMTags();}
   });
   tin.addEventListener('input',()=>renderSugs(tin.value));
+
+  // Auto-fetch thumb when drive url changes (YouTube detection)
+  const mUrl=document.getElementById('m-url');
+  mUrl.addEventListener('blur',()=>{ if(mUrl.value) autoFetchThumbFromUrl(mUrl.value); });
+
   document.getElementById('vin').addEventListener('change',function(){
     const f=this.files[0]; if(!f) return;
-    if(f.size>150*1024*1024) showToast('Video besar >150MB. Mungkin lambat.','warn');
+    if(f.size>150*1024*1024) showToast('Video >150MB mungkin lambat','warn');
     document.getElementById('uzone').innerHTML=`<div class="uz-icon">✅</div><div class="uz-label">${escH(f.name)}</div><div class="uz-hint">Video berjaya dipilih</div>`;
     const rd=new FileReader();
-    rd.onload=e=>{ pVideo={name:f.name,data:e.target.result}; document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`; };
-    rd.onerror=()=>showToast('Gagal baca video.','err');
+    rd.onload=e=>{pVideo={name:f.name,data:e.target.result};document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`;};
+    rd.onerror=()=>showToast('Gagal baca video','err');
     rd.readAsDataURL(f);
     const t=document.getElementById('m-title'); if(!t.value) t.value=f.name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').trim();
   });
+
+  document.getElementById('thumb-file').addEventListener('change',function(){
+    const f=this.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=e=>{ pThumb={data:e.target.result,source:'manual'}; updateThumbPreview(); setThumbStatus('found','✓ Thumbnail diupload'); };
+    rd.readAsDataURL(f);
+  });
 }
-function closeModal(){ document.getElementById('portal').innerHTML=''; pTags=[]; pVideo=null; }
+
+// ── THUMBNAIL HELPERS ──
+function switchThumbTab(tab){
+  document.getElementById('thumb-auto-section').style.display=tab==='auto'?'block':'none';
+  document.getElementById('thumb-manual-section').style.display=tab==='manual'?'block':'none';
+  document.getElementById('tab-auto').className='thumb-btn'+(tab==='auto'?' active':'');
+  document.getElementById('tab-manual').className='thumb-btn'+(tab==='manual'?' active':'');
+}
+
+function setThumbStatus(type,msg){
+  const el=document.getElementById('thumb-status'); if(!el) return;
+  el.className='thumb-status '+type; el.textContent=msg;
+}
+
+function updateThumbPreview(){
+  const el=document.getElementById('thumb-preview'); if(!el) return;
+  if(pThumb&&pThumb.data){ el.src=pThumb.data; el.style.display='block'; el.tagName==='DIV'&&(el.outerHTML=`<img id="thumb-preview" class="thumb-preview" src="${pThumb.data}">`); }
+}
+
+async function autoFetchThumbFromUrl(url){
+  const thumbUrl=extractThumbFromUrl(url);
+  if(!thumbUrl){ return; }
+  setThumbStatus('loading','⏳ Extracting thumbnail...');
+  try {
+    const res=await fetch(thumbUrl);
+    if(!res.ok) throw new Error('Not found');
+    const blob=await res.blob();
+    const reader=new FileReader();
+    reader.onload=e=>{ pThumb={data:e.target.result,source:'auto'}; updateThumbPreview(); setThumbStatus('found','✓ Thumbnail auto-extracted dari YouTube!'); };
+    reader.readAsDataURL(blob);
+  } catch(e){ setThumbStatus('manual','YouTube thumbnail gagal load. Cuba upload manual.'); }
+}
+
+async function fetchThumb(){
+  const url=(document.getElementById('thumb-url').value||'').trim();
+  if(!url){ showToast('Paste URL dulu!','err'); return; }
+  await autoFetchThumbFromUrl(url);
+}
+
+function extractThumbFromUrl(url){
+  const ytMatch=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if(ytMatch) return `https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`;
+  return null;
+}
+
+function closeModal(){ document.getElementById('portal').innerHTML=''; pTags=[]; pVideo=null; pThumb=null; }
 
 // ── TAG HELPERS ──
 function addTag(v){ const t=v.trim().replace(/,+$/,'').toLowerCase().trim(); if(t&&!pTags.includes(t)&&pTags.length<20)pTags.push(t); renderMTags(); }
@@ -773,45 +899,58 @@ function rmTag(i){ pTags.splice(i,1); renderMTags(); }
 function renderSugs(q){ const el=document.getElementById('tsugs'); if(!el)return; const ex=allTags().filter(t=>!pTags.includes(t)&&(!q||t.includes(q.toLowerCase()))).slice(0,10); el.innerHTML=ex.map(t=>`<span class="tsug" onclick="addSug('${escA(t)}')">${escH(t)}</span>`).join(''); }
 function addSug(t){ if(!pTags.includes(t))pTags.push(t); renderMTags(); renderSugs(document.getElementById('tin')?.value||''); }
 
-async function doPaste(){
-  try{ const t=await navigator.clipboard.readText(); const el=document.getElementById('m-url'); if(el)el.value=t; }
-  catch(e){ showToast('Paste manual ya — clipboard tak accessible.','warn'); }
+async function doPaste(fieldId){
+  try{ const t=await navigator.clipboard.readText(); const el=document.getElementById(fieldId); if(el)el.value=t; }
+  catch(e){ showToast('Paste manual ya','warn'); }
 }
 
-async function doSave(){
+async function doSave(editId){
   const title=(document.getElementById('m-title').value||'').trim();
   if(!title){ showToast('Isi nama masakan dulu!','err'); return; }
   const raw=(document.getElementById('tin').value||'').trim(); if(raw) addTag(raw);
   const url=(document.getElementById('m-url').value||'').trim();
-  const recipe={
-    id: nextId++, title, tags:[...pTags], notes:'', driveUrl:url,
-    videoData: pVideo?pVideo.data:null,
-    videoName: pVideo?pVideo.name:null,
-    createdAt: new Date().toISOString()
-  };
-  recipes.unshift(recipe);
-  saveLocal();
-  closeModal();
-  renderCloud(); renderList();
-  showToast('✓ Resepi disimpan!');
-  // sync to sheet (without videoData — too large)
-  await pushToSheet(recipe);
-  showToast('✓ Disimpan & synced ke Sheets!');
+  const notesEl=document.getElementById('m-notes');
+
+  if(editId!==null&&editId!=='null'){
+    const r=recipes.find(x=>x.id===editId);
+    if(r){
+      r.title=title; r.tags=[...pTags]; r.driveUrl=url;
+      if(notesEl) r.notes=notesEl.value;
+      if(pVideo){ r.videoData=pVideo.data; r.videoName=pVideo.name; }
+      if(pThumb) r.thumbData=pThumb.data;
+    }
+    showToast('✓ Resepi dikemaskini!','ok');
+  } else {
+    const recipe={ id:nextId++, title, tags:[...pTags], notes:'', driveUrl:url,
+      videoData:pVideo?pVideo.data:null, videoName:pVideo?pVideo.name:null,
+      thumbData:pThumb?pThumb.data:null, createdAt:new Date().toISOString() };
+    recipes.unshift(recipe);
+    curPage=1;
+  }
+  saveLocal(); closeModal(); renderCloud(); renderList();
+  showToast('✓ Disimpan!','ok');
+  const r=recipes.find(x=>x.title===title);
+  if(r) await pushToSheet(r);
 }
 
-// ── CONFIRM DIALOG ──
+function openEdit(id){
+  closeAllSwipes();
+  selId=null;
+  document.getElementById('detail-panel').style.display='none';
+  showModal(id);
+}
+
+// ── CONFIRM ──
 function showConfirm(icon,title,msg,btnLabel,onConfirm){
-  document.getElementById('portal').innerHTML=`<div class="confirm-overlay">
-    <div class="confirm-box">
-      <div class="confirm-icon">${icon}</div>
-      <div class="confirm-title">${title}</div>
-      <div class="confirm-msg">${msg}</div>
-      <div class="confirm-btns">
-        <button class="c-cancel" onclick="closeConfirm()">Batal</button>
-        <button class="c-confirm" id="c-ok">${btnLabel}</button>
-      </div>
+  document.getElementById('portal').innerHTML=`<div class="confirm-overlay"><div class="confirm-box">
+    <div class="confirm-icon">${icon}</div>
+    <div class="confirm-title">${title}</div>
+    <div class="confirm-msg">${msg}</div>
+    <div class="confirm-btns">
+      <button class="c-cancel" onclick="closeConfirm()">Batal</button>
+      <button class="c-confirm" id="c-ok">${btnLabel}</button>
     </div>
-  </div>`;
+  </div></div>`;
   document.getElementById('c-ok').addEventListener('click',()=>{ closeConfirm(); onConfirm(); });
 }
 function closeConfirm(){ document.getElementById('portal').innerHTML=''; }
