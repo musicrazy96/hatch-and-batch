@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ms">
+<html lang="ms" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -18,87 +18,129 @@
   --white:#FFFFFF;--border:#EDD89A;--border-light:#F5E6C0;
   --shadow:rgba(139,105,20,0.12);--danger:#E05C3A;
   --green:#52B788;--green-pale:#D8F3DC;--blue:#4A90D9;--blue-pale:#E3F0FC;
+  --card-bg:#FFFFFF;--app-bg:#FFFBEE;--surface:#FDF3D0;
 }
-html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:var(--text)}
-.app{width:100%;max-width:430px;margin:0 auto;background:var(--cream);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
+[data-theme="dark"]{
+  --cream:#1A1508;--cream2:#221C09;--beige:#2E2610;--beige2:#3D3318;
+  --text:#F5E6C0;--text-mid:#D4B86A;--text-light:#8B7040;
+  --white:#2A2208;--border:#3D3318;--border-light:#2E2610;
+  --shadow:rgba(0,0,0,0.3);--yolk-soft:#2A2208;--yolk-pale:#221C09;
+  --card-bg:#221C09;--app-bg:#1A1508;--surface:#221C09;
+  --blue-pale:#1A2535;--green-pale:#0D2318;
+}
+html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:var(--text);transition:background 0.3s}
+[data-theme="dark"] body{background:#111008}
+.app{width:100%;max-width:430px;margin:0 auto;background:var(--app-bg);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;transition:background 0.3s}
 
 /* TOPBAR */
 .topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:hidden;flex-shrink:0}
-.tb-blob1{position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.15);border-radius:50%;pointer-events:none}
-.tb-blob2{position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.1);border-radius:50%;pointer-events:none}
+[data-theme="dark"] .topbar{background:#2A2005}
+.tb-blob1{position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.12);border-radius:50%;pointer-events:none}
+.tb-blob2{position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;pointer-events:none}
 .logo-row{display:flex;flex-direction:column;align-items:center;position:relative;z-index:1}
 .logo-svg{width:76px;height:76px;margin-bottom:6px;filter:drop-shadow(0 3px 8px rgba(139,105,20,0.2))}
 .brand-name{font-family:'Fredoka',sans-serif;font-size:26px;font-weight:700;color:var(--text);letter-spacing:0.3px;line-height:1}
+[data-theme="dark"] .brand-name{color:#F5E6C0}
 .brand-tag{font-size:11px;font-weight:600;color:var(--brown);letter-spacing:0.8px;margin-top:3px;margin-bottom:14px}
-.topbar-actions{position:absolute;top:20px;right:18px;z-index:2}
-.icon-btn{background:rgba(255,255,255,0.3);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
-.search-wrap{background:rgba(255,255,255,0.55);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:16px;border:1.5px solid rgba(255,255,255,0.7);position:relative;z-index:1}
+[data-theme="dark"] .brand-tag{color:#8B7040}
+.topbar-actions{position:absolute;top:20px;right:18px;z-index:2;display:flex;gap:6px}
+.icon-btn{background:rgba(255,255,255,0.25);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background 0.15s}
+.icon-btn:hover{background:rgba(255,255,255,0.4)}
+.search-wrap{background:rgba(255,255,255,0.5);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:10px;margin-bottom:16px;border:1.5px solid rgba(255,255,255,0.6);position:relative;z-index:1}
 .search-wrap input{background:transparent;border:none;outline:none;color:var(--text);font-size:14px;flex:1;font-family:'Nunito',sans-serif;font-weight:600}
+[data-theme="dark"] .search-wrap input{color:#F5E6C0}
 .search-wrap input::placeholder{color:var(--brown-light)}
 .clear-btn{background:none;border:none;color:var(--brown);font-size:20px;cursor:pointer;line-height:1;padding:0;display:none}
 
+/* SEARCH SUGGESTION DROPDOWN */
+.search-container{position:relative;z-index:1;margin-bottom:16px}
+.search-container .search-wrap{margin-bottom:0}
+.suggest-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 8px 24px var(--shadow);z-index:50;display:none}
+.suggest-dropdown.open{display:block}
+.suggest-item{padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light);transition:background 0.12s}
+.suggest-item:last-child{border-bottom:none}
+.suggest-item:hover{background:var(--yolk-soft)}
+.suggest-icon{font-size:14px;flex-shrink:0}
+.suggest-type{font-size:10px;font-weight:700;color:var(--text-light);margin-left:auto;letter-spacing:0.5px}
+
 /* SYNC BAR */
-.sync-bar{background:var(--cream2);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-mid);flex-shrink:0}
+.sync-bar{background:var(--surface);border-bottom:1px solid var(--border);padding:7px 16px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--text-mid);flex-shrink:0}
 .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--beige2);flex-shrink:0;transition:background 0.3s}
-.sync-dot.ok{background:var(--green)}
-.sync-dot.syncing{background:var(--yolk-deep);animation:blink 1s infinite}
-.sync-dot.err{background:var(--danger)}
+.sync-dot.ok{background:var(--green)}.sync-dot.syncing{background:var(--yolk-deep);animation:blink 1s infinite}.sync-dot.err{background:var(--danger)}
 @keyframes blink{0%,100%{opacity:1}50%{opacity:0.4}}
 .sync-btn{margin-left:auto;background:none;border:1.5px solid var(--border);border-radius:8px;padding:3px 10px;font-size:10px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif}
 
-/* STATS */
-.stats-row{display:flex;gap:8px;padding:14px 16px 6px;flex-shrink:0}
-.stat-card{flex:1;background:var(--white);border-radius:14px;padding:10px 12px;border:1.5px solid var(--border-light);text-align:center}
-.stat-num{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:var(--text);line-height:1}
-.stat-label{font-size:10px;font-weight:700;color:var(--text-light);letter-spacing:0.8px;margin-top:2px}
+/* RECENTLY VIEWED */
+.recently-section{padding:10px 16px 0;flex-shrink:0}
+.recently-label{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.5px;margin-bottom:8px}
+.recently-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px}
+.recently-scroll::-webkit-scrollbar{display:none}
+.recently-chip{display:flex;align-items:center;gap:6px;background:var(--card-bg);border:1.5px solid var(--border-light);border-radius:12px;padding:6px 10px;cursor:pointer;white-space:nowrap;flex-shrink:0;transition:border-color 0.15s}
+.recently-chip:hover{border-color:var(--yolk-deep)}
+.recently-thumb{width:28px;height:28px;border-radius:6px;object-fit:cover;background:var(--yolk-soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px}
+.recently-name{font-size:11px;font-weight:700;color:var(--text);max-width:90px;overflow:hidden;text-overflow:ellipsis}
+
+/* TOOLBAR (sort + filter + fav) */
+.toolbar{display:flex;align-items:center;gap:8px;padding:10px 16px 4px;flex-shrink:0;flex-wrap:wrap}
+.sort-select{background:var(--card-bg);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:11px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;outline:none;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23B8924A'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;padding-right:24px}
+.filter-btn{background:var(--card-bg);border:1.5px solid var(--border);border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s;display:flex;align-items:center;gap:4px}
+.filter-btn.active{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
+.fav-filter-btn{background:var(--card-bg);border:1.5px solid var(--border);border-radius:10px;padding:6px 12px;font-size:11px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s;margin-left:auto}
+.fav-filter-btn.active{background:#FFF0F0;color:#E05C3A;border-color:#FFB8A8}
 
 /* TAG CLOUD */
-.tag-cloud{padding:8px 16px 4px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
-.tc{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--text-mid);background:var(--white);cursor:pointer;transition:all 0.15s;user-select:none}
+.tag-cloud{padding:4px 16px 4px;display:flex;gap:6px;flex-wrap:wrap;flex-shrink:0}
+.tc{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--text-mid);background:var(--card-bg);cursor:pointer;transition:all 0.15s;user-select:none}
 .tc.active{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
-.sec-lbl{padding:10px 18px 6px;font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.8px;flex-shrink:0}
+.sec-lbl{padding:8px 18px 6px;font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.8px;flex-shrink:0}
+
+/* STATS */
+.stats-row{display:flex;gap:8px;padding:14px 16px 6px;flex-shrink:0}
+.stat-card{flex:1;background:var(--card-bg);border-radius:14px;padding:10px 12px;border:1.5px solid var(--border-light);text-align:center}
+.stat-num{font-family:'Fredoka',sans-serif;font-size:22px;font-weight:600;color:var(--text);line-height:1}
+.stat-label{font-size:10px;font-weight:700;color:var(--text-light);letter-spacing:0.8px;margin-top:2px}
 
 /* LIST */
 .list{flex:1;padding:0 14px 10px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
-/* ── CARD ── */
-.card{background:var(--white);border-radius:18px;border:1.5px solid var(--border-light);overflow:visible;box-shadow:0 2px 8px var(--shadow);flex-shrink:0;transition:border-color 0.18s,box-shadow 0.18s}
-.card.active{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.35)}
+/* PULL TO REFRESH */
+.ptr-indicator{text-align:center;padding:8px;font-size:12px;font-weight:700;color:var(--text-light);height:0;overflow:hidden;transition:height 0.2s;flex-shrink:0}
+.ptr-indicator.show{height:36px}
 
-/* thumbnail — clickable area */
+/* CARD */
+.card{background:var(--card-bg);border-radius:18px;border:1.5px solid var(--border-light);overflow:visible;box-shadow:0 2px 8px var(--shadow);flex-shrink:0;transition:border-color 0.18s,box-shadow 0.18s;position:relative}
+.card.active{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.3)}
 .vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden;border-radius:16px 16px 0 0;cursor:pointer}
 .vid-wrap img,.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-.vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--cream2))}
+.vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--surface))}
 .vp-play{width:36px;height:36px;background:var(--yolk);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--yolk-deep)}
 .vp-tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid var(--brown);margin-left:3px}
 .vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
 .drive-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:4px}
 .db-dot{width:6px;height:6px;border-radius:50%;background:var(--yolk-deep)}
-/* click hint overlay on thumb */
-.thumb-overlay{position:absolute;inset:0;background:rgba(61,44,0,0);transition:background 0.2s;display:flex;align-items:center;justify-content:center}
-.card.active .thumb-overlay{background:rgba(61,44,0,0.18)}
-.thumb-tap-hint{font-size:10px;font-weight:700;color:rgba(255,255,255,0);background:rgba(0,0,0,0);padding:5px 12px;border-radius:20px;transition:all 0.2s;letter-spacing:0.3px}
+/* favourite star */
+.fav-star{position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:2}
+.fav-star:hover{transform:scale(1.15)}
+.thumb-overlay{position:absolute;inset:0;background:rgba(61,44,0,0);transition:background 0.2s}
+.card.active .thumb-overlay{background:rgba(61,44,0,0.15)}
+.card-body{padding:11px 14px 12px}
+.card-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.similar-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;background:var(--green-pale);color:#2D6A4F;cursor:pointer;flex-shrink:0}
+.card-meta-row{display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.last-edited{font-size:10px;font-weight:600;color:var(--text-light)}
+.tag-row{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2);cursor:pointer;transition:background 0.12s}
+.tag:hover{background:var(--yolk-pale)}
 
-/* ── 3 MINI ICONS BAR ── */
-.mini-icons-bar{display:flex;gap:0;border-top:1.5px solid var(--border-light);overflow:hidden;border-radius:0;max-height:0;transition:max-height 0.28s cubic-bezier(0.4,0,0.2,1),opacity 0.22s;opacity:0}
+/* MINI ICONS */
+.mini-icons-bar{display:flex;gap:0;border-top:1.5px solid var(--border-light);overflow:hidden;border-radius:0 0 16px 16px;max-height:0;transition:max-height 0.28s cubic-bezier(0.4,0,0.2,1),opacity 0.22s;opacity:0}
 .card.active .mini-icons-bar{max-height:64px;opacity:1}
 .mini-icon-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;cursor:pointer;border:none;background:transparent;transition:background 0.15s;position:relative;font-family:'Nunito',sans-serif}
 .mini-icon-btn:not(:last-child)::after{content:'';position:absolute;right:0;top:20%;height:60%;width:1px;background:var(--border-light)}
-.mini-icon-btn:hover{background:var(--cream2)}
-.mi-edit:hover{background:var(--blue-pale)}
-.mi-note:hover{background:var(--yolk-soft)}
-.mi-del:hover{background:#FDE8E0}
+.mi-edit:hover{background:var(--blue-pale)}.mi-note:hover{background:var(--yolk-soft)}.mi-similar:hover{background:var(--green-pale)}.mi-del:hover{background:#FDE8E0}
 .mini-icon-emoji{font-size:18px;line-height:1}
 .mini-icon-label{font-size:10px;font-weight:700;color:var(--text-mid);letter-spacing:0.2px}
-.mi-edit .mini-icon-label{color:var(--blue)}
-.mi-note .mini-icon-label{color:var(--brown)}
-.mi-del .mini-icon-label{color:var(--danger)}
-
-/* card body (title + tags only) */
-.card-body{padding:11px 14px 12px}
-.card-title{font-family:'Fredoka',sans-serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:7px}
-.tag-row{display:flex;gap:5px;flex-wrap:wrap}
-.tag{font-size:10px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2)}
+.mi-edit .mini-icon-label{color:var(--blue)}.mi-note .mini-icon-label{color:var(--brown)}.mi-similar .mini-icon-label{color:var(--green)}.mi-del .mini-icon-label{color:var(--danger)}
 
 /* EMPTY */
 .empty{text-align:center;padding:50px 20px;color:var(--text-light)}
@@ -108,7 +150,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 
 /* PAGINATION */
 .pagination{display:flex;align-items:center;justify-content:center;gap:8px;padding:12px 16px 4px;flex-shrink:0}
-.pg-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-mid);transition:all 0.15s}
+.pg-btn{width:36px;height:36px;border-radius:10px;border:1.5px solid var(--border);background:var(--card-bg);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-weight:700;color:var(--text-mid);transition:all 0.15s}
 .pg-btn:disabled{opacity:0.35;cursor:not-allowed}
 .pg-btn:not(:disabled):hover{border-color:var(--yolk-deep);background:var(--yolk-pale)}
 .pg-dot-row{display:flex;gap:5px;align-items:center}
@@ -118,48 +160,45 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 /* TOAST */
 .toast-wrap{padding:0 16px 4px;flex-shrink:0}
 .toast{font-size:12px;font-weight:700;padding:10px 18px;border-radius:12px;text-align:center;display:none;letter-spacing:0.3px;background:var(--brown);color:var(--white)}
-.toast.show{display:block}
-.toast.err{background:var(--danger)}
-.toast.warn{background:var(--brown-light)}
-.toast.ok{background:var(--green)}
+[data-theme="dark"] .toast{color:var(--text)}
+.toast.show{display:block}.toast.err{background:var(--danger)}.toast.warn{background:var(--brown-light)}.toast.ok{background:var(--green)}
 
 /* FAB */
 .fab-area{padding:10px 18px 24px;display:flex;justify-content:flex-end;flex-shrink:0}
 .fab{width:56px;height:56px;border-radius:50%;background:var(--yolk);border:2.5px solid var(--yolk-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 18px rgba(230,176,32,0.45);font-size:28px;font-weight:700;color:var(--text);font-family:'Nunito',sans-serif;transition:transform 0.15s}
 .fab:active{transform:scale(0.92)}
 
-/* ── POP-UP PANELS (modal-style, slides from bottom) ── */
+/* POPUP SHEETS */
 .popup-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.45);z-index:100;display:flex;align-items:flex-end;justify-content:center}
+[data-theme="dark"] .popup-overlay{background:rgba(0,0,0,0.6)}
 .popup-sheet{background:var(--cream);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:88dvh;display:flex;flex-direction:column;animation:slideUp 0.25s cubic-bezier(0.4,0,0.2,1)}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .popup-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 0}
 .popup-header{padding:12px 18px 0;flex-shrink:0;display:flex;align-items:center;justify-content:space-between}
 .popup-title{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;color:var(--text)}
-.popup-close{background:var(--cream2);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.popup-close{background:var(--surface);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text)}
 .popup-body{overflow-y:auto;padding:14px 18px;flex:1;-webkit-overflow-scrolling:touch}
 .popup-footer{padding:10px 18px 28px;flex-shrink:0}
-
-/* NOTE POPUP */
-.note-textarea{width:100%;border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;font-size:14px;font-family:'Nunito',sans-serif;color:var(--text);background:var(--white);resize:none;min-height:120px;outline:none;font-weight:600;line-height:1.6;transition:border-color 0.15s}
-.note-textarea:focus{border-color:var(--yolk-deep)}
 .note-recipe-name{font-size:12px;font-weight:700;color:var(--text-light);margin-bottom:10px;padding:7px 12px;background:var(--yolk-soft);border-radius:8px}
+.note-textarea{width:100%;border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;font-size:14px;font-family:'Nunito',sans-serif;color:var(--text);background:var(--card-bg);resize:none;min-height:120px;outline:none;font-weight:600;line-height:1.6;transition:border-color 0.15s}
+.note-textarea:focus{border-color:var(--yolk-deep)}
 
-/* AI SUGGEST POPUP */
-.ai-loading{text-align:center;padding:30px 20px}
-.ai-loading-icon{font-size:40px;margin-bottom:10px;animation:bounce 1s infinite}
-@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
-.ai-result{font-size:14px;line-height:1.8;color:var(--text);font-weight:500}
-.ai-result strong{color:var(--brown);font-weight:700}
+/* SIMILAR RECIPES */
+.similar-list{display:flex;flex-direction:column;gap:10px}
+.similar-card{background:var(--surface);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1.5px solid var(--border-light);transition:border-color 0.15s}
+.similar-card:hover{border-color:var(--yolk-deep)}
+.similar-thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;background:var(--yolk-soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.similar-info{flex:1;min-width:0}
+.similar-title{font-size:13px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.similar-tags-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+.similar-tag-match{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--green-pale);color:#2D6A4F}
+.similar-tag-other{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--yolk-soft);color:var(--brown)}
+.similar-score{font-size:11px;font-weight:700;color:var(--text-light);flex-shrink:0}
+.no-similar{text-align:center;padding:30px 20px;color:var(--text-light);font-size:13px;font-weight:600}
 
-/* SHARED BUTTON STYLES */
-.btn-full{width:100%;padding:14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text)}
-.btn-row{display:flex;gap:8px}
-.btn-secondary{flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
-.btn-primary{flex:2;padding:13px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
-.btn-danger{flex:1;padding:13px;border-radius:14px;border:none;background:var(--danger);color:var(--white);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
-
-/* MODAL (add/edit recipe) */
+/* MODAL */
 .modal-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:150;display:flex;align-items:flex-end;justify-content:center}
+[data-theme="dark"] .modal-overlay{background:rgba(0,0,0,0.65)}
 .modal{background:var(--cream);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:92dvh;display:flex;flex-direction:column;animation:slideUp 0.25s cubic-bezier(0.4,0,0.2,1)}
 .modal-header{padding:16px 18px 0;flex-shrink:0}
 .modal-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px}
@@ -169,29 +208,27 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .modal-footer{padding:14px 18px 28px;flex-shrink:0}
 .upload-zone{border:2px dashed var(--beige2);border-radius:18px;padding:20px;text-align:center;cursor:pointer;margin-bottom:14px;background:var(--yolk-soft);transition:all 0.18s;user-select:none}
 .upload-zone:hover{border-color:var(--yolk-deep);background:var(--yolk-pale)}
-.uz-icon{font-size:28px;margin-bottom:5px}
-.uz-label{font-size:13px;font-weight:700;color:var(--brown);margin-bottom:2px}
-.uz-hint{font-size:11px;color:var(--text-light);font-weight:600}
+.uz-icon{font-size:28px;margin-bottom:5px}.uz-label{font-size:13px;font-weight:700;color:var(--brown);margin-bottom:2px}.uz-hint{font-size:11px;color:var(--text-light);font-weight:600}
 .div-or{display:flex;align-items:center;gap:10px;margin:12px 0}
 .div-or span{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px}
 .div-or hr{flex:1;border:none;border-top:1.5px solid var(--border)}
-.drive-row{background:var(--white);border:1.5px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.drive-row{background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;padding:11px 13px;margin-bottom:14px;display:flex;align-items:center;gap:10px}
 .drive-ico{width:32px;height:32px;background:var(--yolk-pale);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:17px}
 .drive-row input{flex:1;border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);font-weight:600;background:transparent;min-width:0}
 .drive-row input::placeholder{color:var(--text-light)}
 .paste-btn{padding:6px 12px;border-radius:8px;background:var(--yolk-pale);border:1.5px solid var(--beige2);font-size:11px;font-weight:700;color:var(--brown);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap;flex-shrink:0}
 .field{margin-bottom:14px}
 .field label{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;display:block;margin-bottom:5px}
-.field input{width:100%;background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:12px 13px;font-size:14px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s;-webkit-appearance:none}
+.field input{width:100%;background:var(--card-bg);border:1.5px solid var(--border);border-radius:12px;padding:12px 13px;font-size:14px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s;-webkit-appearance:none}
 .field input:focus{border-color:var(--yolk-deep)}
 .field input::placeholder{color:var(--text-light)}
-.tiw{background:var(--white);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color 0.15s;min-height:46px}
+.tiw{background:var(--card-bg);border:1.5px solid var(--border);border-radius:12px;padding:9px 12px;display:flex;flex-wrap:wrap;gap:6px;align-items:center;cursor:text;transition:border-color 0.15s;min-height:46px}
 .tiw:focus-within{border-color:var(--yolk-deep)}
 .ti-tag{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:var(--yolk-soft);color:var(--brown);border:1px solid var(--beige2);display:flex;align-items:center;gap:5px;user-select:none}
 .ti-rm{cursor:pointer;color:var(--yolk-deep);font-size:16px;line-height:1;font-weight:700}
 .tiw input{border:none;outline:none;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);background:transparent;min-width:90px;flex:1;font-weight:600}
 .tsug-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;margin-bottom:4px}
-.tsug{font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:var(--white);color:var(--text-mid);border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;user-select:none}
+.tsug{font-size:11px;font-weight:700;padding:5px 11px;border-radius:20px;background:var(--card-bg);color:var(--text-mid);border:1.5px solid var(--border);cursor:pointer;transition:all 0.15s;user-select:none}
 .tsug:hover{background:var(--yolk-pale);color:var(--brown);border-color:var(--beige2)}
 .prev-vid{width:100%;border-radius:12px;max-height:120px;object-fit:cover;margin-bottom:12px;display:block}
 .thumb-section{margin-bottom:14px}
@@ -200,21 +237,29 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .thumb-status{font-size:11px;font-weight:700;margin-bottom:8px;padding:7px 12px;border-radius:8px;background:var(--beige);color:var(--brown)}
 .thumb-status.found{background:var(--green-pale);color:#2D6A4F}
 .thumb-tabs{display:flex;gap:8px;margin-bottom:10px}
-.thumb-tab{flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:var(--white);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;text-align:center;transition:all 0.15s}
+.thumb-tab{flex:1;padding:9px;border-radius:10px;border:1.5px solid var(--border);background:var(--card-bg);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;text-align:center;transition:all 0.15s}
 .thumb-tab.active{background:var(--yolk-pale);border-color:var(--yolk-deep);color:var(--brown)}
 
+/* BUTTONS */
+.btn-row{display:flex;gap:8px}
+.btn-secondary{flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--card-bg);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
+.btn-primary{flex:2;padding:13px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.btn-full{width:100%;padding:14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);margin-top:8px}
+
 /* SETTINGS */
-.settings-screen{position:fixed;inset:0;background:var(--cream);z-index:200;display:none;flex-direction:column;max-width:430px;margin:0 auto}
+.settings-screen{position:fixed;inset:0;background:var(--app-bg);z-index:200;display:none;flex-direction:column;max-width:430px;margin:0 auto}
 .settings-screen.open{display:flex}
 .settings-header{background:var(--yolk);padding:20px 18px 18px;flex-shrink:0}
+[data-theme="dark"] .settings-header{background:#2A2005}
 .settings-back{display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;background:none;border:none;font-family:'Nunito',sans-serif}
 .settings-back span{font-size:18px}
 .settings-back p{font-size:14px;font-weight:700;color:var(--text)}
 .settings-title{font-family:'Fredoka',sans-serif;font-size:24px;font-weight:600;color:var(--text)}
+[data-theme="dark"] .settings-title{color:#F5E6C0}
 .settings-body{flex:1;overflow-y:auto;padding:20px 18px}
 .settings-section{margin-bottom:24px}
 .settings-section-title{font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.8px;margin-bottom:12px}
-.settings-card{background:var(--white);border-radius:16px;border:1.5px solid var(--border-light);overflow:hidden}
+.settings-card{background:var(--card-bg);border-radius:16px;border:1.5px solid var(--border-light);overflow:hidden}
 .settings-row{padding:14px 16px;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:12px}
 .settings-row:last-child{border-bottom:none}
 .settings-row-icon{font-size:20px;width:28px;text-align:center;flex-shrink:0}
@@ -222,34 +267,49 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .settings-row-title{font-size:14px;font-weight:700;color:var(--text)}
 .settings-row-sub{font-size:11px;font-weight:600;color:var(--text-light);margin-top:2px;word-break:break-all}
 .settings-row-action{flex-shrink:0}
-.settings-row-btn{padding:7px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--cream2);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
+.settings-row-btn{padding:7px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;white-space:nowrap}
 .settings-row-btn.primary{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
-.settings-row-btn.danger{background:var(--white);color:var(--danger);border-color:#FFB8A8}
+.settings-row-btn.danger{background:var(--card-bg);color:var(--danger);border-color:#FFB8A8}
+/* dark mode toggle */
+.toggle-wrap{display:flex;align-items:center;gap:10px}
+.toggle{position:relative;width:44px;height:24px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--beige2);border-radius:24px;cursor:pointer;transition:background 0.3s}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:var(--white);border-radius:50%;transition:transform 0.3s}
+.toggle input:checked+.toggle-slider{background:var(--yolk-deep)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(20px)}
 .api-input-wrap{padding:14px 16px}
-.api-input{width:100%;background:var(--cream);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;font-size:12px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s}
+.api-input{width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 13px;font-size:12px;font-family:'Nunito',sans-serif;color:var(--text);outline:none;font-weight:600;transition:border-color 0.15s}
 .api-input:focus{border-color:var(--yolk-deep)}
 .api-input::placeholder{color:var(--text-light)}
 .api-save-btn{width:100%;margin-top:10px;padding:13px;border-radius:12px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 .connected-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;color:#2D6A4F}
 .connected-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+/* export/import area */
+.export-btns{display:flex;gap:8px;padding:0 16px 14px}
+.export-btn{flex:1;padding:11px;border-radius:12px;border:1.5px solid var(--border);background:var(--surface);font-size:12px;font-weight:700;color:var(--text-mid);cursor:pointer;font-family:'Nunito',sans-serif;text-align:center;transition:all 0.15s}
+.export-btn:hover{border-color:var(--yolk-deep);background:var(--yolk-pale);color:var(--brown)}
 
 /* CONFIRM */
 .confirm-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+[data-theme="dark"] .confirm-overlay{background:rgba(0,0,0,0.65)}
 .confirm-box{background:var(--cream);border-radius:20px;padding:24px 20px;width:100%;max-width:320px;text-align:center}
 .confirm-icon{font-size:36px;margin-bottom:10px}
 .confirm-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
 .confirm-msg{font-size:13px;font-weight:600;color:var(--text-mid);margin-bottom:18px;line-height:1.5}
 .confirm-btns{display:flex;gap:8px}
-.c-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:var(--white);font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
-.c-confirm{flex:1;padding:12px;border-radius:12px;border:none;background:var(--danger);color:var(--white);font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.c-cancel{flex:1;padding:12px;border-radius:12px;border:1.5px solid var(--border);background:var(--card-bg);font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;color:var(--text-mid)}
+.c-confirm{flex:1;padding:12px;border-radius:12px;border:none;background:var(--danger);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 </style>
 </head>
 <body>
 
 <div class="app" id="app">
+  <!-- TOPBAR -->
   <div class="topbar">
     <div class="tb-blob1"></div><div class="tb-blob2"></div>
     <div class="topbar-actions">
+      <button class="icon-btn" id="dark-toggle-btn" onclick="toggleDark()" title="Dark mode">🌙</button>
       <button class="icon-btn" onclick="openSettings()">⚙️</button>
     </div>
     <div class="logo-row">
@@ -273,29 +333,59 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
       <div class="brand-name">Hatch &amp; Batch</div>
       <div class="brand-tag">koleksi video resepi kau ✨</div>
     </div>
-    <div class="search-wrap">
-      <span style="font-size:16px">🔍</span>
-      <input type="text" id="search" placeholder="Cari nama masakan atau tag..." autocomplete="off">
-      <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+    <!-- SEARCH with suggestions -->
+    <div class="search-container">
+      <div class="search-wrap">
+        <span style="font-size:16px">🔍</span>
+        <input type="text" id="search" placeholder="Cari nama, tag..." autocomplete="off">
+        <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+      </div>
+      <div class="suggest-dropdown" id="suggest-drop"></div>
     </div>
   </div>
 
+  <!-- SYNC BAR -->
   <div class="sync-bar">
     <div class="sync-dot local" id="sync-dot"></div>
     <span id="sync-text">Local sahaja</span>
-    <button class="sync-btn" onclick="syncNow()">↻ Sync</button>
+    <button class="sync-btn" id="ptr-sync-btn" onclick="syncNow()">↻ Sync</button>
   </div>
 
+  <!-- STATS -->
   <div class="stats-row">
     <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">RESEPI</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-fav">0</div><div class="stat-label">FAVOURITE</div></div>
     <div class="stat-card"><div class="stat-num" id="s-tags">0</div><div class="stat-label">TAG</div></div>
-    <div class="stat-card"><div class="stat-num" id="s-drive">0</div><div class="stat-label">DI DRIVE</div></div>
   </div>
 
+  <!-- RECENTLY VIEWED -->
+  <div class="recently-section" id="recently-section" style="display:none">
+    <div class="recently-label">RECENTLY VIEWED</div>
+    <div class="recently-scroll" id="recently-scroll"></div>
+  </div>
+
+  <!-- TOOLBAR: sort + fav filter -->
+  <div class="toolbar">
+    <select class="sort-select" id="sort-select" onchange="renderList()">
+      <option value="newest">🕐 Terbaru</option>
+      <option value="az">🔤 A → Z</option>
+      <option value="za">🔤 Z → A</option>
+      <option value="fav">⭐ Favourite dulu</option>
+      <option value="views">👁 Paling kerap dibuka</option>
+    </select>
+    <button class="fav-filter-btn" id="fav-filter-btn" onclick="toggleFavFilter()">⭐ Favourite</button>
+  </div>
+
+  <!-- TAG CLOUD -->
   <div id="tag-cloud" class="tag-cloud"></div>
   <div class="sec-lbl" id="sec-lbl">SEMUA RESEPI</div>
+
+  <!-- PTR indicator -->
+  <div class="ptr-indicator" id="ptr-indicator">↓ Tarik untuk sync...</div>
+
   <div class="list" id="list"></div>
 
+  <!-- PAGINATION -->
   <div class="pagination" id="pagination" style="display:none">
     <button class="pg-btn" id="pg-prev" onclick="changePage(-1)">‹</button>
     <div class="pg-dot-row" id="pg-dots"></div>
@@ -313,6 +403,25 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
     <div class="settings-title">Settings ⚙️</div>
   </div>
   <div class="settings-body">
+    <!-- APPEARANCE -->
+    <div class="settings-section">
+      <div class="settings-section-title">APPEARANCE</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon">🌙</div>
+          <div class="settings-row-body">
+            <div class="settings-row-title">Dark Mode</div>
+            <div class="settings-row-sub">Tukar ke tema gelap</div>
+          </div>
+          <div class="settings-row-action">
+            <div class="toggle-wrap">
+              <label class="toggle"><input type="checkbox" id="dark-toggle-settings" onchange="toggleDarkFromSettings(this.checked)"><span class="toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- SYNC -->
     <div class="settings-section">
       <div class="settings-section-title">GOOGLE SHEETS SYNC</div>
       <div class="settings-card">
@@ -340,6 +449,30 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
         </div>
       </div>
     </div>
+    <!-- BACKUP -->
+    <div class="settings-section">
+      <div class="settings-section-title">BACKUP &amp; RESTORE</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon">📤</div>
+          <div class="settings-row-body">
+            <div class="settings-row-title">Export data</div>
+            <div class="settings-row-sub">Download semua resepi sebagai JSON</div>
+          </div>
+          <div class="settings-row-action"><button class="settings-row-btn primary" onclick="exportData()">Export</button></div>
+        </div>
+        <div class="settings-row">
+          <div class="settings-row-icon">📥</div>
+          <div class="settings-row-body">
+            <div class="settings-row-title">Import data</div>
+            <div class="settings-row-sub">Restore dari JSON backup</div>
+          </div>
+          <div class="settings-row-action"><button class="settings-row-btn" onclick="document.getElementById('import-file').click()">Import</button></div>
+        </div>
+        <input type="file" id="import-file" accept=".json" style="display:none">
+      </div>
+    </div>
+    <!-- DATA -->
     <div class="settings-section">
       <div class="settings-section-title">DATA</div>
       <div class="settings-card">
@@ -360,6 +493,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
         </div>
       </div>
     </div>
+    <!-- ABOUT -->
     <div class="settings-section">
       <div class="settings-section-title">TENTANG</div>
       <div class="settings-card">
@@ -367,7 +501,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
           <div class="settings-row-icon">🐣</div>
           <div class="settings-row-body">
             <div class="settings-row-title">Hatch &amp; Batch</div>
-            <div class="settings-row-sub">v4.0 — Click-to-reveal icons edition</div>
+            <div class="settings-row-sub">v5.0 — Full features edition</div>
           </div>
         </div>
       </div>
@@ -378,54 +512,91 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 <div id="portal"></div>
 
 <script>
-const STORE_KEY='hatchbatch_v4', API_KEY='hatchbatch_api_url', SYNC_KEY='hatchbatch_last_sync';
+// ── CONSTANTS ──
+const STORE_KEY='hatchbatch_v5',API_KEY='hatchbatch_api_url',SYNC_KEY='hatchbatch_last_sync';
+const RECENT_KEY='hatchbatch_recent',VIEWS_KEY='hatchbatch_views',DARK_KEY='hatchbatch_dark';
 const PER_PAGE=5;
 
-let recipes=[], nextId=1, activeCardId=null, searchQ='', activeTag='', curPage=1;
-let pTags=[], pVideo=null, pThumb=null;
-let apiUrl=localStorage.getItem(API_KEY)||'', isSyncing=false;
+// ── STATE ──
+let recipes=[],nextId=1,activeCardId=null,searchQ='',activeTag='',curPage=1,favOnly=false;
+let pTags=[],pVideo=null,pThumb=null;
+let apiUrl=localStorage.getItem(API_KEY)||'',isSyncing=false;
+let recentIds=JSON.parse(localStorage.getItem(RECENT_KEY)||'[]');
+let viewCounts=JSON.parse(localStorage.getItem(VIEWS_KEY)||'{}');
+let isDark=localStorage.getItem(DARK_KEY)==='1';
 
 // ── INIT ──
 function init(){
-  loadLocal(); renderCloud(); renderList();
-  updateSyncBar(); updateSettingsStatus();
+  loadLocal();
+  if(isDark) applyDark(true,false);
+  renderCloud();renderList();renderRecent();
+  updateSyncBar();updateSettingsStatus();
   if(apiUrl) syncNow();
-  // close active card on outside click
-  document.addEventListener('click', e=>{
-    if(activeCardId && !e.target.closest(`#card-${activeCardId}`)){
+  setupPullToRefresh();
+  document.addEventListener('click',e=>{
+    if(activeCardId&&!e.target.closest(`#card-${activeCardId}`)){
       const prev=document.getElementById(`card-${activeCardId}`);
       if(prev) prev.classList.remove('active');
       activeCardId=null;
     }
+    const sd=document.getElementById('suggest-drop');
+    if(!e.target.closest('.search-container')) sd.classList.remove('open');
   });
+  document.getElementById('import-file').addEventListener('change',importData);
 }
+
+// ── DARK MODE ──
+function applyDark(on, save=true){
+  isDark=on;
+  document.documentElement.setAttribute('data-theme',on?'dark':'light');
+  document.getElementById('dark-toggle-btn').textContent=on?'☀️':'🌙';
+  const ds=document.getElementById('dark-toggle-settings');
+  if(ds) ds.checked=on;
+  if(save) localStorage.setItem(DARK_KEY,on?'1':'0');
+}
+function toggleDark(){ applyDark(!isDark); }
+function toggleDarkFromSettings(v){ applyDark(v); }
 
 // ── LOCAL STORAGE ──
 function loadLocal(){
-  try{ const r=localStorage.getItem(STORE_KEY); if(r){recipes=JSON.parse(r);nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;return;} }catch(e){}
+  try{const r=localStorage.getItem(STORE_KEY);if(r){recipes=JSON.parse(r);nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;return;}}catch(e){}
   recipes=[
-    {id:1,title:'Rendang Tok Perak',tags:['daging lembu','rempah','santan'],notes:'Masak 3 jam baru kering',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
-    {id:2,title:'Gulai Ikan Kembung',tags:['ikan kembung','santan','kunyit'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
-    {id:3,title:'Tumis Sayur Kobis',tags:['sayur kobis','sos tiram','bawang putih'],notes:'Jangan masak lama',driveUrl:'',videoData:null,videoName:'kobis.mp4',thumbData:null,createdAt:new Date().toISOString()},
-    {id:4,title:'Ayam Goreng Berempah',tags:['ayam','rempah','kunyit'],notes:'Garing luar lembut dalam',driveUrl:'',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
-    {id:5,title:'Sup Tulang Merah',tags:['tulang','rempah','tomato'],notes:'Tambah kentang lagi sedap',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
-    {id:6,title:'Nasi Goreng Kampung',tags:['nasi','telur','ikan bilis'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
-    {id:7,title:'Sambal Udang Petai',tags:['udang','petai','cili'],notes:'',driveUrl:'',videoData:null,videoName:null,thumbData:null,createdAt:new Date().toISOString()},
+    {id:1,title:'Rendang Tok Perak',tags:['daging lembu','rempah','santan'],notes:'Masak 3 jam baru kering',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,fav:true,createdAt:'2024-11-01T08:00:00Z',editedAt:'2024-11-10T10:00:00Z'},
+    {id:2,title:'Gulai Ikan Kembung',tags:['ikan kembung','santan','kunyit'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,fav:false,createdAt:'2024-11-05T08:00:00Z',editedAt:'2024-11-05T08:00:00Z'},
+    {id:3,title:'Tumis Sayur Kobis',tags:['sayur kobis','sos tiram','bawang putih'],notes:'Jangan masak lama',driveUrl:'',videoData:null,videoName:null,thumbData:null,fav:false,createdAt:'2024-11-08T08:00:00Z',editedAt:'2024-11-08T08:00:00Z'},
+    {id:4,title:'Ayam Goreng Berempah',tags:['ayam','rempah','kunyit'],notes:'Garing luar lembut dalam',driveUrl:'',videoData:null,videoName:null,thumbData:null,fav:true,createdAt:'2024-11-12T08:00:00Z',editedAt:'2024-11-15T09:00:00Z'},
+    {id:5,title:'Sup Tulang Merah',tags:['tulang','rempah','tomato'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,fav:false,createdAt:'2024-11-15T08:00:00Z',editedAt:'2024-11-15T08:00:00Z'},
+    {id:6,title:'Nasi Goreng Kampung',tags:['nasi','telur','ikan bilis'],notes:'',driveUrl:'https://drive.google.com',videoData:null,videoName:null,thumbData:null,fav:false,createdAt:'2024-11-18T08:00:00Z',editedAt:'2024-11-18T08:00:00Z'},
+    {id:7,title:'Sambal Udang Petai',tags:['udang','petai','cili'],notes:'',driveUrl:'',videoData:null,videoName:null,thumbData:null,fav:false,createdAt:'2024-11-20T08:00:00Z',editedAt:'2024-11-20T08:00:00Z'},
   ];
   nextId=8;
 }
-function saveLocal(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(recipes));}catch(e){showToast('Storage penuh!','err');} }
+function saveLocal(){try{localStorage.setItem(STORE_KEY,JSON.stringify(recipes));}catch(e){showToast('Storage penuh!','err');}}
+
+// ── PULL TO REFRESH ──
+function setupPullToRefresh(){
+  const list=document.getElementById('list');
+  const ind=document.getElementById('ptr-indicator');
+  let startY=0,pulling=false;
+  list.addEventListener('touchstart',e=>{if(list.scrollTop===0)startY=e.touches[0].clientY;},{passive:true});
+  list.addEventListener('touchmove',e=>{
+    if(startY&&e.touches[0].clientY-startY>60&&list.scrollTop===0){pulling=true;ind.classList.add('show');ind.textContent='↓ Lepaskan untuk sync...';}
+  },{passive:true});
+  list.addEventListener('touchend',()=>{
+    if(pulling){pulling=false;ind.textContent='⏳ Syncing...';syncNow().then(()=>{ind.classList.remove('show');});}
+    startY=0;
+  },{passive:true});
+}
 
 // ── SYNC ──
 async function syncNow(){
   if(!apiUrl){showToast('Setup Google Sheets dulu dalam Settings ⚙️','warn');return;}
   if(isSyncing)return;
-  isSyncing=true; setSyncState('syncing','Syncing...');
+  isSyncing=true;setSyncState('syncing','Syncing...');
   try{
     const res=await fetch(apiUrl+'?action=getAll');
-    if(!res.ok) throw new Error('HTTP '+res.status);
-    const json=await res.json();
-    if(!json.ok) throw new Error(json.error||'Sheets error');
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const json=await res.json();if(!json.ok)throw new Error(json.error||'Sheets error');
     const sm={},lm={};
     (json.data||[]).forEach(r=>{if(r.id)sm[String(r.id)]=r;});
     recipes.forEach(r=>{lm[String(r.id)]=r;});
@@ -433,28 +604,87 @@ async function syncNow(){
     const merged=[];
     ids.forEach(id=>{
       const s=sm[id],l=lm[id];
-      if(s&&l) merged.push({...s,id:Number(id)||id,videoData:l.videoData||null,thumbData:l.thumbData||s.thumbData||null,videoName:l.videoName||s.videoName||null});
-      else if(s) merged.push({...s,id:Number(id)||id,videoData:null,thumbData:s.thumbData||null});
+      if(s&&l)merged.push({...s,id:Number(id)||id,videoData:l.videoData||null,thumbData:l.thumbData||s.thumbData||null,videoName:l.videoName||s.videoName||null,fav:l.fav||s.fav||false});
+      else if(s)merged.push({...s,id:Number(id)||id,videoData:null,thumbData:s.thumbData||null,fav:s.fav||false});
       else{merged.push(l);pushToSheet(l);}
     });
     merged.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
-    recipes=merged; nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;
+    recipes=merged;nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;
     saveLocal();
     const now=new Date().toLocaleTimeString('ms-MY',{hour:'2-digit',minute:'2-digit'});
-    localStorage.setItem(SYNC_KEY,now);
-    setSyncState('ok','Sync berjaya · '+now);
-    showToast('✓ Sync berjaya!','ok');
-    renderCloud(); renderList(); updateSettingsStatus();
-  }catch(err){setSyncState('err','Sync gagal — semak URL dalam Settings');showToast('Sync gagal: '+err.message,'err');}
+    localStorage.setItem(SYNC_KEY,now);setSyncState('ok','Sync berjaya · '+now);
+    showToast('✓ Sync berjaya!','ok');renderCloud();renderList();renderRecent();updateSettingsStatus();
+  }catch(err){setSyncState('err','Sync gagal — semak URL');showToast('Sync gagal: '+err.message,'err');}
   isSyncing=false;
 }
-async function pushToSheet(r){ if(!apiUrl)return; try{await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'save',recipe:{...r,videoData:undefined}}),headers:{'Content-Type':'application/json'}});}catch(e){} }
-async function deleteFromSheet(id){ if(!apiUrl)return; try{await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'delete',id:String(id)}),headers:{'Content-Type':'application/json'}});}catch(e){} }
+async function pushToSheet(r){if(!apiUrl)return;try{await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'save',recipe:{...r,videoData:undefined}}),headers:{'Content-Type':'application/json'}});}catch(e){}}
+async function deleteFromSheet(id){if(!apiUrl)return;try{await fetch(apiUrl,{method:'POST',body:JSON.stringify({action:'delete',id:String(id)}),headers:{'Content-Type':'application/json'}});}catch(e){}}
 function setSyncState(s,t){document.getElementById('sync-dot').className='sync-dot '+s;document.getElementById('sync-text').textContent=t;}
-function updateSyncBar(){ if(!apiUrl){setSyncState('local','Local sahaja — setup Sheets di Settings');}else{const l=localStorage.getItem(SYNC_KEY);setSyncState(l?'ok':'syncing',l?'Terakhir sync: '+l:'Menyambung...');} }
+function updateSyncBar(){if(!apiUrl){setSyncState('local','Local sahaja — setup Sheets di Settings');}else{const l=localStorage.getItem(SYNC_KEY);setSyncState(l?'ok':'syncing',l?'Terakhir sync: '+l:'Menyambung...');}}
+
+// ── EXPORT / IMPORT ──
+function exportData(){
+  const data={version:5,exportedAt:new Date().toISOString(),recipes:recipes.map(r=>({...r,videoData:undefined}))};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`hatch-batch-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  URL.revokeObjectURL(url);showToast('✓ Data exported!','ok');
+}
+function importData(e){
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      const imported=data.recipes||data;
+      if(!Array.isArray(imported))throw new Error('Format salah');
+      showConfirm('📥','Import Data?',`${imported.length} resepi akan diimport. Data sedia ada akan digabungkan.`,'Import',()=>{
+        const existIds=new Set(recipes.map(r=>String(r.id)));
+        let added=0;
+        imported.forEach(r=>{
+          if(!existIds.has(String(r.id))){recipes.push({...r,fav:r.fav||false,editedAt:r.editedAt||r.createdAt});added++;}
+        });
+        nextId=recipes.reduce((m,r)=>Math.max(m,Number(r.id)||0),0)+1;
+        saveLocal();renderCloud();renderList();renderRecent();
+        showToast(`✓ ${added} resepi diimport!`,'ok');
+      });
+    }catch(err){showToast('Format JSON tidak sah','err');}
+  };
+  rd.readAsText(f);
+  e.target.value='';
+}
+
+// ── RECENTLY VIEWED ──
+function addToRecent(id){
+  recentIds=recentIds.filter(x=>x!==id);
+  recentIds.unshift(id);
+  if(recentIds.length>5)recentIds=recentIds.slice(0,5);
+  localStorage.setItem(RECENT_KEY,JSON.stringify(recentIds));
+  // increment view count
+  viewCounts[String(id)]=(viewCounts[String(id)]||0)+1;
+  localStorage.setItem(VIEWS_KEY,JSON.stringify(viewCounts));
+}
+function renderRecent(){
+  const sec=document.getElementById('recently-section');
+  const scroll=document.getElementById('recently-scroll');
+  const valid=recentIds.map(id=>recipes.find(r=>r.id===id||String(r.id)===String(id))).filter(Boolean);
+  if(!valid.length){sec.style.display='none';return;}
+  sec.style.display='block';
+  scroll.innerHTML=valid.map(r=>{
+    const thumb=r.thumbData?`<img class="recently-thumb" src="${r.thumbData}" style="width:28px;height:28px;border-radius:6px;object-fit:cover;flex-shrink:0">`:`<div class="recently-thumb">🍽️</div>`;
+    return`<div class="recently-chip" onclick="scrollToRecipe(${r.id})">${thumb}<span class="recently-name">${escH(r.title)}</span></div>`;
+  }).join('');
+}
+function scrollToRecipe(id){
+  // find page of recipe
+  const sortedFiltered=getSorted(recipes);
+  const idx=sortedFiltered.findIndex(r=>r.id===id||String(r.id)===String(id));
+  if(idx>=0){curPage=Math.floor(idx/PER_PAGE)+1;renderList();}
+  setTimeout(()=>{const el=document.getElementById(`card-${id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'center'});},100);
+}
 
 // ── SETTINGS ──
-function openSettings(){updateSettingsStatus();document.getElementById('settings-screen').classList.add('open');document.getElementById('api-url-input').value=apiUrl;}
+function openSettings(){updateSettingsStatus();document.getElementById('settings-screen').classList.add('open');document.getElementById('api-url-input').value=apiUrl;document.getElementById('dark-toggle-settings').checked=isDark;}
 function closeSettings(){document.getElementById('settings-screen').classList.remove('open');}
 function updateSettingsStatus(){
   const pill=document.getElementById('conn-status-pill'),txt=document.getElementById('conn-status-text');
@@ -468,33 +698,64 @@ async function saveApiUrl(){
   const val=(document.getElementById('api-url-input').value||'').trim();
   if(!val){showToast('Paste URL dulu!','err');return;}
   if(!val.startsWith('https://script.google.com')){showToast('URL mesti start dengan https://script.google.com','err');return;}
-  apiUrl=val;localStorage.setItem(API_KEY,apiUrl);
-  showToast('URL disimpan! Testing...');updateSyncBar();await syncNow();updateSettingsStatus();
+  apiUrl=val;localStorage.setItem(API_KEY,apiUrl);showToast('URL disimpan! Testing...');updateSyncBar();await syncNow();updateSettingsStatus();
 }
 function confirmClearLocal(){
   showConfirm('🗑️','Clear Local Data?','Data dalam browser ni akan dipadam. Sheets masih selamat.','Clear',()=>{
-    localStorage.removeItem(STORE_KEY);loadLocal();renderCloud();renderList();
-    showToast('Local data cleared.');
+    localStorage.removeItem(STORE_KEY);loadLocal();renderCloud();renderList();renderRecent();showToast('Local data cleared.');
   });
 }
 
 // ── HELPERS ──
 function allTags(){const c={};recipes.forEach(r=>(r.tags||[]).forEach(t=>{c[t]=(c[t]||0)+1;}));return Object.entries(c).sort((a,b)=>b[1]-a[1]).map(e=>e[0]);}
-function filtered(){const q=searchQ.toLowerCase().trim();return recipes.filter(r=>{const mq=!q||r.title.toLowerCase().includes(q)||(r.tags||[]).some(t=>t.toLowerCase().includes(q));return mq&&(!activeTag||(r.tags||[]).includes(activeTag));});}
 function escH(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function escA(s){if(!s)return'';return String(s).replace(/"/g,'&quot;').replace(/'/g,'&#039;');}
 function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',2400);}
+function fmtDate(iso){if(!iso)return'';try{return new Date(iso).toLocaleDateString('ms-MY',{day:'numeric',month:'short',year:'numeric'});}catch(e){return'';}}
 
-// ── PAGINATION ──
-function totalPages(){return Math.max(1,Math.ceil(filtered().length/PER_PAGE));}
-function pageItems(){const f=filtered(),s=(curPage-1)*PER_PAGE;return f.slice(s,s+PER_PAGE);}
+// ── SORT + FILTER ──
+function getSorted(arr){
+  const sort=document.getElementById('sort-select')?.value||'newest';
+  const q=searchQ.toLowerCase().trim();
+  let f=arr.filter(r=>{
+    const mq=!q||r.title.toLowerCase().includes(q)||(r.tags||[]).some(t=>t.toLowerCase().includes(q));
+    const mt=!activeTag||(r.tags||[]).includes(activeTag);
+    const mf=!favOnly||r.fav;
+    return mq&&mt&&mf;
+  });
+  if(sort==='az') f.sort((a,b)=>a.title.localeCompare(b.title));
+  else if(sort==='za') f.sort((a,b)=>b.title.localeCompare(a.title));
+  else if(sort==='fav') f.sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
+  else if(sort==='views') f.sort((a,b)=>(viewCounts[String(b.id)]||0)-(viewCounts[String(a.id)]||0));
+  else f.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  return f;
+}
+function totalPages(){return Math.max(1,Math.ceil(getSorted(recipes).length/PER_PAGE));}
+function pageItems(){const f=getSorted(recipes),s=(curPage-1)*PER_PAGE;return f.slice(s,s+PER_PAGE);}
 function changePage(dir){const tp=totalPages();curPage=Math.max(1,Math.min(tp,curPage+dir));activeCardId=null;renderList();}
+function toggleFavFilter(){favOnly=!favOnly;document.getElementById('fav-filter-btn').classList.toggle('active',favOnly);curPage=1;renderList();}
+
+// ── SEARCH SUGGESTIONS ──
+function renderSuggestions(q){
+  const drop=document.getElementById('suggest-drop');
+  if(!q||q.length<1){drop.classList.remove('open');return;}
+  const ql=q.toLowerCase();
+  const suggestions=[];
+  // matching recipe names
+  recipes.filter(r=>r.title.toLowerCase().includes(ql)).slice(0,3).forEach(r=>suggestions.push({icon:'🍽️',text:r.title,type:'Resepi',action:()=>{searchQ=r.title;renderList();drop.classList.remove('open');document.getElementById('search').value=r.title;}}));
+  // matching tags
+  allTags().filter(t=>t.toLowerCase().includes(ql)&&!suggestions.find(s=>s.text===t)).slice(0,4).forEach(t=>suggestions.push({icon:'🏷️',text:t,type:'Tag',action:()=>{activeTag=t;searchQ='';document.getElementById('search').value='';renderCloud();renderList();drop.classList.remove('open');}}));
+  if(!suggestions.length){drop.classList.remove('open');return;}
+  drop.innerHTML=suggestions.map((s,i)=>`<div class="suggest-item" data-idx="${i}"><span class="suggest-icon">${s.icon}</span><span>${escH(s.text)}</span><span class="suggest-type">${s.type}</span></div>`).join('');
+  drop.querySelectorAll('.suggest-item').forEach((el,i)=>el.addEventListener('click',()=>suggestions[i].action()));
+  drop.classList.add('open');
+}
 
 // ── RENDER ──
 function renderStats(){
   document.getElementById('s-total').textContent=recipes.length;
+  document.getElementById('s-fav').textContent=recipes.filter(r=>r.fav).length;
   document.getElementById('s-tags').textContent=allTags().length;
-  document.getElementById('s-drive').textContent=recipes.filter(r=>r.driveUrl&&r.driveUrl.trim()).length;
 }
 function renderCloud(){
   const tags=allTags().slice(0,14),el=document.getElementById('tag-cloud');
@@ -506,185 +767,199 @@ function renderCloud(){
 function renderList(){
   renderStats();
   const items=pageItems(),el=document.getElementById('list'),tp=totalPages(),pg=document.getElementById('pagination');
-  if(filtered().length>PER_PAGE){
+  if(getSorted(recipes).length>PER_PAGE){
     pg.style.display='flex';
     document.getElementById('pg-prev').disabled=curPage<=1;
     document.getElementById('pg-next').disabled=curPage>=tp;
     document.getElementById('pg-dots').innerHTML=Array.from({length:tp},(_,i)=>`<div class="pg-dot${i+1===curPage?' active':''}"></div>`).join('');
-  } else { pg.style.display='none'; }
-
-  if(!items.length){el.innerHTML=`<div class="empty"><div class="empty-icon">🐣</div><div class="empty-t">Takde resepi jumpa</div><div class="empty-s">Cuba keyword atau tag lain</div></div>`;return;}
+  }else{pg.style.display='none';}
+  if(!items.length){el.innerHTML=`<div class="empty"><div class="empty-icon">${favOnly?'⭐':'🐣'}</div><div class="empty-t">${favOnly?'Takde favourite lagi':'Takde resepi jumpa'}</div><div class="empty-s">${favOnly?'Tekan ⭐ pada resepi untuk favourite':'Cuba keyword atau tag lain'}</div></div>`;return;}
 
   el.innerHTML=items.map(r=>{
     const isActive=activeCardId===r.id;
     const hasDrive=r.driveUrl&&r.driveUrl.trim();
+    const views=viewCounts[String(r.id)]||0;
     let mediaEl='';
-    if(r.thumbData){
-      mediaEl=`<img src="${r.thumbData}" alt="${escA(r.title)}" loading="lazy" style="pointer-events:none">`;
-    } else if(r.videoData){
-      mediaEl=`<video src="${r.videoData}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"></video>`;
-    } else {
-      mediaEl=`<div class="vid-placeholder">${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}<div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasDrive?'Tap buka Drive':'Tiada video')}</div></div>`;
-    }
+    if(r.thumbData) mediaEl=`<img src="${r.thumbData}" alt="${escA(r.title)}" loading="lazy" style="pointer-events:none;width:100%;height:100%;object-fit:cover;display:block">`;
+    else if(r.videoData) mediaEl=`<video src="${r.videoData}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"></video>`;
+    else mediaEl=`<div class="vid-placeholder">${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}<div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasDrive?'Tap buka Drive':'Tiada video')}</div></div>`;
+
+    // find similar recipes (share at least 1 tag)
+    const similarCount=recipes.filter(x=>x.id!==r.id&&(x.tags||[]).some(t=>(r.tags||[]).includes(t))).length;
 
     return`<div class="card${isActive?' active':''}" id="card-${r.id}">
       <div class="vid-wrap" onclick="toggleCard(event,${r.id})">
         ${mediaEl}
-        ${hasDrive&&!r.thumbData&&!r.videoData?'':`${r.thumbData||r.videoData?`<div class="drive-badge" style="${hasDrive?'':'display:none'}"><div class="db-dot"></div>Drive</div>`:''}`}
+        ${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}
+        <button class="fav-star" onclick="toggleFav(event,${r.id})" title="${r.fav?'Remove favourite':'Add favourite'}">${r.fav?'⭐':'☆'}</button>
         <div class="thumb-overlay"></div>
       </div>
       <div class="card-body">
-        <div class="card-title">${escH(r.title)}</div>
-        <div class="tag-row">${(r.tags||[]).map(t=>`<span class="tag">${escH(t)}</span>`).join('')}${r.notes?'<span class="tag" style="background:var(--beige);border-color:var(--beige2)">📝</span>':''}</div>
+        <div class="card-title">
+          ${escH(r.title)}
+          ${similarCount>0?`<span class="similar-badge" onclick="openSimilar(event,${r.id})">~${similarCount} serupa</span>`:''}
+        </div>
+        <div class="card-meta-row">
+          <span class="last-edited">✏️ ${fmtDate(r.editedAt||r.createdAt)}</span>
+          ${views>0?`<span class="last-edited">· 👁 ${views}x</span>`:''}
+        </div>
+        <div class="tag-row">
+          ${(r.tags||[]).map(t=>`<span class="tag" onclick="filterByTag(event,'${escA(t)}')">${escH(t)}</span>`).join('')}
+          ${r.notes?'<span class="tag" style="background:var(--beige);border-color:var(--beige2)">📝</span>':''}
+        </div>
       </div>
       <div class="mini-icons-bar">
-        <button class="mini-icon-btn mi-edit" onclick="openEdit(${r.id})" title="Edit resepi">
-          <span class="mini-icon-emoji">✏️</span>
-          <span class="mini-icon-label">Edit</span>
-        </button>
-        <button class="mini-icon-btn mi-note" onclick="openNotes(${r.id})" title="Nota peribadi">
-          <span class="mini-icon-emoji">📝</span>
-          <span class="mini-icon-label">Nota</span>
-        </button>
-        <button class="mini-icon-btn mi-del" onclick="confirmDel(${r.id})" title="Padam resepi">
-          <span class="mini-icon-emoji">🗑️</span>
-          <span class="mini-icon-label">Padam</span>
-        </button>
+        <button class="mini-icon-btn mi-edit" onclick="openEdit(${r.id})"><span class="mini-icon-emoji">✏️</span><span class="mini-icon-label">Edit</span></button>
+        <button class="mini-icon-btn mi-note" onclick="openNotes(${r.id})"><span class="mini-icon-emoji">📝</span><span class="mini-icon-label">Nota</span></button>
+        <button class="mini-icon-btn mi-similar" onclick="openSimilar(null,${r.id})"><span class="mini-icon-emoji">🔍</span><span class="mini-icon-label">Serupa</span></button>
+        <button class="mini-icon-btn mi-del" onclick="confirmDel(${r.id})"><span class="mini-icon-emoji">🗑️</span><span class="mini-icon-label">Padam</span></button>
       </div>
     </div>`;
   }).join('');
 }
 
-// ── TOGGLE CARD (click thumbnail) ──
-function toggleCard(e, id){
+// ── TOGGLE CARD ──
+function toggleCard(e,id){
   e.stopPropagation();
-  const card=document.getElementById(`card-${id}`);
-  if(!card) return;
-  if(activeCardId===id){
-    card.classList.remove('active');
-    activeCardId=null;
-  } else {
-    if(activeCardId){
-      const prev=document.getElementById(`card-${activeCardId}`);
-      if(prev) prev.classList.remove('active');
-    }
-    card.classList.add('active');
-    activeCardId=id;
+  const card=document.getElementById(`card-${id}`);if(!card)return;
+  if(activeCardId===id){card.classList.remove('active');activeCardId=null;}
+  else{
+    if(activeCardId){const prev=document.getElementById(`card-${activeCardId}`);if(prev)prev.classList.remove('active');}
+    card.classList.add('active');activeCardId=id;
+    addToRecent(id);renderRecent();
   }
+}
+
+// ── FAVOURITE ──
+function toggleFav(e,id){
+  e.stopPropagation();
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  r.fav=!r.fav;r.editedAt=new Date().toISOString();
+  saveLocal();pushToSheet(r);renderList();renderRecent();
+  showToast(r.fav?'⭐ Ditambah ke favourite!':'Dibuang dari favourite');
+}
+
+// ── FILTER BY TAG (click tag chip on card) ──
+function filterByTag(e,tag){
+  e.stopPropagation();
+  activeTag=tag;curPage=1;
+  document.getElementById('sec-lbl').textContent=tag.toUpperCase();
+  renderCloud();renderList();
 }
 
 // ── NOTES POPUP ──
 function openNotes(id){
-  const r=recipes.find(x=>x.id===id); if(!r) return;
+  const r=recipes.find(x=>x.id===id);if(!r)return;
   document.getElementById('portal').innerHTML=`<div class="popup-overlay" id="pp-ov">
     <div class="popup-sheet">
       <div class="popup-handle"></div>
-      <div class="popup-header">
-        <div class="popup-title">📝 Nota</div>
-        <button class="popup-close" onclick="closePopup()">×</button>
-      </div>
+      <div class="popup-header"><div class="popup-title">📝 Nota</div><button class="popup-close" onclick="closePopup()">×</button></div>
       <div class="popup-body">
         <div class="note-recipe-name">📌 ${escH(r.title)}</div>
-        <textarea class="note-textarea" id="note-ta" placeholder="Tulis tip, ubahsuai, masa masak, serving size...">${escH(r.notes||'')}</textarea>
+        <textarea class="note-textarea" id="note-ta" placeholder="Tip, ubahsuai, masa masak, serving size...">${escH(r.notes||'')}</textarea>
       </div>
-      <div class="popup-footer">
-        <div class="btn-row">
-          <button class="btn-secondary" onclick="closePopup()">Batal</button>
-          <button class="btn-primary" onclick="saveNotePopup(${id})">💾 Simpan Nota</button>
-        </div>
-      </div>
+      <div class="popup-footer"><div class="btn-row"><button class="btn-secondary" onclick="closePopup()">Batal</button><button class="btn-primary" onclick="saveNotePopup(${id})">💾 Simpan</button></div></div>
     </div>
   </div>`;
   document.getElementById('pp-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closePopup();});
   setTimeout(()=>document.getElementById('note-ta')?.focus(),300);
 }
-
 async function saveNotePopup(id){
-  const r=recipes.find(x=>x.id===id), ta=document.getElementById('note-ta');
-  if(!r||!ta) return;
-  r.notes=ta.value; saveLocal(); await pushToSheet(r);
-  closePopup(); renderList();
-  showToast('✓ Nota disimpan!','ok');
+  const r=recipes.find(x=>x.id===id),ta=document.getElementById('note-ta');
+  if(!r||!ta)return;
+  r.notes=ta.value;r.editedAt=new Date().toISOString();
+  saveLocal();await pushToSheet(r);closePopup();renderList();showToast('✓ Nota disimpan!','ok');
 }
 
-// ── AI SUGGEST POPUP ──
-function openAISuggest(id){
-  const r=recipes.find(x=>x.id===id); if(!r) return;
+// ── SIMILAR RECIPES POPUP ──
+function openSimilar(e,id){
+  if(e)e.stopPropagation();
+  const r=recipes.find(x=>x.id===id);if(!r)return;
+  const similar=recipes
+    .filter(x=>x.id!==r.id)
+    .map(x=>{const shared=(x.tags||[]).filter(t=>(r.tags||[]).includes(t));return{...x,shared,score:shared.length};})
+    .filter(x=>x.score>0)
+    .sort((a,b)=>b.score-a.score);
+
   document.getElementById('portal').innerHTML=`<div class="popup-overlay" id="pp-ov">
     <div class="popup-sheet">
       <div class="popup-handle"></div>
-      <div class="popup-header">
-        <div class="popup-title">✨ Cadangan Resepi</div>
-        <button class="popup-close" onclick="closePopup()">×</button>
-      </div>
+      <div class="popup-header"><div class="popup-title">🔍 Resepi Serupa</div><button class="popup-close" onclick="closePopup()">×</button></div>
       <div class="popup-body">
-        <div class="note-recipe-name">🏷️ Tag: ${escH((r.tags||[]).join(', ')||'—')}</div>
-        <div class="ai-loading" id="ai-result">
-          <div class="ai-loading-icon">🐣</div>
-          <div style="font-size:13px;font-weight:700;color:var(--text-mid)">Sedang cari cadangan...</div>
-        </div>
+        <div class="note-recipe-name">📌 Berdasarkan: ${escH(r.title)}</div>
+        ${similar.length?`<div class="similar-list">${similar.map(s=>`
+          <div class="similar-card" onclick="closePopupAndScroll(${s.id})">
+            ${s.thumbData?`<img class="similar-thumb" src="${s.thumbData}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div class="similar-thumb">🍽️</div>`}
+            <div class="similar-info">
+              <div class="similar-title">${escH(s.title)}</div>
+              <div class="similar-tags-row">
+                ${s.shared.map(t=>`<span class="similar-tag-match">${escH(t)}</span>`).join('')}
+                ${(s.tags||[]).filter(t=>!s.shared.includes(t)).slice(0,2).map(t=>`<span class="similar-tag-other">${escH(t)}</span>`).join('')}
+              </div>
+            </div>
+            <div class="similar-score">${s.score} tag sama</div>
+          </div>`).join('')}</div>`
+        :`<div class="no-similar">🐣 Tiada resepi dengan tag yang sama lagi</div>`}
       </div>
-      <div class="popup-footer">
-        <button class="btn-full" onclick="closePopup()">Tutup</button>
-      </div>
+      <div class="popup-footer"><button class="btn-full" onclick="closePopup()">Tutup</button></div>
     </div>
   </div>`;
   document.getElementById('pp-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closePopup();});
-  if(typeof sendPrompt==='function'){
-    closePopup();
-    sendPrompt('Aku ada bahan/tag: '+r.tags.join(', ')+'. Boleh suggest resepi lain yang sesuai?');
-  }
 }
+function closePopupAndScroll(id){closePopup();scrollToRecipe(id);}
 
-// ── DELETE CONFIRM ──
+// ── DELETE ──
 function confirmDel(id){
-  const r=recipes.find(x=>x.id===id); if(!r) return;
+  const r=recipes.find(x=>x.id===id);if(!r)return;
   showConfirm('🗑️','Padam Resepi?',`"${escH(r.title)}" akan dipadam permanently.`,'Padam',()=>doDelete(id));
 }
 async function doDelete(id){
   recipes=recipes.filter(x=>x.id!==id);
-  if(pageItems().length===0&&curPage>1) curPage--;
-  activeCardId=null; saveLocal(); deleteFromSheet(id);
-  renderCloud(); renderList(); showToast('Resepi dipadam.');
+  recentIds=recentIds.filter(x=>x!==id);localStorage.setItem(RECENT_KEY,JSON.stringify(recentIds));
+  if(pageItems().length===0&&curPage>1)curPage--;
+  activeCardId=null;saveLocal();deleteFromSheet(id);
+  renderCloud();renderList();renderRecent();showToast('Resepi dipadam.');
 }
 
-// ── EDIT RECIPE ──
-function openEdit(id){ showModal(id); }
+// ── EDIT ──
+function openEdit(id){showModal(id);}
 
-// ── CLEAR SEARCH ──
-function clearSearch(){document.getElementById('search').value='';searchQ='';activeTag='';curPage=1;document.getElementById('clear-btn').style.display='none';document.getElementById('sec-lbl').textContent='SEMUA RESEPI';renderCloud();renderList();}
-document.getElementById('search').addEventListener('input',function(){searchQ=this.value;activeTag='';curPage=1;document.getElementById('clear-btn').style.display=this.value?'block':'none';document.getElementById('sec-lbl').textContent=searchQ?'HASIL CARIAN':'SEMUA RESEPI';renderCloud();renderList();});
+// ── SEARCH ──
+document.getElementById('search').addEventListener('input',function(){
+  searchQ=this.value;activeTag='';curPage=1;
+  document.getElementById('clear-btn').style.display=this.value?'block':'none';
+  document.getElementById('sec-lbl').textContent=searchQ?'HASIL CARIAN':'SEMUA RESEPI';
+  renderCloud();renderList();renderSuggestions(this.value);
+});
+document.getElementById('search').addEventListener('focus',function(){if(this.value)renderSuggestions(this.value);});
+function clearSearch(){document.getElementById('search').value='';searchQ='';activeTag='';curPage=1;document.getElementById('clear-btn').style.display='none';document.getElementById('suggest-drop').classList.remove('open');document.getElementById('sec-lbl').textContent='SEMUA RESEPI';renderCloud();renderList();}
 document.getElementById('fab').addEventListener('click',()=>showModal());
-
-// ── POPUP CLOSE ──
 function closePopup(){document.getElementById('portal').innerHTML='';}
 
-// ── SHOW MODAL (add/edit) ──
+// ── MODAL (add/edit) ──
 function showModal(editId=null){
   pTags=[];pVideo=null;pThumb=null;
-  const isEdit=editId!==null;
-  const r=isEdit?recipes.find(x=>x.id===editId):null;
+  const isEdit=editId!==null,r=isEdit?recipes.find(x=>x.id===editId):null;
   if(r){pTags=[...r.tags];if(r.thumbData)pThumb={data:r.thumbData,source:'existing'};}
-
   document.getElementById('portal').innerHTML=`<div class="modal-overlay" id="m-ov">
     <div class="modal">
       <div class="modal-header">
         <div class="modal-handle"></div>
         <div class="modal-title">${isEdit?'✏️ Edit Resepi':'➕ Tambah Resepi'}</div>
-        <div class="modal-sub">${isEdit?'Kemaskini maklumat resepi':'Upload video atau paste link Google Drive'}</div>
+        <div class="modal-sub">${isEdit?'Kemaskini maklumat resepi':'Upload video atau paste Drive link'}</div>
       </div>
       <div class="modal-body">
         <div class="upload-zone" id="uzone" onclick="document.getElementById('vin').click()">
           <div class="uz-icon">🎬</div>
           <div class="uz-label">${isEdit&&r?.videoName?r.videoName:'Upload video dari peranti'}</div>
-          <div class="uz-hint">${isEdit&&r?.videoName?'Tap untuk tukar video':'Tap untuk pilih video (MP4, MOV)'}</div>
+          <div class="uz-hint">${isEdit&&r?.videoName?'Tap untuk tukar':'Tap untuk pilih (MP4, MOV)'}</div>
         </div>
         <input type="file" id="vin" accept="video/*" style="display:none">
         <div id="vprev"></div>
         <div class="div-or"><hr><span>ATAU</span><hr></div>
         <div class="drive-row">
           <div class="drive-ico">💾</div>
-          <input id="m-url" type="url" placeholder="Paste link Google Drive video..." value="${isEdit&&r?escA(r.driveUrl||''):''}">
+          <input id="m-url" type="url" placeholder="Paste Google Drive link..." value="${isEdit&&r?escA(r.driveUrl||''):''}">
           <button class="paste-btn" onclick="doPaste('m-url')">Paste</button>
         </div>
         <div class="field">
@@ -702,10 +977,10 @@ function showModal(editId=null){
         <div class="thumb-section">
           <div class="thumb-label">THUMBNAIL</div>
           <img id="thumb-preview-img" class="thumb-preview-img" src="${isEdit&&r?.thumbData?r.thumbData:''}" style="${isEdit&&r?.thumbData?'display:block':'display:none'}">
-          <div id="thumb-status" class="thumb-status ${isEdit&&r?.thumbData?'found':''}">${isEdit&&r?.thumbData?'✓ Thumbnail sedia':'Tiada thumbnail — extract atau upload'}</div>
+          <div id="thumb-status" class="thumb-status${isEdit&&r?.thumbData?' found':''}">${isEdit&&r?.thumbData?'✓ Thumbnail sedia':'Tiada thumbnail'}</div>
           <div class="thumb-tabs">
-            <button class="thumb-tab active" id="tab-auto" onclick="switchThumbTab('auto')">🔗 Auto dari URL</button>
-            <button class="thumb-tab" id="tab-manual" onclick="switchThumbTab('manual')">📷 Upload gambar</button>
+            <button class="thumb-tab active" id="tab-auto" onclick="switchThumbTab('auto')">🔗 Auto (YouTube)</button>
+            <button class="thumb-tab" id="tab-manual" onclick="switchThumbTab('manual')">📷 Upload</button>
           </div>
           <div id="thumb-auto-sec">
             <div class="drive-row" style="margin-bottom:6px">
@@ -726,105 +1001,77 @@ function showModal(editId=null){
       <div class="modal-footer">
         <div class="btn-row">
           <button class="btn-secondary" onclick="closeModal()">Batal</button>
-          <button class="btn-primary" onclick="doSave(${editId||'null'})">${isEdit?'Kemaskini':'Simpan Resepi'}</button>
+          <button class="btn-primary" onclick="doSave(${editId||'null'})">${isEdit?'Kemaskini':'Simpan'}</button>
         </div>
       </div>
     </div>
   </div>`;
-
   document.getElementById('m-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
   renderMTags();renderSugs('');
-
   const tin=document.getElementById('tin');
   tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(tin.value);tin.value='';renderSugs('');}else if(e.key==='Backspace'&&!tin.value&&pTags.length){pTags.pop();renderMTags();}});
   tin.addEventListener('input',()=>renderSugs(tin.value));
-
-  const mUrl=document.getElementById('m-url');
-  mUrl.addEventListener('blur',()=>{if(mUrl.value)autoFetchThumb(mUrl.value);});
-
+  document.getElementById('m-url').addEventListener('blur',e=>{if(e.target.value)autoFetchThumb(e.target.value);});
   document.getElementById('vin').addEventListener('change',function(){
     const f=this.files[0];if(!f)return;
     if(f.size>150*1024*1024)showToast('Video >150MB mungkin lambat','warn');
     document.getElementById('uzone').innerHTML=`<div class="uz-icon">✅</div><div class="uz-label">${escH(f.name)}</div><div class="uz-hint">Video dipilih</div>`;
-    const rd=new FileReader();
-    rd.onload=e=>{pVideo={name:f.name,data:e.target.result};document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`;};
-    rd.onerror=()=>showToast('Gagal baca video','err');
-    rd.readAsDataURL(f);
+    const rd=new FileReader();rd.onload=e=>{pVideo={name:f.name,data:e.target.result};document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`;};rd.onerror=()=>showToast('Gagal baca video','err');rd.readAsDataURL(f);
     const t=document.getElementById('m-title');if(!t.value)t.value=f.name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').trim();
   });
-
   document.getElementById('thumb-file').addEventListener('change',function(){
     const f=this.files[0];if(!f)return;
-    const rd=new FileReader();
-    rd.onload=e=>{pThumb={data:e.target.result,source:'manual'};updateThumbPreview();setThumbStatus('found','✓ Thumbnail diupload');};
-    rd.readAsDataURL(f);
+    const rd=new FileReader();rd.onload=e=>{pThumb={data:e.target.result,source:'manual'};updateThumbPreview();setThumbStatus('found','✓ Thumbnail diupload');};rd.readAsDataURL(f);
   });
 }
 
-// ── THUMBNAIL ──
-function switchThumbTab(tab){
-  document.getElementById('thumb-auto-sec').style.display=tab==='auto'?'block':'none';
-  document.getElementById('thumb-manual-sec').style.display=tab==='manual'?'block':'none';
-  document.getElementById('tab-auto').className='thumb-tab'+(tab==='auto'?' active':'');
-  document.getElementById('tab-manual').className='thumb-tab'+(tab==='manual'?' active':'');
-}
-function setThumbStatus(type,msg){const el=document.getElementById('thumb-status');if(!el)return;el.className='thumb-status '+type;el.textContent=msg;}
+// THUMBNAIL
+function switchThumbTab(tab){document.getElementById('thumb-auto-sec').style.display=tab==='auto'?'block':'none';document.getElementById('thumb-manual-sec').style.display=tab==='manual'?'block':'none';document.getElementById('tab-auto').className='thumb-tab'+(tab==='auto'?' active':'');document.getElementById('tab-manual').className='thumb-tab'+(tab==='manual'?' active':'');}
+function setThumbStatus(type,msg){const el=document.getElementById('thumb-status');if(!el)return;el.className='thumb-status'+(type?' '+type:'');el.textContent=msg;}
 function updateThumbPreview(){const el=document.getElementById('thumb-preview-img');if(!el||!pThumb)return;el.src=pThumb.data;el.style.display='block';}
 function extractThumbUrl(url){const m=url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/);return m?`https://img.youtube.com/vi/${m[1]}/hqdefault.jpg`:null;}
 async function autoFetchThumb(url){
   const thumbUrl=extractThumbUrl(url);if(!thumbUrl)return;
   setThumbStatus('','⏳ Extracting...');
-  try{
-    const res=await fetch(thumbUrl);if(!res.ok)throw new Error();
-    const blob=await res.blob();
-    const rd=new FileReader();
-    rd.onload=e=>{pThumb={data:e.target.result,source:'auto'};updateThumbPreview();setThumbStatus('found','✓ Thumbnail auto-extracted dari YouTube!');};
-    rd.readAsDataURL(blob);
-  }catch(e){setThumbStatus('','YouTube thumbnail gagal. Cuba upload manual.');}
+  try{const res=await fetch(thumbUrl);if(!res.ok)throw new Error();const blob=await res.blob();const rd=new FileReader();rd.onload=e=>{pThumb={data:e.target.result,source:'auto'};updateThumbPreview();setThumbStatus('found','✓ Auto-extracted dari YouTube!');};rd.readAsDataURL(blob);}
+  catch(e){setThumbStatus('','Gagal. Cuba upload manual.');}
 }
 async function fetchThumb(){const url=(document.getElementById('thumb-url').value||'').trim();if(!url){showToast('Paste URL dulu!','err');return;}await autoFetchThumb(url);}
-
 function closeModal(){document.getElementById('portal').innerHTML='';pTags=[];pVideo=null;pThumb=null;}
 
-// ── TAG HELPERS ──
+// TAG HELPERS
 function addTag(v){const t=v.trim().replace(/,+$/,'').toLowerCase().trim();if(t&&!pTags.includes(t)&&pTags.length<20)pTags.push(t);renderMTags();}
 function renderMTags(){const el=document.getElementById('tchips');if(!el)return;el.innerHTML=pTags.map((t,i)=>`<span class="ti-tag">${escH(t)}<span class="ti-rm" onclick="rmTag(${i})">×</span></span>`).join('');}
 function rmTag(i){pTags.splice(i,1);renderMTags();}
 function renderSugs(q){const el=document.getElementById('tsugs');if(!el)return;const ex=allTags().filter(t=>!pTags.includes(t)&&(!q||t.includes(q.toLowerCase()))).slice(0,10);el.innerHTML=ex.map(t=>`<span class="tsug" onclick="addSug('${escA(t)}')">${escH(t)}</span>`).join('');}
 function addSug(t){if(!pTags.includes(t))pTags.push(t);renderMTags();renderSugs(document.getElementById('tin')?.value||'');}
-async function doPaste(fieldId){try{const t=await navigator.clipboard.readText();const el=document.getElementById(fieldId);if(el)el.value=t;}catch(e){showToast('Paste manual ya','warn');}}
+async function doPaste(fid){try{const t=await navigator.clipboard.readText();const el=document.getElementById(fid);if(el)el.value=t;}catch(e){showToast('Paste manual ya','warn');}}
 
 async function doSave(editId){
   const title=(document.getElementById('m-title').value||'').trim();
   if(!title){showToast('Isi nama masakan dulu!','err');return;}
   const raw=(document.getElementById('tin').value||'').trim();if(raw)addTag(raw);
   const url=(document.getElementById('m-url').value||'').trim();
-
+  const now=new Date().toISOString();
   if(editId!==null&&editId!=='null'){
     const r=recipes.find(x=>x.id===editId);
-    if(r){r.title=title;r.tags=[...pTags];r.driveUrl=url;if(pVideo){r.videoData=pVideo.data;r.videoName=pVideo.name;}if(pThumb)r.thumbData=pThumb.data;}
+    if(r){r.title=title;r.tags=[...pTags];r.driveUrl=url;r.editedAt=now;if(pVideo){r.videoData=pVideo.data;r.videoName=pVideo.name;}if(pThumb)r.thumbData=pThumb.data;}
+    saveLocal();closeModal();renderCloud();renderList();
     showToast('✓ Resepi dikemaskini!','ok');
-    saveLocal();closeModal();renderCloud();renderList();
     const updated=recipes.find(x=>x.id===editId);if(updated)await pushToSheet(updated);
-  } else {
-    const recipe={id:nextId++,title,tags:[...pTags],notes:'',driveUrl:url,videoData:pVideo?pVideo.data:null,videoName:pVideo?pVideo.name:null,thumbData:pThumb?pThumb.data:null,createdAt:new Date().toISOString()};
-    recipes.unshift(recipe);curPage=1;
-    saveLocal();closeModal();renderCloud();renderList();
-    showToast('✓ Resepi disimpan!','ok');
-    await pushToSheet(recipe);
+  }else{
+    const recipe={id:nextId++,title,tags:[...pTags],notes:'',driveUrl:url,videoData:pVideo?pVideo.data:null,videoName:pVideo?pVideo.name:null,thumbData:pThumb?pThumb.data:null,fav:false,createdAt:now,editedAt:now};
+    recipes.unshift(recipe);curPage=1;saveLocal();closeModal();renderCloud();renderList();
+    showToast('✓ Resepi disimpan!','ok');await pushToSheet(recipe);
   }
 }
 
-// ── CONFIRM ──
+// CONFIRM
 function showConfirm(icon,title,msg,btnLabel,onConfirm){
   document.getElementById('portal').innerHTML=`<div class="confirm-overlay"><div class="confirm-box">
-    <div class="confirm-icon">${icon}</div>
-    <div class="confirm-title">${title}</div>
+    <div class="confirm-icon">${icon}</div><div class="confirm-title">${title}</div>
     <div class="confirm-msg">${msg}</div>
-    <div class="confirm-btns">
-      <button class="c-cancel" onclick="closeConfirm()">Batal</button>
-      <button class="c-confirm" id="c-ok">${btnLabel}</button>
-    </div>
+    <div class="confirm-btns"><button class="c-cancel" onclick="closeConfirm()">Batal</button><button class="c-confirm" id="c-ok">${btnLabel}</button></div>
   </div></div>`;
   document.getElementById('c-ok').addEventListener('click',()=>{closeConfirm();onConfirm();});
 }
