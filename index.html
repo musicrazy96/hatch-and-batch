@@ -105,16 +105,14 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .card.active{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.3)}
 .vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden;border-radius:16px 16px 0 0}
 .vid-wrap img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
-.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block}
-.thumb-click-area{position:absolute;inset:0;cursor:pointer;z-index:1}
-.vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--surface))}
-/* Play overlay button — sits on top of thumbnail, opens external URL */
-.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none}
-.play-overlay-btn{width:46px;height:46px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2.5px solid rgba(255,255,255,0.85);cursor:pointer;pointer-events:all;transition:transform 0.15s,background 0.15s;backdrop-filter:blur(2px)}
-.play-overlay-btn:hover{transform:scale(1.1);background:rgba(0,0,0,0.75)}
+.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--surface));pointer-events:none}
+/* Play button — separate absolutely positioned button, highest z-index */
+.play-overlay-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:4;width:48px;height:48px;background:rgba(0,0,0,0.58);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2.5px solid rgba(255,255,255,0.85);cursor:pointer;transition:transform 0.15s,background 0.15s}
+.play-overlay-btn:hover{transform:translate(-50%,-50%) scale(1.12);background:rgba(0,0,0,0.8)}
 .play-overlay-btn .tri{width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:14px solid #fff;margin-left:3px}
 /* Platform badge */
-.platform-badge{position:absolute;bottom:8px;left:8px;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;z-index:2;pointer-events:none}
+.platform-badge{position:absolute;bottom:8px;left:8px;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;z-index:9;pointer-events:none}
 .pb-yt{background:rgba(255,0,0,0.85);color:#fff}
 .pb-tiktok{background:rgba(0,0,0,0.8);color:#fff}
 .pb-fb{background:rgba(24,119,242,0.85);color:#fff}
@@ -125,7 +123,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
 .drive-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:4px}
 .db-dot{width:6px;height:6px;border-radius:50%;background:var(--yolk-deep)}
-.fav-star{position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:2}
+.fav-star{position:absolute;top:8px;left:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:11;pointer-events:all}
 .fav-star:hover{transform:scale(1.15)}
 .thumb-overlay{position:absolute;inset:0;background:rgba(61,44,0,0);transition:background 0.2s}
 .card.active .thumb-overlay{background:rgba(61,44,0,0.15)}
@@ -323,6 +321,8 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .platform-status.err{background:#FDE8E0;color:var(--danger)}
 .platform-status.info{background:var(--yolk-soft);color:var(--brown)}
 
+
+.thumb-click-area{position:absolute;inset:0;z-index:2;cursor:pointer;background:transparent}
 </style>
 </head>
 <body>
@@ -786,45 +786,84 @@ function renderList() {
   if(!items.length){el.innerHTML=`<div class="empty"><div class="empty-icon">${favOnly?'⭐':'🐣'}</div><div class="empty-t">${favOnly?'Takde favourite lagi':'Takde resepi jumpa'}</div><div class="empty-s">${favOnly?'Tekan ⭐ pada resepi untuk favourite':'Cuba keyword atau tag lain'}</div></div>`;return;}
 
   el.innerHTML=items.map(r=>{
-    const isActive=activeCardId===r.id;
-    const playUrl=r.platformUrl||r.driveUrl||'';
-    const hasDrive=r.driveUrl&&r.driveUrl.trim();
-    const hasPlatform=r.platformUrl&&r.platformUrl.trim();
-    const hasPlay=hasDrive||hasPlatform;
-    const similarCount=recipes.filter(x=>x.id!==r.id&&(x.tags||[]).some(t=>(r.tags||[]).includes(t))).length;
-    const thumbSrc=r.thumbUrl||'';
-    const platform=detectPlatform(r.platformUrl||'');
-    // platform badge
+    const isActive   = activeCardId===r.id;
+    const platformUrl= (r.platformUrl||'').trim();
+    const driveUrl   = (r.driveUrl||'').trim();
+    const videoData  = r.videoData||'';
+    const thumbSrc   = r.thumbUrl||'';
+
+    // What URL to open when play is tapped
+    const playUrl    = platformUrl || driveUrl;
+    const hasExtUrl  = !!playUrl;
+    const hasLocalVid= !!videoData;
+    const platform   = detectPlatform(platformUrl);
+
+    const similarCount = recipes.filter(x=>
+      x.id!==r.id && (x.tags||[]).some(t=>(r.tags||[]).includes(t))
+    ).length;
+
+    // ── PLATFORM BADGE ──
     let pbHtml='';
-    if(hasPlatform){
-      const pb={youtube:'pb-yt',ytshorts:'pb-yt',tiktok:'pb-tiktok',facebook:'pb-fb',instagram:'pb-ig'};
-      const pn={youtube:'▶ YouTube',ytshorts:'▶ YT Shorts',tiktok:'TikTok',facebook:'Facebook',instagram:'Instagram'};
-      pbHtml=`<div class="platform-badge ${pb[platform]||'pb-drive'}">${pn[platform]||'Video'}</div>`;
-    } else if(hasDrive){
+    const pbCls={youtube:'pb-yt',ytshorts:'pb-yt',tiktok:'pb-tiktok',facebook:'pb-fb',instagram:'pb-ig'};
+    const pbName={youtube:'▶ YouTube',ytshorts:'▶ YT Shorts',tiktok:'TikTok',facebook:'Facebook Reel',instagram:'Instagram Reel'};
+    if(platformUrl){
+      pbHtml=`<div class="platform-badge ${pbCls[platform]||'pb-drive'}">${pbName[platform]||'Video'}</div>`;
+    } else if(driveUrl){
       pbHtml=`<div class="platform-badge pb-drive"><div class="db-dot"></div>Drive</div>`;
     }
-    // play overlay — only show if there's a URL to open
-    const playBtn=hasPlay?`<div class="play-overlay"><button class="play-overlay-btn" onclick="openVideo(event,'${escA(playUrl)}')" title="Buka video"><div class="tri"></div></button></div>`:'';
-    // media
+
+    // ── MEDIA ELEMENT ──
+    // Priority: thumbnail image > local video > placeholder
     let mediaEl='';
     if(thumbSrc){
-      mediaEl=`<img src="${escA(thumbSrc)}" alt="${escA(r.title)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">`;
-    } else if(r.videoData){
-      mediaEl=`<video src="${escA(r.videoData)}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block" id="vid-${r.id}"></video>`;
+      // Has thumbnail — show image, play button opens URL if available
+      mediaEl=`<img src="${escA(thumbSrc)}" alt="${escA(r.title)}" loading="lazy"
+        style="width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"
+        onerror="this.style.display='none'">`;
+    } else if(hasLocalVid){
+      // Local video uploaded — show actual video element, playable inline
+      mediaEl=`<video
+        src="${escA(videoData)}"
+        controls
+        playsinline
+        preload="metadata"
+        style="width:100%;height:100%;object-fit:cover;display:block"
+        onclick="event.stopPropagation()"
+        id="vid-${r.id}"></video>`;
     } else {
-      mediaEl=`<div class="vid-placeholder"><div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasPlay?'Tap ▶ untuk buka':'Tiada video')}</div></div>`;
+      // No media — placeholder
+      mediaEl=`<div class="vid-placeholder">
+        <div class="vp-play"><div class="vp-tri"></div></div>
+        <div class="vp-label">${hasExtUrl?'Tap ▶ untuk buka':'Tiada video'}</div>
+      </div>`;
     }
+
+    // ── PLAY OVERLAY ──
+    // Show play button overlay when: has thumbnail + external URL
+    // OR has placeholder + external URL
+    // HIDE when: local video (video has native controls)
+    const showPlayOverlay = hasExtUrl && !hasLocalVid;
+    const playOverlay = showPlayOverlay
+      ? `<button class="play-overlay-btn" onclick="event.stopPropagation();openVideo(event,'${escA(playUrl)}')" title="Buka video ↗">
+          <div class="tri"></div>
+        </button>`
+      : '';
+
     return`<div class="card${isActive?' active':''}" id="card-${r.id}">
       <div class="vid-wrap">
         ${mediaEl}
         ${pbHtml}
-        ${playBtn}
-        <button class="fav-star" onclick="toggleFav(event,${r.id})" style="z-index:4">${r.fav?'⭐':'☆'}</button>
+        ${playOverlay}
+        <button class="fav-star"
+          onclick="event.stopPropagation();toggleFav(event,${r.id})"
+          style="z-index:5">${r.fav?'⭐':'☆'}</button>
         <div class="thumb-click-area" onclick="toggleCard(event,${r.id})"></div>
-        <div class="thumb-overlay"></div>
       </div>
       <div class="card-body">
-        <div class="card-title">${escH(r.title)}${similarCount>0?`<span class="similar-badge" onclick="openSimilar(null,${r.id})">~${similarCount} serupa</span>`:''}</div>
+        <div class="card-title">
+          ${escH(r.title)}
+          ${similarCount>0?`<span class="similar-badge" onclick="openSimilar(null,${r.id})">~${similarCount} serupa</span>`:''}
+        </div>
         <div class="card-meta-row">
           <span class="last-edited">✏️ ${fmtDate(r.editedAt||r.createdAt)}</span>
           ${(viewCounts[String(r.id)]||0)>0?`<span class="last-edited">· 👁 ${viewCounts[String(r.id)]}x</span>`:''}
@@ -846,7 +885,8 @@ function renderList() {
 
 // ── TOGGLE CARD ──
 function toggleCard(e, id) {
-  e.stopPropagation();
+  // Don't toggle if clicking play button or fav star
+  if(e.target.closest('.play-overlay-btn')||e.target.closest('.fav-star'))return;
   const card=document.getElementById(`card-${id}`); if(!card)return;
   if(activeCardId===id){card.classList.remove('active');activeCardId=null;}
   else{
@@ -859,6 +899,7 @@ function toggleCard(e, id) {
 // ── FAVOURITE ──
 async function toggleFav(e, id) {
   e.stopPropagation();
+  e.preventDefault();
   const r=recipes.find(x=>x.id===id); if(!r)return;
   r.fav=!r.fav; r.editedAt=new Date().toISOString();
   renderList(); renderRecent();
@@ -994,6 +1035,26 @@ function showModal(editId=null){
         <div class="modal-sub">${isEdit?'Kemaskini maklumat resepi':'Upload video atau paste Drive link'}</div>
       </div>
       <div class="modal-body">
+        <!-- OPTION 1: Platform URL -->
+        <div class="platform-section">
+          <div class="platform-title">🎯 OPTION 1 — PASTE LINK VIDEO (YOUTUBE / TIKTOK / FB / IG)</div>
+          <div class="platform-pills" id="platform-pills">
+            <span class="platform-pill" data-platform="youtube" onclick="selectPlatform(this)">▶ YouTube</span>
+            <span class="platform-pill" data-platform="ytshorts" onclick="selectPlatform(this)">▶ YT Shorts</span>
+            <span class="platform-pill" data-platform="tiktok" onclick="selectPlatform(this)">TikTok</span>
+            <span class="platform-pill" data-platform="facebook" onclick="selectPlatform(this)">Facebook Reel</span>
+            <span class="platform-pill" data-platform="instagram" onclick="selectPlatform(this)">Instagram Reel</span>
+          </div>
+          <div class="platform-url-row">
+            <input type="url" id="platform-url-input" placeholder="Paste link video di sini..." value="${isEdit&&r?escA(r.platformUrl||'')':''}">
+            <button class="paste-btn" onclick="doPaste('platform-url-input').then(onPlatformUrlChange)">Paste</button>
+          </div>
+          <div id="platform-url-status"></div>
+        </div>
+
+        <div class="div-or"><hr><span>ATAU OPTION 2 — UPLOAD VIDEO DARI PERANTI</span><hr></div>
+
+        <!-- OPTION 2: Upload local video -->
         <div class="upload-zone" id="uzone" onclick="document.getElementById('vin').click()">
           <div class="uz-icon">🎬</div>
           <div class="uz-label">${isEdit&&r?.videoName?escH(r.videoName):'Upload video dari peranti'}</div>
@@ -1001,7 +1062,10 @@ function showModal(editId=null){
         </div>
         <input type="file" id="vin" accept="video/*" style="display:none">
         <div id="vprev"></div>
-        <div class="div-or"><hr><span>ATAU</span><hr></div>
+
+        <div class="div-or"><hr><span>ATAU OPTION 3 — GOOGLE DRIVE LINK</span><hr></div>
+
+        <!-- OPTION 3: Google Drive -->
         <div class="drive-row">
           <div class="drive-ico">💾</div>
           <input id="m-url" type="url" placeholder="Paste Google Drive link..." value="${isEdit&&r?escA(r.driveUrl||''):''}">
@@ -1133,6 +1197,7 @@ function getPlatformLabel(platform){
 // ── OPEN VIDEO (external URL) ──
 function openVideo(e, url){
   e.stopPropagation();
+  e.preventDefault();
   if(!url)return;
   window.open(url,'_blank','noopener,noreferrer');
 }
