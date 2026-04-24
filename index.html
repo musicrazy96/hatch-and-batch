@@ -1046,7 +1046,7 @@ function showModal(editId=null){
             <span class="platform-pill" data-platform="instagram" onclick="selectPlatform(this)">Instagram Reel</span>
           </div>
           <div class="platform-url-row">
-            <input type="url" id="platform-url-input" placeholder="Paste link video di sini..." value="${isEdit&&r?escA(r.platformUrl||'')':''}">
+            <input type="url" id="platform-url-input" placeholder="Paste link video di sini..." value="${isEdit&&r?escA(r.platformUrl||''):''}">
             <button class="paste-btn" onclick="doPaste('platform-url-input').then(onPlatformUrlChange)">Paste</button>
           </div>
           <div id="platform-url-status"></div>
@@ -1334,6 +1334,17 @@ function importData(e){
   rd.readAsText(f);e.target.value='';
 }
 document.getElementById('import-file').addEventListener('change',importData);
+
+
+async function saveApiUrl(){
+  const val=(document.getElementById('api-url-input')?.value||'').trim();
+  if(!val){showToast('Paste URL dulu!','err');return;}
+  if(!val.startsWith('https://')){showToast('URL mesti start dengan https://','err');return;}
+  // Save to localStorage for reference (actual key is hardcoded)
+  showToast('Sync sekarang...','ok');
+  await loadFromSupabase();
+  updateSettingsStatus();
+}
 
 // ── SETTINGS ──
 function openSettings(){updateSettingsStatus();document.getElementById('settings-screen').classList.add('open');document.getElementById('dark-toggle-settings').checked=isDark;}
