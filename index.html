@@ -103,9 +103,23 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 /* CARD */
 .card{background:var(--card-bg);border-radius:18px;border:1.5px solid var(--border-light);overflow:visible;box-shadow:0 2px 8px var(--shadow);flex-shrink:0;transition:border-color 0.18s,box-shadow 0.18s;position:relative}
 .card.active{border-color:var(--yolk-deep);border-width:2px;box-shadow:0 4px 16px rgba(245,200,66,0.3)}
-.vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden;border-radius:16px 16px 0 0;cursor:pointer}
-.vid-wrap img,.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.vid-wrap{width:100%;height:110px;position:relative;background:var(--yolk-soft);overflow:hidden;border-radius:16px 16px 0 0}
+.vid-wrap img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.vid-wrap video{width:100%;height:100%;object-fit:cover;display:block}
+.thumb-click-area{position:absolute;inset:0;cursor:pointer;z-index:1}
 .vid-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;background:linear-gradient(135deg,var(--yolk-pale),var(--surface))}
+/* Play overlay button — sits on top of thumbnail, opens external URL */
+.play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:3;pointer-events:none}
+.play-overlay-btn{width:46px;height:46px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2.5px solid rgba(255,255,255,0.85);cursor:pointer;pointer-events:all;transition:transform 0.15s,background 0.15s;backdrop-filter:blur(2px)}
+.play-overlay-btn:hover{transform:scale(1.1);background:rgba(0,0,0,0.75)}
+.play-overlay-btn .tri{width:0;height:0;border-top:9px solid transparent;border-bottom:9px solid transparent;border-left:14px solid #fff;margin-left:3px}
+/* Platform badge */
+.platform-badge{position:absolute;bottom:8px;left:8px;border-radius:8px;padding:3px 8px;font-size:10px;font-weight:700;display:flex;align-items:center;gap:4px;z-index:2;pointer-events:none}
+.pb-yt{background:rgba(255,0,0,0.85);color:#fff}
+.pb-tiktok{background:rgba(0,0,0,0.8);color:#fff}
+.pb-fb{background:rgba(24,119,242,0.85);color:#fff}
+.pb-ig{background:rgba(193,53,132,0.85);color:#fff}
+.pb-drive{background:rgba(255,255,255,0.92);color:var(--brown)}
 .vp-play{width:36px;height:36px;background:var(--yolk);border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--yolk-deep)}
 .vp-tri{width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:11px solid var(--brown);margin-left:3px}
 .vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
@@ -289,6 +303,26 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .sb-status-icon{font-size:20px;flex-shrink:0}
 .sb-status-text{font-size:12px;font-weight:700;color:#2D6A4F}
 .sb-status-row.err .sb-status-text{color:var(--danger)}
+
+/* PLATFORM URL SECTION in modal */
+.platform-section{background:var(--surface);border-radius:14px;padding:14px;margin-bottom:14px;border:1.5px solid var(--border-light)}
+.platform-title{font-size:11px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:10px}
+.platform-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.platform-pill{padding:5px 12px;border-radius:20px;font-size:11px;font-weight:700;border:1.5px solid var(--border);color:var(--text-mid);background:var(--card-bg);cursor:pointer;transition:all 0.15s;user-select:none}
+.platform-pill.active-yt{background:#FFEEEE;color:#CC0000;border-color:#FF4444}
+.platform-pill.active-tiktok{background:#F0F0F0;color:#010101;border-color:#010101}
+.platform-pill.active-fb{background:#E8F0FF;color:#1877F2;border-color:#1877F2}
+.platform-pill.active-ig{background:#FDE8F5;color:#C13584;border-color:#C13584}
+.platform-pill.active-ytshorts{background:#FFEEEE;color:#CC0000;border-color:#FF4444}
+.platform-url-row{display:flex;gap:8px;align-items:center}
+.platform-url-row input{flex:1;border:1.5px solid var(--border);border-radius:12px;padding:10px 13px;font-size:13px;font-family:'Nunito',sans-serif;color:var(--text);font-weight:600;background:var(--card-bg);outline:none;transition:border-color 0.15s}
+.platform-url-row input:focus{border-color:var(--yolk-deep)}
+.platform-url-row input::placeholder{color:var(--text-light)}
+.platform-status{margin-top:8px;font-size:11px;font-weight:700;padding:6px 10px;border-radius:8px}
+.platform-status.ok{background:var(--green-pale);color:#2D6A4F}
+.platform-status.err{background:#FDE8E0;color:var(--danger)}
+.platform-status.info{background:var(--yolk-soft);color:var(--brown)}
+
 </style>
 </head>
 <body>
@@ -452,8 +486,13 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 <script>
 // ── SUPABASE CONFIG ──
 const SB_URL   = 'https://bygjubptglhnxeuxqzet.supabase.co';
-const SB_KEY   = 'sb_publishable_dKA_dcbN4iciMZ3i9Fp4Ig_Uqubc49H';
-const SB_HEADS = { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' };
+const SB_KEY   = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ5Z2p1YnB0Z2xobnhldXhxemV0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4ODkxMDMsImV4cCI6MjA5MjQ2NTEwM30.GiRWh4Z9lnEgp4KRhVt0M2z_x85j9TgNCzuArSgHXCM';
+const SB_HEADS = {
+  'apikey': SB_KEY,
+  'Authorization': `Bearer ${SB_KEY}`,
+  'Content-Type': 'application/json',
+  'Accept': 'application/json',
+};
 
 // ── LOCAL CACHE KEYS ──
 const CACHE_KEY   = 'hatchbatch_cache_v8';
@@ -475,7 +514,10 @@ let viewCounts   = JSON.parse(localStorage.getItem(VIEWS_KEY)  || '{}');
 
 // ── SUPABASE API ──
 async function sbFetch(path, options = {}) {
-  const res = await fetch(SB_URL + path, { headers: SB_HEADS, ...options });
+  // Merge headers properly so custom Prefer headers don't override auth
+  const mergedHeaders = { ...SB_HEADS, ...(options.headers || {}) };
+  const { headers, ...restOptions } = options;
+  const res = await fetch(SB_URL + path, { headers: mergedHeaders, ...restOptions });
   if (!res.ok) {
     const err = await res.text();
     throw new Error(`Supabase error ${res.status}: ${err}`);
@@ -491,17 +533,18 @@ async function loadFromSupabase() {
     const data = await sbFetch('/rest/v1/recipes?select=*&order=created_at.desc');
     // map snake_case → camelCase
     recipes = data.map(r => ({
-      id:        r.id,
-      title:     r.title,
-      tags:      r.tags || [],
-      notes:     r.notes || '',
-      driveUrl:  r.drive_url || '',
-      videoName: r.video_name || '',
-      thumbUrl:  r.thumb_url || '',
-      fav:       r.fav || false,
-      viewCount: r.view_count || 0,
-      createdAt: r.created_at,
-      editedAt:  r.edited_at,
+      id:          r.id,
+      title:       r.title,
+      tags:        r.tags || [],
+      notes:       r.notes || '',
+      driveUrl:    r.drive_url || '',
+      platformUrl: r.platform_url || '',
+      videoName:   r.video_name || '',
+      thumbUrl:    r.thumb_url || '',
+      fav:         r.fav || false,
+      viewCount:   r.view_count || 0,
+      createdAt:   r.created_at,
+      editedAt:    r.edited_at,
     }));
     // sync view counts from db
     recipes.forEach(r => { viewCounts[String(r.id)] = r.viewCount; });
@@ -514,11 +557,15 @@ async function loadFromSupabase() {
     updateSettingsStatus();
     renderCloud(); renderList(); renderRecent();
   } catch(e) {
-    setSyncState('err', 'Gagal sambung Supabase');
-    showToast('Gagal: ' + e.message, 'err');
-    // fallback to cache
+    console.error('Supabase error:', e);
+    setSyncState('err', 'Gagal: ' + e.message);
+    showToast('⚠️ ' + e.message, 'err');
+    // fallback to local cache
     const cached = localStorage.getItem(CACHE_KEY);
-    if (cached) { recipes = JSON.parse(cached); renderCloud(); renderList(); renderRecent(); }
+    if (cached) {
+      try { recipes = JSON.parse(cached); } catch(pe) { recipes = []; }
+    }
+    renderCloud(); renderList(); renderRecent();
   }
 }
 
@@ -529,20 +576,21 @@ async function upsertRecipe(r) {
     thumbUrl = await uploadThumb(r.id, r._thumbBase64);
   }
   const payload = {
-    id:         r.id,
-    title:      r.title,
-    tags:       r.tags || [],
-    notes:      r.notes || '',
-    drive_url:  r.driveUrl || '',
-    video_name: r.videoName || '',
-    thumb_url:  thumbUrl,
-    fav:        r.fav || false,
-    created_at: r.createdAt,
-    edited_at:  new Date().toISOString(),
+    id:           r.id,
+    title:        r.title,
+    tags:         r.tags || [],
+    notes:        r.notes || '',
+    drive_url:    r.driveUrl || '',
+    platform_url: r.platformUrl || '',
+    video_name:   r.videoName || '',
+    thumb_url:    thumbUrl,
+    fav:          r.fav || false,
+    created_at:   r.createdAt,
+    edited_at:    new Date().toISOString(),
   };
   await sbFetch('/rest/v1/recipes', {
     method: 'POST',
-    headers: { ...SB_HEADS, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+    headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
     body: JSON.stringify(payload),
   });
   // update local recipe with stored thumb url
@@ -552,14 +600,19 @@ async function upsertRecipe(r) {
 }
 
 async function deleteRecipeDB(id) {
-  await sbFetch(`/rest/v1/recipes?id=eq.${id}`, { method: 'DELETE' });
+  await sbFetch(`/rest/v1/recipes?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { 'Prefer': 'return=minimal' },
+  });
 }
 
 async function incrementViewDB(id) {
-  await sbFetch(`/rest/v1/rpc/increment_view`, {
-    method: 'POST',
-    body: JSON.stringify({ p_id: id }),
-  });
+  try {
+    await sbFetch(`/rest/v1/rpc/increment_view`, {
+      method: 'POST',
+      body: JSON.stringify({ p_id: id }),
+    });
+  } catch(e) { /* non-critical, ignore */ }
 }
 
 // ── SUPABASE STORAGE (thumbnails) ──
@@ -734,20 +787,40 @@ function renderList() {
 
   el.innerHTML=items.map(r=>{
     const isActive=activeCardId===r.id;
+    const playUrl=r.platformUrl||r.driveUrl||'';
     const hasDrive=r.driveUrl&&r.driveUrl.trim();
+    const hasPlatform=r.platformUrl&&r.platformUrl.trim();
+    const hasPlay=hasDrive||hasPlatform;
     const similarCount=recipes.filter(x=>x.id!==r.id&&(x.tags||[]).some(t=>(r.tags||[]).includes(t))).length;
     const thumbSrc=r.thumbUrl||'';
+    const platform=detectPlatform(r.platformUrl||'');
+    // platform badge
+    let pbHtml='';
+    if(hasPlatform){
+      const pb={youtube:'pb-yt',ytshorts:'pb-yt',tiktok:'pb-tiktok',facebook:'pb-fb',instagram:'pb-ig'};
+      const pn={youtube:'▶ YouTube',ytshorts:'▶ YT Shorts',tiktok:'TikTok',facebook:'Facebook',instagram:'Instagram'};
+      pbHtml=`<div class="platform-badge ${pb[platform]||'pb-drive'}">${pn[platform]||'Video'}</div>`;
+    } else if(hasDrive){
+      pbHtml=`<div class="platform-badge pb-drive"><div class="db-dot"></div>Drive</div>`;
+    }
+    // play overlay — only show if there's a URL to open
+    const playBtn=hasPlay?`<div class="play-overlay"><button class="play-overlay-btn" onclick="openVideo(event,'${escA(playUrl)}')" title="Buka video"><div class="tri"></div></button></div>`:'';
+    // media
     let mediaEl='';
     if(thumbSrc){
-      mediaEl=`<img src="${escA(thumbSrc)}" alt="${escA(r.title)}" loading="lazy" style="pointer-events:none;width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">`;
+      mediaEl=`<img src="${escA(thumbSrc)}" alt="${escA(r.title)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">`;
+    } else if(r.videoData){
+      mediaEl=`<video src="${escA(r.videoData)}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block" id="vid-${r.id}"></video>`;
     } else {
-      mediaEl=`<div class="vid-placeholder">${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}<div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasDrive?'Tap buka Drive':'Tiada video')}</div></div>`;
+      mediaEl=`<div class="vid-placeholder"><div class="vp-play"><div class="vp-tri"></div></div><div class="vp-label">${r.videoName?escH(r.videoName):(hasPlay?'Tap ▶ untuk buka':'Tiada video')}</div></div>`;
     }
     return`<div class="card${isActive?' active':''}" id="card-${r.id}">
-      <div class="vid-wrap" onclick="toggleCard(event,${r.id})">
+      <div class="vid-wrap">
         ${mediaEl}
-        ${hasDrive?`<div class="drive-badge"><div class="db-dot"></div>Drive</div>`:''}
-        <button class="fav-star" onclick="toggleFav(event,${r.id})">${r.fav?'⭐':'☆'}</button>
+        ${pbHtml}
+        ${playBtn}
+        <button class="fav-star" onclick="toggleFav(event,${r.id})" style="z-index:4">${r.fav?'⭐':'☆'}</button>
+        <div class="thumb-click-area" onclick="toggleCard(event,${r.id})"></div>
         <div class="thumb-overlay"></div>
       </div>
       <div class="card-body">
@@ -995,6 +1068,14 @@ function showModal(editId=null){
   tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(tin.value);tin.value='';renderSugs('');}else if(e.key==='Backspace'&&!tin.value&&pTags.length){pTags.pop();renderMTags();}});
   tin.addEventListener('input',()=>renderSugs(tin.value));
   document.getElementById('m-url').addEventListener('blur',e=>{if(e.target.value)testLink('m-url','url-status').then(()=>autoFetchThumb(e.target.value));});
+  // Platform URL listener
+  const pui=document.getElementById('platform-url-input');
+  if(pui){
+    pui.addEventListener('input',onPlatformUrlChange);
+    pui.addEventListener('blur',onPlatformUrlChange);
+    // if edit mode already has platformUrl, validate it
+    if(isEdit&&r?.platformUrl) setTimeout(onPlatformUrlChange,100);
+  }
   document.getElementById('vin').addEventListener('change',function(){
     const f=this.files[0];if(!f)return;
     if(f.size>150*1024*1024)showToast('Video >150MB mungkin lambat','warn');
@@ -1031,6 +1112,74 @@ async function fetchDriveThumb(fieldId){
   try{const res=await fetch(url);if(!res.ok)throw new Error('Gagal');const blob=await res.blob();if(!blob.type.startsWith('image/'))throw new Error('Bukan imej');const rd=new FileReader();rd.onload=e=>{pThumb={data:e.target.result,source:'url'};updateThumbPreview();setThumbStatus('found','✓ Imej dimuatkan!');};rd.readAsDataURL(blob);}
   catch(e){setThumbStatus('','Gagal muatkan imej.');}
 }
+
+// ── PLATFORM DETECTION ──
+function detectPlatform(url){
+  if(!url)return'';
+  if(url.match(/youtube\.com\/shorts\//))return'ytshorts';
+  if(url.match(/youtube\.com|youtu\.be/))return'youtube';
+  if(url.match(/tiktok\.com/))return'tiktok';
+  if(url.match(/facebook\.com|fb\.watch/))return'facebook';
+  if(url.match(/instagram\.com/))return'instagram';
+  if(url.match(/drive\.google\.com/))return'drive';
+  return'';
+}
+
+function getPlatformLabel(platform){
+  const labels={youtube:'YouTube',ytshorts:'YouTube Shorts',tiktok:'TikTok',facebook:'Facebook Reel',instagram:'Instagram Reel',drive:'Google Drive'};
+  return labels[platform]||'';
+}
+
+// ── OPEN VIDEO (external URL) ──
+function openVideo(e, url){
+  e.stopPropagation();
+  if(!url)return;
+  window.open(url,'_blank','noopener,noreferrer');
+}
+
+// ── VALIDATE PLATFORM URL ──
+function validatePlatformUrl(url){
+  if(!url)return{ok:false,msg:''};
+  const platform=detectPlatform(url);
+  if(!platform)return{ok:false,msg:'⚠️ URL tidak dikenali. Guna YouTube, YT Shorts, TikTok, Facebook atau Instagram je.'};
+  return{ok:true,msg:`✅ ${getPlatformLabel(platform)} URL dikenali!`,platform};
+}
+
+// ── HANDLE PLATFORM URL INPUT ──
+
+function selectPlatform(el){
+  document.querySelectorAll('.platform-pill').forEach(p=>p.className='platform-pill');
+  const platform=el.dataset.platform;
+  const cls={youtube:'active-yt',ytshorts:'active-yt',tiktok:'active-tiktok',facebook:'active-fb',instagram:'active-ig'};
+  el.classList.add(cls[platform]||'');
+  const hints={youtube:'https://youtube.com/watch?v=...',ytshorts:'https://youtube.com/shorts/...',tiktok:'https://tiktok.com/@.../video/...',facebook:'https://facebook.com/reel/...',instagram:'https://instagram.com/reel/...'};
+  const pui=document.getElementById('platform-url-input');
+  if(pui&&!pui.value) pui.placeholder=hints[platform]||'Paste URL di sini...';
+  pui?.focus();
+}
+
+function onPlatformUrlChange(){
+  const url=(document.getElementById('platform-url-input')?.value||'').trim();
+  const statusEl=document.getElementById('platform-url-status');
+  if(!statusEl)return;
+  if(!url){statusEl.className='';statusEl.textContent='';return;}
+  const result=validatePlatformUrl(url);
+  if(result.ok){
+    statusEl.className='platform-status ok';statusEl.textContent=result.msg;
+    // auto-fetch YouTube thumbnail
+    if(result.platform==='youtube'||result.platform==='ytshorts'){
+      autoFetchThumb(url);
+    }
+    // auto-fill title hint
+    const titleEl=document.getElementById('m-title');
+    if(titleEl&&!titleEl.value){
+      titleEl.placeholder='cth: Nama resepi yang kau tengok tu...';
+    }
+  }else{
+    statusEl.className='platform-status err';statusEl.textContent=result.msg;
+  }
+}
+
 function closeModal(){document.getElementById('portal').innerHTML='';pTags=[];pVideo=null;pThumb=null;}
 
 // ── TAG HELPERS ──
@@ -1051,18 +1200,21 @@ async function doSave(editId){
   if(btn){btn.disabled=true;btn.textContent='⏳ Menyimpan...';}
   try{
     const now=new Date().toISOString();
+    const platformUrlVal=(document.getElementById('platform-url-input')?.value||'').trim();
+    const existing=editId!==null&&editId!=='null'?recipes.find(x=>x.id===editId):null;
     const recipe={
-      id:        editId!==null&&editId!=='null' ? editId : getNextId(),
+      id:          editId!==null&&editId!=='null' ? editId : getNextId(),
       title,
-      tags:      [...pTags],
-      notes:     editId!==null&&editId!=='null' ? (recipes.find(x=>x.id===editId)?.notes||'') : '',
-      driveUrl:  url,
-      videoName: pVideo ? pVideo.name : (editId!==null&&editId!=='null'?recipes.find(x=>x.id===editId)?.videoName||'':''),
-      thumbUrl:  pThumb?.source==='existing' ? pThumb.data : '',
-      _thumbBase64: (pThumb && pThumb.source!=='existing') ? pThumb.data : null,
-      fav:       editId!==null&&editId!=='null' ? (recipes.find(x=>x.id===editId)?.fav||false) : false,
-      createdAt: editId!==null&&editId!=='null' ? (recipes.find(x=>x.id===editId)?.createdAt||now) : now,
-      editedAt:  now,
+      tags:        [...pTags],
+      notes:       existing?.notes||'',
+      driveUrl:    url,
+      platformUrl: platformUrlVal,
+      videoName:   pVideo ? pVideo.name : (existing?.videoName||''),
+      thumbUrl:    pThumb?.source==='existing' ? pThumb.data : '',
+      _thumbBase64:(pThumb && pThumb.source!=='existing') ? pThumb.data : null,
+      fav:         existing?.fav||false,
+      createdAt:   existing?.createdAt||now,
+      editedAt:    now,
     };
     // Upsert to Supabase (also uploads thumb)
     await upsertRecipe(recipe);
