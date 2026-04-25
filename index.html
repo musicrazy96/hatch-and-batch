@@ -919,11 +919,8 @@ function renderList() {
     }
 
     // ── PLAY OVERLAY ──
-    // Cases where we show play button:
-    // 1. Thumbnail + external URL (platform/drive)
-    // 2. Thumbnail + Supabase video URL
-    // 3. Placeholder + any play URL
-    // HIDE play overlay only when video element is shown inline (has native controls)
+    // inlineVideoShown = video element with native controls shown directly
+    // When inline video, NO overlay & NO thumb-click-area (they block video controls)
     const inlineVideoShown = hasVideo && !thumbSrc;
     const showPlayOverlay  = hasPlay && !inlineVideoShown;
     const playOverlay = showPlayOverlay
@@ -933,6 +930,11 @@ function renderList() {
            <div class="tri"></div>
          </button>`
       : '';
+    // thumb-click-area only when NOT showing inline video
+    // (inline video needs full interaction for native controls)
+    const clickArea = inlineVideoShown
+      ? ''
+      : `<div class="thumb-click-area" onclick="toggleCard(event,${r.id})"></div>`;
 
     return`<div class="card${isActive?' active':''}" id="card-${r.id}">
       <div class="vid-wrap">
@@ -942,9 +944,9 @@ function renderList() {
         <button class="fav-star"
           onclick="event.stopPropagation();toggleFav(event,${r.id})"
           style="z-index:5">${r.fav?'⭐':'☆'}</button>
-        <div class="thumb-click-area" onclick="toggleCard(event,${r.id})"></div>
+        ${clickArea}
       </div>
-      <div class="card-body">
+      <div class="card-body" onclick="${inlineVideoShown?'toggleCard(event,'+r.id+')':''}">
         <div class="card-title">
           ${escH(r.title)}
           ${similarCount>0?`<span class="similar-badge" onclick="openSimilar(null,${r.id})">~${similarCount} serupa</span>`:''}
