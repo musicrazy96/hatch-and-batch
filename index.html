@@ -323,6 +323,30 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 
 
 .thumb-click-area{position:absolute;inset:0;z-index:2;cursor:pointer;background:transparent}
+
+/* VIDEO COMPRESSION PROGRESS */
+.compress-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.compress-box{background:var(--cream);border-radius:20px;padding:28px 24px;width:100%;max-width:320px;text-align:center}
+.compress-icon{font-size:40px;margin-bottom:12px;animation:spin 2s linear infinite}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.compress-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;color:var(--text);margin-bottom:6px}
+.compress-msg{font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:16px;line-height:1.5}
+.compress-bar-wrap{background:var(--border);border-radius:20px;height:8px;overflow:hidden;margin-bottom:8px}
+.compress-bar{height:100%;background:var(--yolk);border-radius:20px;transition:width 0.3s;width:0%}
+.compress-pct{font-size:12px;font-weight:700;color:var(--text-light)}
+
+/* REALTIME INDICATOR */
+.rt-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:4px;animation:rtpulse 2s infinite}
+@keyframes rtpulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.85)}}
+.rt-dot.disconnected{background:var(--danger);animation:none}
+.rt-dot.connecting{background:var(--yolk-deep);animation:blink 1s infinite}
+
+/* FILE SIZE WARNING */
+.size-warning{background:#FDE8E0;border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700;color:var(--danger);margin-bottom:10px;display:none;align-items:center;gap:8px}
+.size-warning.show{display:flex}
+.size-ok{background:var(--green-pale);border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700;color:#2D6A4F;margin-bottom:10px;display:none;align-items:center;gap:8px}
+.size-ok.show{display:flex}
+
 </style>
 </head>
 <body>
@@ -366,6 +390,10 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
   <div class="sync-bar">
     <div class="sync-dot local" id="sync-dot"></div>
     <span id="sync-text">Menyambung ke Supabase...</span>
+    <span id="rt-status" title="Realtime sync status" style="display:none">
+      <span class="rt-dot connecting" id="rt-dot"></span>
+      <span id="rt-text" style="font-size:10px;font-weight:700;color:var(--text-light)">Realtime</span>
+    </span>
     <button class="sync-btn" onclick="loadFromSupabase()">↻ Refresh</button>
   </div>
   <div class="stats-row">
@@ -429,8 +457,13 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
           <div class="settings-row-body"><div class="settings-row-title">API Key</div><div class="settings-row-sub" id="sb-key-display">—</div></div>
         </div>
         <div class="settings-row">
+          <div class="settings-row-icon">🔴</div>
+          <div class="settings-row-body"><div class="settings-row-title">Realtime sync</div><div class="settings-row-sub" id="rt-settings-text">Menyambung...</div></div>
+          <div class="settings-row-action"><button class="settings-row-btn" onclick="connectRealtime()">Reconnect</button></div>
+        </div>
+        <div class="settings-row">
           <div class="settings-row-icon">↻</div>
-          <div class="settings-row-body"><div class="settings-row-title">Sync sekarang</div><div class="settings-row-sub" id="last-sync-text">—</div></div>
+          <div class="settings-row-body"><div class="settings-row-title">Manual sync</div><div class="settings-row-sub" id="last-sync-text">—</div></div>
           <div class="settings-row-action"><button class="settings-row-btn primary" onclick="loadFromSupabase()">Sync</button></div>
         </div>
       </div>
@@ -482,6 +515,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 </div>
 
 <div id="portal"></div>
+<div id="compress-overlay" style="display:none"></div>
 
 <script>
 // ── SUPABASE CONFIG ──
@@ -532,21 +566,7 @@ async function loadFromSupabase() {
   try {
     const data = await sbFetch('/rest/v1/recipes?select=*&order=created_at.desc');
     // map snake_case → camelCase
-    recipes = data.map(r => ({
-      id:          r.id,
-      title:       r.title,
-      tags:        r.tags || [],
-      notes:       r.notes || '',
-      driveUrl:    r.drive_url || '',
-      platformUrl: r.platform_url || '',
-      videoUrl:    r.video_url || '',
-      videoName:   r.video_name || '',
-      thumbUrl:    r.thumb_url || '',
-      fav:         r.fav || false,
-      viewCount:   r.view_count || 0,
-      createdAt:   r.created_at,
-      editedAt:    r.edited_at,
-    }));
+    recipes = data.map(r => mapDbRecipe(r));
     // sync view counts from db
     recipes.forEach(r => { viewCounts[String(r.id)] = r.viewCount; });
     localStorage.setItem(VIEWS_KEY, JSON.stringify(viewCounts));
@@ -651,8 +671,10 @@ async function uploadVideo(id, base64, filename) {
 
 async function uploadThumb(id, base64) {
   try {
-    const blob = await fetch(base64).then(r => r.blob());
-    const ext  = blob.type.split('/')[1] || 'jpg';
+    // Compress image before upload
+    const compressedBase64 = await compressImage(base64);
+    const blob = await fetch(compressedBase64).then(r => r.blob());
+    const ext  = 'jpg'; // always JPEG after compression
     const path = `thumb_${id}_${Date.now()}.${ext}`;
     const res  = await fetch(`${SB_URL}/storage/v1/object/thumbnails/${path}`, {
       method:  'POST',
@@ -669,9 +691,12 @@ async function uploadThumb(id, base64) {
 
 async function uploadVideo(id, base64, filename) {
   try {
+    // Step 1: Compress video first
+    const compressed = await compressVideo(base64, filename);
+    // Step 2: Upload compressed video to Supabase Storage
     showToast('⏳ Uploading video ke Supabase...', 'warn');
-    const blob = await fetch(base64).then(r => r.blob());
-    const ext  = filename ? filename.split('.').pop() : 'mp4';
+    const blob = await fetch(compressed).then(r => r.blob());
+    const ext  = blob.type.includes('webm') ? 'webm' : (filename ? filename.split('.').pop() : 'mp4');
     const path = `video_${id}_${Date.now()}.${ext}`;
     const res  = await fetch(`${SB_URL}/storage/v1/object/videos/${path}`, {
       method:  'POST',
@@ -685,7 +710,7 @@ async function uploadVideo(id, base64, filename) {
     });
     if (!res.ok) throw new Error('Video upload failed: ' + res.status);
     const videoUrl = `${SB_URL}/storage/v1/object/public/videos/${path}`;
-    showToast('✅ Video uploaded!', 'ok');
+    showToast('✅ Video uploaded & saved!', 'ok');
     return videoUrl;
   } catch(e) {
     console.warn('Video upload failed:', e);
@@ -1228,11 +1253,29 @@ function showModal(editId=null){
     // if edit mode already has platformUrl, validate it
     if(isEdit&&r?.platformUrl) setTimeout(onPlatformUrlChange,100);
   }
-  document.getElementById('vin').addEventListener('change',function(){
+  document.getElementById('vin').addEventListener('change',async function(){
     const f=this.files[0];if(!f)return;
-    if(f.size>150*1024*1024)showToast('Video >150MB mungkin lambat','warn');
-    document.getElementById('uzone').innerHTML=`<div class="uz-icon">✅</div><div class="uz-label">${escH(f.name)}</div><div class="uz-hint">Video dipilih</div>`;
-    const rd=new FileReader();rd.onload=e=>{pVideo={name:f.name,data:e.target.result};document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${e.target.result}" controls muted playsinline></video>`;};rd.onerror=()=>showToast('Gagal baca video','err');rd.readAsDataURL(f);
+    const sizeMB = f.size/(1024*1024);
+    const uzone = document.getElementById('uzone');
+    uzone.innerHTML=`<div class="uz-icon">⏳</div><div class="uz-label">Memuatkan ${escH(f.name)}...</div><div class="uz-hint">${sizeMB.toFixed(1)}MB</div>`;
+    const rd=new FileReader();
+    rd.onload=async (ev)=>{
+      pVideo={name:f.name,data:ev.target.result};
+      uzone.innerHTML=`<div class="uz-icon">✅</div><div class="uz-label">${escH(f.name)}</div><div class="uz-hint">${sizeMB.toFixed(1)}MB — akan dicompress sebelum upload</div>`;
+      // Show preview
+      document.getElementById('vprev').innerHTML=`<video class="prev-vid" src="${ev.target.result}" controls muted playsinline></video>`;
+      // Auto-generate thumbnail if no thumb yet
+      if(!pThumb){
+        const autoThumb = await generateThumbFromVideo(ev.target.result);
+        if(autoThumb){
+          pThumb={data:autoThumb,source:'auto-video'};
+          updateThumbPreview();
+          setThumbStatus('found','✓ Thumbnail auto-generated dari video!');
+        }
+      }
+    };
+    rd.onerror=()=>showToast('Gagal baca video','err');
+    rd.readAsDataURL(f);
     const t=document.getElementById('m-title');if(!t.value)t.value=f.name.replace(/\.[^.]+$/,'').replace(/[_\-]/g,' ').trim();
   });
   document.getElementById('thumb-file').addEventListener('change',function(){
@@ -1489,6 +1532,393 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.search-container'))sd.classList.remove('open');
 });
 
+
+// ══════════════════════════════════════════
+// ── VIDEO COMPRESSION (Canvas + MediaRecorder)
+// ══════════════════════════════════════════
+
+const MAX_VIDEO_MB  = 50;   // warn above 50MB
+const TARGET_VIDEO_MB = 30; // target after compression
+const MAX_THUMB_PX  = 800;  // max thumbnail dimension
+
+// Show compression progress overlay
+function showCompressOverlay(title, msg) {
+  const el = document.getElementById('compress-overlay');
+  el.style.display = 'flex';
+  el.style.cssText = 'position:fixed;inset:0;background:rgba(61,44,0,0.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px';
+  el.innerHTML = `<div class="compress-box">
+    <div class="compress-icon">⚙️</div>
+    <div class="compress-title">${title}</div>
+    <div class="compress-msg" id="compress-msg">${msg}</div>
+    <div class="compress-bar-wrap"><div class="compress-bar" id="compress-bar"></div></div>
+    <div class="compress-pct" id="compress-pct">0%</div>
+  </div>`;
+}
+
+function updateCompressProgress(pct, msg) {
+  const bar = document.getElementById('compress-bar');
+  const pctEl = document.getElementById('compress-pct');
+  const msgEl = document.getElementById('compress-msg');
+  if (bar) bar.style.width = pct + '%';
+  if (pctEl) pctEl.textContent = pct + '%';
+  if (msgEl && msg) msgEl.textContent = msg;
+}
+
+function hideCompressOverlay() {
+  const el = document.getElementById('compress-overlay');
+  if (el) el.style.display = 'none';
+}
+
+// Compress image thumbnail using Canvas
+async function compressImage(base64, maxPx = MAX_THUMB_PX, quality = 0.82) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => {
+      let { width, height } = img;
+      // Scale down if too large
+      if (width > maxPx || height > maxPx) {
+        const ratio = Math.min(maxPx / width, maxPx / height);
+        width  = Math.round(width  * ratio);
+        height = Math.round(height * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width  = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, width, height);
+      resolve(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.onerror = () => resolve(base64); // fallback original
+    img.src = base64;
+  });
+}
+
+// Compress video using MediaRecorder (re-encode at lower bitrate)
+async function compressVideo(base64, filename) {
+  return new Promise(async (resolve) => {
+    try {
+      showCompressOverlay('Memampatkan Video...', 'Sedang proses — sila tunggu');
+      updateCompressProgress(5, 'Memuatkan video...');
+
+      // Decode base64 to blob
+      const res    = await fetch(base64);
+      const blob   = await res.blob();
+      const sizeMB = blob.size / (1024 * 1024);
+
+      // If already small enough, skip compression
+      if (sizeMB <= TARGET_VIDEO_MB) {
+        updateCompressProgress(100, `Video sudah kecil (${sizeMB.toFixed(1)}MB) — skip compression`);
+        await new Promise(r => setTimeout(r, 800));
+        hideCompressOverlay();
+        resolve(base64);
+        return;
+      }
+
+      updateCompressProgress(15, `Saiz asal: ${sizeMB.toFixed(1)}MB — memampatkan...`);
+
+      // Create video element to get dimensions
+      const videoEl = document.createElement('video');
+      videoEl.muted = true;
+      videoEl.playsInline = true;
+      videoEl.src = base64;
+
+      await new Promise((r) => {
+        videoEl.onloadedmetadata = r;
+        videoEl.onerror = r;
+      });
+
+      updateCompressProgress(25, 'Menyediakan canvas...');
+
+      // Scale down resolution (max 720p)
+      const MAX_W = 1280, MAX_H = 720;
+      let vw = videoEl.videoWidth  || 1280;
+      let vh = videoEl.videoHeight || 720;
+      if (vw > MAX_W || vh > MAX_H) {
+        const ratio = Math.min(MAX_W / vw, MAX_H / vh);
+        vw = Math.round(vw * ratio);
+        vh = Math.round(vh * ratio);
+      }
+
+      // Canvas for frame capture
+      const canvas   = document.createElement('canvas');
+      canvas.width   = vw;
+      canvas.height  = vh;
+      const ctx      = canvas.getContext('2d');
+
+      // Check MediaRecorder support
+      const mimeTypes = [
+        'video/webm;codecs=vp9',
+        'video/webm;codecs=vp8',
+        'video/webm',
+        'video/mp4',
+      ];
+      const mimeType = mimeTypes.find(t => MediaRecorder.isTypeSupported(t)) || 'video/webm';
+
+      // Target bitrate based on resolution (bits per second)
+      const targetBitrate = Math.min(1_500_000, (vw * vh * 2));
+
+      const stream   = canvas.captureStream(24); // 24fps
+      const recorder = new MediaRecorder(stream, {
+        mimeType,
+        videoBitsPerSecond: targetBitrate,
+      });
+
+      const chunks = [];
+      recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+
+      recorder.onstop = async () => {
+        updateCompressProgress(90, 'Menyiapkan fail...');
+        const compressedBlob = new Blob(chunks, { type: mimeType });
+        const compressedMB   = compressedBlob.size / (1024 * 1024);
+        const savings        = ((1 - compressedBlob.size / blob.size) * 100).toFixed(0);
+
+        // Convert back to base64
+        const reader = new FileReader();
+        reader.onload = e => {
+          updateCompressProgress(100, `✓ ${sizeMB.toFixed(1)}MB → ${compressedMB.toFixed(1)}MB (jimat ${savings}%)`);
+          setTimeout(() => {
+            hideCompressOverlay();
+            resolve(e.target.result);
+          }, 1200);
+        };
+        reader.readAsDataURL(compressedBlob);
+      };
+
+      recorder.onerror = () => {
+        hideCompressOverlay();
+        resolve(base64); // fallback
+      };
+
+      // Play video and record frames
+      videoEl.currentTime = 0;
+      recorder.start(100); // collect data every 100ms
+
+      updateCompressProgress(30, 'Merekod semula video...');
+
+      const duration = videoEl.duration || 60;
+      let   lastTime = -1;
+
+      const drawFrame = () => {
+        if (!videoEl.paused && !videoEl.ended) {
+          ctx.drawImage(videoEl, 0, 0, vw, vh);
+          // Update progress
+          const prog = Math.min(85, 30 + (videoEl.currentTime / duration) * 55);
+          if (Math.floor(videoEl.currentTime) !== lastTime) {
+            lastTime = Math.floor(videoEl.currentTime);
+            updateCompressProgress(
+              Math.round(prog),
+              `Memproses... ${Math.round(videoEl.currentTime)}s / ${Math.round(duration)}s`
+            );
+          }
+          requestAnimationFrame(drawFrame);
+        } else {
+          recorder.stop();
+          stream.getTracks().forEach(t => t.stop());
+        }
+      };
+
+      videoEl.onplay = () => requestAnimationFrame(drawFrame);
+      videoEl.onended = () => {
+        if (recorder.state === 'recording') {
+          recorder.stop();
+          stream.getTracks().forEach(t => t.stop());
+        }
+      };
+
+      await videoEl.play().catch(() => {
+        // Autoplay blocked — fallback skip compression
+        recorder.stop();
+        hideCompressOverlay();
+        resolve(base64);
+      });
+
+    } catch (err) {
+      console.warn('Video compression failed:', err);
+      hideCompressOverlay();
+      resolve(base64); // always fallback to original
+    }
+  });
+}
+
+// Auto-generate thumbnail from video first frame
+async function generateThumbFromVideo(base64) {
+  return new Promise((resolve) => {
+    try {
+      const video  = document.createElement('video');
+      video.muted  = true;
+      video.src    = base64;
+      video.currentTime = 1; // seek to 1s for better frame
+      video.onloadeddata = () => {
+        const canvas  = document.createElement('canvas');
+        canvas.width  = Math.min(video.videoWidth,  800);
+        canvas.height = Math.min(video.videoHeight, 450);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL('image/jpeg', 0.82));
+      };
+      video.onerror = () => resolve(null);
+    } catch(e) {
+      resolve(null);
+    }
+  });
+}
+
+// ══════════════════════════════════════════
+// ── SUPABASE REALTIME SYNC
+// ══════════════════════════════════════════
+
+let realtimeWs      = null;
+let realtimeRetries = 0;
+const MAX_RT_RETRIES = 5;
+
+function connectRealtime() {
+  // Supabase Realtime WebSocket endpoint
+  const wsUrl = SB_URL.replace('https://', 'wss://') + '/realtime/v1/websocket?apikey=' + SB_KEY + '&vsn=1.0.0';
+
+  try {
+    if (realtimeWs) {
+      realtimeWs.close();
+      realtimeWs = null;
+    }
+
+    realtimeWs = new WebSocket(wsUrl);
+    setRtStatus('connecting');
+
+    realtimeWs.onopen = () => {
+      realtimeRetries = 0;
+      setRtStatus('connected');
+
+      // Send heartbeat every 30s
+      realtimeWs._heartbeat = setInterval(() => {
+        if (realtimeWs.readyState === WebSocket.OPEN) {
+          realtimeWs.send(JSON.stringify({ topic: 'phoenix', event: 'heartbeat', payload: {}, ref: null }));
+        }
+      }, 30000);
+
+      // Subscribe to recipes table changes
+      const subMsg = {
+        topic:   'realtime:public:recipes',
+        event:   'phx_join',
+        payload: {
+          config: {
+            broadcast:  { self: false },
+            presence:   { key: '' },
+            postgres_changes: [
+              { event: 'INSERT', schema: 'public', table: 'recipes' },
+              { event: 'UPDATE', schema: 'public', table: 'recipes' },
+              { event: 'DELETE', schema: 'public', table: 'recipes' },
+            ],
+          },
+        },
+        ref: '1',
+      };
+      realtimeWs.send(JSON.stringify(subMsg));
+    };
+
+    realtimeWs.onmessage = (e) => {
+      try {
+        const msg = JSON.parse(e.data);
+        handleRealtimeMessage(msg);
+      } catch(err) {}
+    };
+
+    realtimeWs.onerror = () => {
+      setRtStatus('disconnected');
+    };
+
+    realtimeWs.onclose = () => {
+      setRtStatus('disconnected');
+      clearInterval(realtimeWs?._heartbeat);
+      // Auto-reconnect with exponential backoff
+      if (realtimeRetries < MAX_RT_RETRIES) {
+        const delay = Math.min(1000 * Math.pow(2, realtimeRetries), 30000);
+        realtimeRetries++;
+        setTimeout(connectRealtime, delay);
+      }
+    };
+
+  } catch(e) {
+    console.warn('Realtime connection failed:', e);
+    setRtStatus('disconnected');
+  }
+}
+
+function handleRealtimeMessage(msg) {
+  const type    = msg?.payload?.type;
+  const record  = msg?.payload?.record;
+  const old     = msg?.payload?.old_record;
+
+  if (!type) return;
+
+  if (type === 'INSERT' && record) {
+    // New recipe added from another device
+    const exists = recipes.find(r => String(r.id) === String(record.id));
+    if (!exists) {
+      const mapped = mapDbRecipe(record);
+      recipes.unshift(mapped);
+      localStorage.setItem(CACHE_KEY, JSON.stringify(recipes));
+      renderCloud(); renderList(); renderRecent(); renderStats();
+      showToast('🔔 Resepi baru ditambah dari device lain!', 'ok');
+    }
+
+  } else if (type === 'UPDATE' && record) {
+    // Recipe updated from another device
+    const idx = recipes.findIndex(r => String(r.id) === String(record.id));
+    if (idx >= 0) {
+      recipes[idx] = { ...recipes[idx], ...mapDbRecipe(record) };
+      localStorage.setItem(CACHE_KEY, JSON.stringify(recipes));
+      renderCloud(); renderList(); renderRecent();
+      showToast('🔄 Resepi dikemaskini dari device lain', 'ok');
+    }
+
+  } else if (type === 'DELETE' && old) {
+    // Recipe deleted from another device
+    const before = recipes.length;
+    recipes = recipes.filter(r => String(r.id) !== String(old.id));
+    if (recipes.length !== before) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(recipes));
+      renderCloud(); renderList(); renderRecent();
+      showToast('🗑️ Resepi dipadam dari device lain', 'warn');
+    }
+  }
+}
+
+// Map DB snake_case to camelCase
+function mapDbRecipe(r) {
+  return {
+    id:          r.id,
+    title:       r.title,
+    tags:        r.tags || [],
+    notes:       r.notes || '',
+    driveUrl:    r.drive_url || '',
+    platformUrl: r.platform_url || '',
+    videoUrl:    r.video_url || '',
+    videoName:   r.video_name || '',
+    thumbUrl:    r.thumb_url || '',
+    fav:         r.fav || false,
+    viewCount:   r.view_count || 0,
+    createdAt:   r.created_at,
+    editedAt:    r.edited_at,
+  };
+}
+
+function setRtStatus(status) {
+  const dot  = document.getElementById('rt-dot');
+  const text = document.getElementById('rt-text');
+  const wrap = document.getElementById('rt-status');
+  const settingsText = document.getElementById('rt-settings-text');
+  const labels = {
+    connected:    { cls:'rt-dot',              txt:'Live',          stxt:'🟢 Connected — sync automatik aktif',  col:'var(--green)' },
+    connecting:   { cls:'rt-dot connecting',   txt:'Connecting...',  stxt:'🟡 Menyambung...',                     col:'var(--text-light)' },
+    disconnected: { cls:'rt-dot disconnected', txt:'Offline',        stxt:'🔴 Tidak bersambung — akan reconnect', col:'var(--danger)' },
+  };
+  const l = labels[status] || labels.disconnected;
+  if (dot)  { dot.className = l.cls; }
+  if (text) { text.textContent = l.txt; text.style.color = l.col; }
+  if (wrap) { wrap.style.display='inline-flex'; wrap.style.alignItems='center'; }
+  if (settingsText) settingsText.textContent = l.stxt;
+}
+
 // ── INIT ──
 function init(){
   if(isDark)applyDark(true,false);
@@ -1497,8 +1927,10 @@ function init(){
   if(cached){
     try{recipes=JSON.parse(cached);renderCloud();renderList();renderRecent();}catch(e){}
   }
-  // then sync from Supabase
+  // sync from Supabase
   loadFromSupabase();
+  // start realtime connection
+  connectRealtime();
 }
 init();
 </script>
