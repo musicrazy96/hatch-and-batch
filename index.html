@@ -347,6 +347,48 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .size-ok{background:var(--green-pale);border-radius:10px;padding:9px 12px;font-size:11px;font-weight:700;color:#2D6A4F;margin-bottom:10px;display:none;align-items:center;gap:8px}
 .size-ok.show{display:flex}
 
+
+/* TAG COUNT BADGE */
+.tc-count{font-size:9px;font-weight:800;opacity:0.7;margin-left:1px}
+.tc.active .tc-count{opacity:0.9}
+
+/* CARD SLIDE-IN ANIMATION */
+@keyframes cardSlideIn{
+  from{opacity:0;transform:translateY(-16px) scale(0.97)}
+  to{opacity:1;transform:translateY(0) scale(1)}
+}
+.card.new-card{animation:cardSlideIn 0.32s cubic-bezier(0.4,0,0.2,1) forwards}
+
+/* OFFLINE BANNER */
+.offline-banner{background:var(--danger);color:#fff;font-size:12px;font-weight:700;
+  padding:8px 16px;text-align:center;display:none;align-items:center;
+  justify-content:center;gap:8px;flex-shrink:0;letter-spacing:0.3px}
+.offline-banner.show{display:flex}
+
+/* STORAGE INDICATOR */
+.storage-bar-wrap{background:var(--border);border-radius:20px;height:6px;
+  overflow:hidden;margin:8px 0 4px}
+.storage-bar{height:100%;border-radius:20px;transition:width 0.5s;background:var(--green)}
+.storage-bar.warn{background:var(--yolk-deep)}
+.storage-bar.danger{background:var(--danger)}
+.storage-text{font-size:11px;font-weight:600;color:var(--text-light)}
+
+/* SHARE MODAL */
+.share-canvas-wrap{background:var(--surface);border-radius:14px;overflow:hidden;
+  margin-bottom:14px;text-align:center}
+.share-canvas-wrap canvas{max-width:100%;border-radius:12px;display:block}
+.share-btns{display:flex;gap:8px;flex-wrap:wrap}
+.share-btn{flex:1;min-width:100px;padding:11px;border-radius:12px;border:1.5px solid var(--border);
+  background:var(--card-bg);font-size:12px;font-weight:700;color:var(--text-mid);
+  cursor:pointer;font-family:'Nunito',sans-serif;transition:all 0.15s;text-align:center}
+.share-btn:hover{border-color:var(--yolk-deep);background:var(--yolk-pale);color:var(--brown)}
+.share-btn.primary{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep)}
+
+/* SEARCH NOTES HIGHLIGHT */
+.notes-match{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;
+  background:var(--yolk-pale);color:var(--brown);border:1px solid var(--beige2);
+  display:inline-flex;align-items:center;gap:3px}
+
 </style>
 </head>
 <body>
@@ -396,6 +438,9 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
     </span>
     <button class="sync-btn" onclick="loadFromSupabase()">↻ Refresh</button>
   </div>
+  <div class="offline-banner" id="offline-banner">
+    📡 Tiada internet — menunjukkan data cache
+  </div>
   <div class="stats-row">
     <div class="stat-card"><div class="stat-num" id="s-total">0</div><div class="stat-label">RESEPI</div></div>
     <div class="stat-card"><div class="stat-num" id="s-fav">0</div><div class="stat-label">FAVOURITE</div></div>
@@ -407,11 +452,13 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
   </div>
   <div class="toolbar">
     <select class="sort-select" id="sort-select" onchange="renderList()">
-      <option value="newest">🕐 Terbaru</option>
+      <option value="newest">🕐 Terbaru ditambah</option>
+      <option value="recent">👁 Recently viewed</option>
       <option value="az">🔤 A → Z</option>
       <option value="za">🔤 Z → A</option>
       <option value="fav">⭐ Favourite dulu</option>
-      <option value="views">👁 Paling kerap dibuka</option>
+      <option value="views">📊 Paling kerap dibuka</option>
+      <option value="edited">✏️ Terbaru diedit</option>
     </select>
     <button class="fav-filter-btn" id="fav-filter-btn" onclick="toggleFavFilter()">⭐ Favourite</button>
   </div>
@@ -485,11 +532,21 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
       </div>
     </div>
     <div class="settings-section">
-      <div class="settings-section-title">DATA</div>
+      <div class="settings-section-title">DATA &amp; STORAGE</div>
       <div class="settings-card">
         <div class="settings-row">
           <div class="settings-row-icon">📦</div>
           <div class="settings-row-body"><div class="settings-row-title">Total resepi</div><div class="settings-row-sub" id="data-count-text">0 resepi</div></div>
+        </div>
+        <div class="settings-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+          <div style="display:flex;align-items:center;gap:10px;width:100%">
+            <div class="settings-row-icon">💾</div>
+            <div class="settings-row-body"><div class="settings-row-title">Supabase Storage</div></div>
+            <div class="settings-row-action"><button class="settings-row-btn" onclick="fetchStorageUsage()">Semak</button></div>
+          </div>
+          <div id="storage-usage" style="width:100%;padding:0 16px 8px">
+            <div class="storage-text">Tekan "Semak" untuk lihat penggunaan storage</div>
+          </div>
         </div>
         <div class="settings-row">
           <div class="settings-row-icon">🗑️</div>
@@ -791,15 +848,30 @@ function getSorted(arr) {
   const sort = document.getElementById('sort-select')?.value || 'newest';
   const q    = searchQ.toLowerCase().trim();
   let f = arr.filter(r => {
-    const mq = !q || r.title.toLowerCase().includes(q) || (r.tags||[]).some(t=>t.toLowerCase().includes(q));
+    const mq = !q ||
+      r.title.toLowerCase().includes(q) ||
+      (r.tags||[]).some(t=>t.toLowerCase().includes(q)) ||
+      (r.notes||'').toLowerCase().includes(q);  // ← search in notes too
     const mt = !activeTag || (r.tags||[]).includes(activeTag);
     const mf = !favOnly || r.fav;
     return mq && mt && mf;
   });
-  if(sort==='az')    f.sort((a,b)=>a.title.localeCompare(b.title));
-  else if(sort==='za')   f.sort((a,b)=>b.title.localeCompare(a.title));
-  else if(sort==='fav')  f.sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
-  else if(sort==='views')f.sort((a,b)=>(viewCounts[String(b.id)]||0)-(viewCounts[String(a.id)]||0));
+  if(sort==='az')       f.sort((a,b)=>a.title.localeCompare(b.title));
+  else if(sort==='za')    f.sort((a,b)=>b.title.localeCompare(a.title));
+  else if(sort==='fav')   f.sort((a,b)=>(b.fav?1:0)-(a.fav?1:0));
+  else if(sort==='views') f.sort((a,b)=>(viewCounts[String(b.id)]||0)-(viewCounts[String(a.id)]||0));
+  else if(sort==='recent'){
+    // Sort by position in recentIds (most recently viewed first)
+    const order={};
+    recentIds.forEach((id,i)=>order[String(id)]=i);
+    f.sort((a,b)=>{
+      const ai=order[String(a.id)]??9999;
+      const bi=order[String(b.id)]??9999;
+      if(ai!==bi) return ai-bi;
+      return new Date(b.createdAt||0)-new Date(a.createdAt||0);
+    });
+  }
+  else if(sort==='edited') f.sort((a,b)=>new Date(b.editedAt||0)-new Date(a.editedAt||0));
   else f.sort((a,b)=>new Date(b.createdAt||0)-new Date(a.createdAt||0));
   return f;
 }
@@ -864,10 +936,24 @@ function renderCloud() {
   if(!all.length){el.innerHTML='';return;}
   const MAX=8;
   const visible=tagCloudExpanded?all:all.slice(0,MAX);
-  const chips=`<span class="tc${!activeTag?' active':''}" data-tag="">Semua</span>`+visible.map(t=>`<span class="tc${activeTag===t?' active':''}" data-tag="${escA(t)}">${escH(t)}</span>`).join('');
+  // Count recipes per tag
+  const tagCount={};
+  recipes.forEach(r=>(r.tags||[]).forEach(t=>{tagCount[t]=(tagCount[t]||0)+1;}));
+  // Total filtered count for "Semua"
+  const totalCount=recipes.length;
+  const chips=`<span class="tc${!activeTag?' active':''}" data-tag="" title="Semua resepi">Semua <span class="tc-count">${totalCount}</span></span>`
+    +visible.map(t=>{
+      const cnt=tagCount[t]||0;
+      const isActive=activeTag===t;
+      return`<span class="tc${isActive?' active':''}" data-tag="${escA(t)}" title="${cnt} resepi">${escH(t)} <span class="tc-count">${cnt}</span></span>`;
+    }).join('');
   const moreBtn=all.length>MAX?`<button class="tc-more-btn" id="tc-more-btn">${tagCloudExpanded?'⬆ Kurang':'+ '+(all.length-MAX)+' lagi'}</button>`:'';
   el.innerHTML=chips+moreBtn;
-  el.querySelectorAll('.tc').forEach(c=>c.addEventListener('click',function(){activeTag=this.dataset.tag;curPage=1;document.getElementById('sec-lbl').textContent=activeTag?activeTag.toUpperCase():'SEMUA RESEPI';renderCloud();renderList();}));
+  el.querySelectorAll('.tc').forEach(chip=>chip.addEventListener('click',function(){
+    activeTag=this.dataset.tag;curPage=1;
+    document.getElementById('sec-lbl').textContent=activeTag?activeTag.toUpperCase():'SEMUA RESEPI';
+    renderCloud();renderList();
+  }));
   const mb=document.getElementById('tc-more-btn');
   if(mb)mb.addEventListener('click',()=>{tagCloudExpanded=!tagCloudExpanded;renderCloud();});
 }
@@ -961,7 +1047,8 @@ function renderList() {
       ? ''
       : `<div class="thumb-click-area" onclick="toggleCard(event,${r.id})"></div>`;
 
-    return`<div class="card${isActive?' active':''}" id="card-${r.id}">
+    const isNew = newlyAddedId && String(r.id)===String(newlyAddedId);
+    return`<div class="card${isActive?' active':''}${isNew?' new-card':''}" id="card-${r.id}">
       <div class="vid-wrap">
         ${mediaEl}
         ${pbHtml}
@@ -983,12 +1070,14 @@ function renderList() {
         <div class="tag-row">
           ${(r.tags||[]).map(t=>`<span class="tag" onclick="filterByTag(event,'${escA(t)}')">${escH(t)}</span>`).join('')}
           ${r.notes?'<span class="tag" style="background:var(--beige);border-color:var(--beige2)">📝</span>':''}
+          ${searchQ&&r.notes&&r.notes.toLowerCase().includes(searchQ.toLowerCase())?'<span class="notes-match">📝 dalam nota</span>':''}
         </div>
       </div>
       <div class="mini-icons-bar">
         <button class="mini-icon-btn mi-edit" onclick="openEdit(${r.id})"><span class="mini-icon-emoji">✏️</span><span class="mini-icon-label">Edit</span></button>
         <button class="mini-icon-btn mi-note" onclick="openNotes(${r.id})"><span class="mini-icon-emoji">📝</span><span class="mini-icon-label">Nota</span></button>
         <button class="mini-icon-btn mi-similar" onclick="openSimilar(null,${r.id})"><span class="mini-icon-emoji">🔍</span><span class="mini-icon-label">Serupa</span></button>
+        <button class="mini-icon-btn" onclick="shareRecipe(${r.id})" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:10px 6px;cursor:pointer;border:none;background:transparent;transition:background 0.15s;position:relative;font-family:'Nunito',sans-serif" onmouseover="this.style.background='var(--green-pale)'" onmouseout="this.style.background='transparent'"><span class="mini-icon-emoji">📤</span><span class="mini-icon-label" style="color:var(--green);font-size:10px;font-weight:700">Share</span></button>
         <button class="mini-icon-btn mi-del" onclick="confirmDel(${r.id})"><span class="mini-icon-emoji">🗑️</span><span class="mini-icon-label">Padam</span></button>
       </div>
     </div>`;
@@ -1423,7 +1512,8 @@ async function doSave(editId){
       const idx=recipes.findIndex(x=>x.id===editId);
       if(idx>=0)recipes[idx]={...recipes[idx],...recipe,thumbUrl:recipes[idx].thumbUrl||recipe.thumbUrl};
     }else{
-      recipes.unshift(recipe);curPage=1;
+      recipes.unshift(recipe);curPage=1;newlyAddedId=recipe.id;
+    setTimeout(()=>{newlyAddedId=null;},500); // clear after animation
     }
     localStorage.setItem(CACHE_KEY,JSON.stringify(recipes));
     closeModal();renderCloud();renderList();
@@ -1487,11 +1577,13 @@ function closeSettings(){document.getElementById('settings-screen').classList.re
 function updateSettingsStatus(){
   const last=localStorage.getItem('hatchbatch_last_sync');
   const dc=document.getElementById('data-count-text');
-  if(dc)dc.textContent=recipes.length+' resepi, '+allTags().length+' tag unik';
+  if(dc)dc.textContent=recipes.length+' resepi · '+allTags().length+' tag unik';
   const ls=document.getElementById('last-sync-text');
-  if(ls)ls.textContent=last?'Terakhir: '+last:'Belum sync';
-  document.getElementById('sb-url-display').textContent=SB_URL;
-  document.getElementById('sb-key-display').textContent=SB_KEY.slice(0,20)+'...';
+  if(ls)ls.textContent=last?'Terakhir sync: '+last:'Belum sync';
+  const urlEl=document.getElementById('sb-url-display');
+  const keyEl=document.getElementById('sb-key-display');
+  if(urlEl)urlEl.textContent=SB_URL;
+  if(keyEl)keyEl.textContent=SB_KEY.slice(0,20)+'...';
   const statusEl=document.getElementById('sb-status-display');
   const dot=document.getElementById('sync-dot');
   if(dot&&dot.classList.contains('ok')){
@@ -1767,6 +1859,7 @@ async function generateThumbFromVideo(base64) {
 // ── SUPABASE REALTIME SYNC
 // ══════════════════════════════════════════
 
+let newlyAddedId    = null;
 let realtimeWs      = null;
 let realtimeRetries = 0;
 const MAX_RT_RETRIES = 5;
@@ -1919,6 +2012,302 @@ function setRtStatus(status) {
   if (settingsText) settingsText.textContent = l.stxt;
 }
 
+
+// ══════════════════════════════════════════
+// ── OFFLINE DETECTION
+// ══════════════════════════════════════════
+function updateOnlineStatus() {
+  const banner = document.getElementById('offline-banner');
+  if (!banner) return;
+  if (navigator.onLine) {
+    banner.classList.remove('show');
+    // Try reconnect realtime when back online
+    if (!realtimeWs || realtimeWs.readyState !== WebSocket.OPEN) {
+      connectRealtime();
+    }
+  } else {
+    banner.classList.add('show');
+    setRtStatus('disconnected');
+    setSyncState('local', 'Offline — data dari cache');
+  }
+}
+window.addEventListener('online',  updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// ══════════════════════════════════════════
+// ── SUPABASE STORAGE INDICATOR
+// ══════════════════════════════════════════
+async function fetchStorageUsage() {
+  const storageEl = document.getElementById('storage-usage');
+  if (!storageEl) return;
+  storageEl.innerHTML = `<div class="storage-text">Mengira storage...</div>`;
+  try {
+    // List all files in thumbnails + videos bucket
+    let totalBytes = 0;
+
+    const listBucket = async (bucket) => {
+      try {
+        const res = await sbFetch(`/storage/v1/object/list/${bucket}`, {
+          method: 'POST',
+          body: JSON.stringify({ prefix: '', limit: 1000, offset: 0 }),
+        });
+        if (Array.isArray(res)) {
+          res.forEach(f => { totalBytes += f.metadata?.size || 0; });
+        }
+      } catch(e) {}
+    };
+
+    await listBucket('thumbnails');
+    await listBucket('videos');
+
+    const usedMB  = totalBytes / (1024 * 1024);
+    const limitMB = 1024; // 1GB free
+    const pct     = Math.min(100, (usedMB / limitMB) * 100);
+    const barClass= pct > 80 ? 'danger' : pct > 60 ? 'warn' : '';
+    const usedStr = usedMB < 1 ? `${(usedMB*1024).toFixed(0)}KB` : `${usedMB.toFixed(1)}MB`;
+
+    storageEl.innerHTML = `
+      <div class="storage-text">Storage: <strong>${usedStr}</strong> / 1GB digunakan (${pct.toFixed(1)}%)</div>
+      <div class="storage-bar-wrap">
+        <div class="storage-bar ${barClass}" style="width:${pct}%"></div>
+      </div>
+      ${pct>80?'<div class="storage-text" style="color:var(--danger)">⚠️ Storage hampir penuh! Padam video lama atau upgrade plan.</div>':''}
+    `;
+  } catch(e) {
+    storageEl.innerHTML = `<div class="storage-text">Gagal semak storage</div>`;
+  }
+}
+
+// ══════════════════════════════════════════
+// ── SHARE RECIPE CARD (Canvas)
+// ══════════════════════════════════════════
+async function shareRecipe(id) {
+  const r = recipes.find(x => x.id === id);
+  if (!r) return;
+
+  document.getElementById('portal').innerHTML = `<div class="popup-overlay" id="pp-ov">
+    <div class="popup-sheet">
+      <div class="popup-handle"></div>
+      <div class="popup-header">
+        <div class="popup-title">📤 Share Resepi</div>
+        <button class="popup-close" onclick="closePopup()">×</button>
+      </div>
+      <div class="popup-body">
+        <div class="note-recipe-name">📌 ${escH(r.title)}</div>
+        <div class="share-canvas-wrap" id="share-canvas-wrap">
+          <div style="padding:30px;text-align:center;color:var(--text-light);font-weight:600">
+            ⏳ Menjana kad resepi...
+          </div>
+        </div>
+        <div class="share-btns" id="share-btns" style="display:none">
+          <button class="share-btn primary" onclick="downloadShareCard()">💾 Simpan Gambar</button>
+          <button class="share-btn" onclick="copyShareCard()">📋 Copy Imej</button>
+          <button class="share-btn" onclick="nativeShare()">↗ Share...</button>
+        </div>
+      </div>
+      <div class="popup-footer">
+        <button class="btn-full" onclick="closePopup()">Tutup</button>
+      </div>
+    </div>
+  </div>`;
+
+  document.getElementById('pp-ov').addEventListener('click', e => {
+    if (e.target === e.currentTarget) closePopup();
+  });
+
+  // Generate canvas card
+  await generateShareCard(r);
+}
+
+let _shareCanvas = null;
+
+async function generateShareCard(r) {
+  const wrap = document.getElementById('share-canvas-wrap');
+  if (!wrap) return;
+
+  const W = 600, H = 340;
+  const canvas  = document.createElement('canvas');
+  canvas.width  = W * 2; // retina
+  canvas.height = H * 2;
+  canvas.style.width  = W + 'px';
+  canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(2, 2); // retina
+
+  // ── Background ──
+  const isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
+  ctx.fillStyle = isDarkMode ? '#221C09' : '#FFFBEE';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Decorative blob top-right ──
+  ctx.fillStyle = '#F5C842';
+  ctx.beginPath();
+  ctx.arc(W - 30, 30, 80, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = isDarkMode ? '#2A2005' : '#FEF3C0';
+  ctx.beginPath();
+  ctx.arc(W - 10, 50, 60, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ── Thumbnail (left side) ──
+  const THUMB_W = 200, THUMB_H = H - 40, THUMB_X = 20, THUMB_Y = 20;
+  const radius = 16;
+  ctx.save();
+  ctx.beginPath();
+  ctx.moveTo(THUMB_X + radius, THUMB_Y);
+  ctx.lineTo(THUMB_X + THUMB_W - radius, THUMB_Y);
+  ctx.quadraticCurveTo(THUMB_X + THUMB_W, THUMB_Y, THUMB_X + THUMB_W, THUMB_Y + radius);
+  ctx.lineTo(THUMB_X + THUMB_W, THUMB_Y + THUMB_H - radius);
+  ctx.quadraticCurveTo(THUMB_X + THUMB_W, THUMB_Y + THUMB_H, THUMB_X + THUMB_W - radius, THUMB_Y + THUMB_H);
+  ctx.lineTo(THUMB_X + radius, THUMB_Y + THUMB_H);
+  ctx.quadraticCurveTo(THUMB_X, THUMB_Y + THUMB_H, THUMB_X, THUMB_Y + THUMB_H - radius);
+  ctx.lineTo(THUMB_X, THUMB_Y + radius);
+  ctx.quadraticCurveTo(THUMB_X, THUMB_Y, THUMB_X + radius, THUMB_Y);
+  ctx.closePath();
+  ctx.clip();
+
+  if (r.thumbUrl) {
+    try {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      await new Promise((res, rej) => {
+        img.onload = res; img.onerror = rej;
+        img.src = r.thumbUrl;
+      });
+      ctx.drawImage(img, THUMB_X, THUMB_Y, THUMB_W, THUMB_H);
+    } catch(e) {
+      ctx.fillStyle = '#FEF3C0';
+      ctx.fillRect(THUMB_X, THUMB_Y, THUMB_W, THUMB_H);
+      ctx.font = 'bold 48px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🍽️', THUMB_X + THUMB_W/2, THUMB_Y + THUMB_H/2 + 16);
+    }
+  } else {
+    ctx.fillStyle = '#FDF6D8';
+    ctx.fillRect(THUMB_X, THUMB_Y, THUMB_W, THUMB_H);
+    ctx.font = '48px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('🍽️', THUMB_X + THUMB_W/2, THUMB_Y + THUMB_H/2 + 16);
+  }
+  ctx.restore();
+
+  // ── Right side content ──
+  const RX = THUMB_X + THUMB_W + 20;
+  const RW = W - RX - 20;
+
+  // Brand name
+  ctx.fillStyle = '#E6B020';
+  ctx.font = 'bold 13px Nunito, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('🐣 Hatch & Batch', RX, 42);
+
+  // Recipe title
+  ctx.fillStyle = isDarkMode ? '#F5E6C0' : '#3D2C00';
+  ctx.font = 'bold 22px Fredoka, Nunito, sans-serif';
+  // Word wrap title
+  const words = r.title.split(' ');
+  let line = '', y = 80;
+  for (const word of words) {
+    const test = line ? line + ' ' + word : word;
+    if (ctx.measureText(test).width > RW && line) {
+      ctx.fillText(line, RX, y);
+      line = word; y += 28;
+    } else { line = test; }
+  }
+  ctx.fillText(line, RX, y);
+  y += 24;
+
+  // Divider
+  ctx.fillStyle = '#EDD89A';
+  ctx.fillRect(RX, y, RW, 1.5);
+  y += 16;
+
+  // Tags
+  if (r.tags && r.tags.length) {
+    ctx.font = 'bold 12px Nunito, sans-serif';
+    let tx = RX;
+    const TAG_H = 22, TAG_PAD = 10, TAG_R = 11;
+    for (const tag of r.tags.slice(0, 6)) {
+      const tw = ctx.measureText(tag).width + TAG_PAD * 2;
+      if (tx + tw > RX + RW) { tx = RX; y += TAG_H + 6; }
+      // Tag pill background
+      ctx.fillStyle = '#FDF6D8';
+      ctx.beginPath();
+      ctx.roundRect(tx, y - TAG_H + 4, tw, TAG_H, TAG_R);
+      ctx.fill();
+      ctx.strokeStyle = '#EDD89A';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      // Tag text
+      ctx.fillStyle = '#8B6914';
+      ctx.fillText(tag, tx + TAG_PAD, y);
+      tx += tw + 6;
+    }
+    y += TAG_H + 10;
+  }
+
+  // Notes preview (if any)
+  if (r.notes) {
+    ctx.fillStyle = isDarkMode ? '#8B7040' : '#B8924A';
+    ctx.font = '11px Nunito, sans-serif';
+    const notePreview = r.notes.slice(0, 60) + (r.notes.length > 60 ? '...' : '');
+    ctx.fillText('📝 ' + notePreview, RX, y + 10);
+    y += 24;
+  }
+
+  // Date
+  ctx.fillStyle = isDarkMode ? '#3D3318' : '#EDD89A';
+  ctx.fillRect(RX, H - 36, RW, 1);
+  ctx.fillStyle = isDarkMode ? '#8B7040' : '#B8924A';
+  ctx.font = '10px Nunito, sans-serif';
+  ctx.fillText('Disimpan: ' + (r.editedAt ? new Date(r.editedAt).toLocaleDateString('ms-MY') : '—'), RX, H - 16);
+
+  // Show canvas
+  wrap.innerHTML = '';
+  wrap.appendChild(canvas);
+  _shareCanvas = canvas;
+
+  const btns = document.getElementById('share-btns');
+  if (btns) btns.style.display = 'flex';
+}
+
+function downloadShareCard() {
+  if (!_shareCanvas) return;
+  const a = document.createElement('a');
+  a.download = 'resepi-hatch-batch.png';
+  a.href = _shareCanvas.toDataURL('image/png');
+  a.click();
+  showToast('✓ Gambar disimpan!', 'ok');
+}
+
+async function copyShareCard() {
+  if (!_shareCanvas) return;
+  try {
+    _shareCanvas.toBlob(async blob => {
+      await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+      showToast('✓ Gambar dicopy!', 'ok');
+    });
+  } catch(e) {
+    showToast('Copy gagal — guna Download je', 'warn');
+  }
+}
+
+async function nativeShare() {
+  if (!_shareCanvas) return;
+  try {
+    _shareCanvas.toBlob(async blob => {
+      const file = new File([blob], 'resepi.png', {type:'image/png'});
+      if (navigator.share && navigator.canShare({files:[file]})) {
+        await navigator.share({ files:[file], title: 'Resepi dari Hatch & Batch' });
+      } else {
+        downloadShareCard();
+      }
+    });
+  } catch(e) {
+    downloadShareCard();
+  }
+}
+
 // ── INIT ──
 function init(){
   if(isDark)applyDark(true,false);
@@ -1927,6 +2316,8 @@ function init(){
   if(cached){
     try{recipes=JSON.parse(cached);renderCloud();renderList();renderRecent();}catch(e){}
   }
+  // check online status
+  updateOnlineStatus();
   // sync from Supabase
   loadFromSupabase();
   // start realtime connection
