@@ -389,6 +389,35 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
   background:var(--yolk-pale);color:var(--brown);border:1px solid var(--beige2);
   display:inline-flex;align-items:center;gap:3px}
 
+
+/* DUPLICATE DETECTOR */
+.dup-overlay{position:fixed;inset:0;background:rgba(61,44,0,0.5);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.dup-sheet{background:var(--cream);border-radius:24px 24px 0 0;width:100%;max-width:430px;max-height:80dvh;display:flex;flex-direction:column;animation:slideUp 0.25s cubic-bezier(0.4,0,0.2,1)}
+.dup-handle{width:40px;height:4px;background:var(--border);border-radius:2px;margin:14px auto 0;flex-shrink:0}
+.dup-header{padding:14px 18px 0;flex-shrink:0;display:flex;align-items:center;gap:10px}
+.dup-icon{font-size:28px}
+.dup-title{font-family:'Fredoka',sans-serif;font-size:20px;font-weight:600;color:var(--text)}
+.dup-subtitle{font-size:12px;font-weight:600;color:var(--text-light);padding:4px 18px 10px}
+.dup-body{overflow-y:auto;padding:0 18px 8px;flex:1}
+.dup-card{background:var(--surface);border-radius:14px;padding:12px 14px;margin-bottom:10px;border:1.5px solid var(--border-light);display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color 0.15s}
+.dup-card:hover{border-color:var(--yolk-deep)}
+.dup-card-thumb{width:52px;height:52px;border-radius:10px;object-fit:cover;background:var(--yolk-soft);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:22px;overflow:hidden}
+.dup-card-thumb img{width:100%;height:100%;object-fit:cover}
+.dup-card-info{flex:1;min-width:0}
+.dup-card-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dup-card-tags{display:flex;gap:4px;flex-wrap:wrap}
+.dup-match-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--danger-pale,#FDE8E0);color:var(--danger)}
+.dup-other-tag{font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;background:var(--yolk-soft);color:var(--brown)}
+.dup-score{font-size:11px;font-weight:800;color:var(--text-light);flex-shrink:0;text-align:center;line-height:1.3}
+.dup-score span{display:block;font-size:18px;color:var(--danger)}
+.dup-ai-msg{background:var(--blue-pale);border-radius:12px;padding:12px 14px;margin-bottom:12px;font-size:12px;font-weight:600;color:var(--blue);line-height:1.7;display:flex;gap:10px;align-items:flex-start}
+.dup-ai-msg .ai-icon{font-size:18px;flex-shrink:0;margin-top:1px}
+.dup-loading{text-align:center;padding:24px;color:var(--text-light)}
+.dup-loading-icon{font-size:32px;margin-bottom:8px;animation:bounce 1s infinite}
+.dup-footer{padding:12px 18px 28px;flex-shrink:0;display:flex;gap:8px}
+.dup-btn-save{flex:2;padding:13px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+.dup-btn-cancel{flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-mid);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
+
 </style>
 </head>
 <body>
@@ -1587,6 +1616,24 @@ async function doSave(editId){
   if(!title){showToast('Isi nama masakan dulu!','err');return;}
   const raw=(document.getElementById('tin').value||'').trim();if(raw)addTag(raw);
   const url=(document.getElementById('m-url').value||'').trim();
+
+  // ── DUPLICATE CHECK (new recipes only) ──
+  if(editId===null||editId==='null'){
+    await checkDuplicatesBeforeSave(
+      title, [...pTags],
+      ()=>_doSaveActual(editId, title, url), // onProceed
+      ()=>{                                   // onCancel
+        const btn=document.getElementById('save-btn');
+        if(btn){btn.disabled=false;btn.textContent='Simpan Resepi';}
+      },
+      editId
+    );
+    return; // wait for user decision
+  }
+  await _doSaveActual(editId, title, url);
+}
+
+async function _doSaveActual(editId, title, url){
   const btn=document.getElementById('save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Menyimpan...';}
   try{
@@ -1624,7 +1671,7 @@ async function doSave(editId){
     showToast(editId!==null&&editId!=='null'?'✓ Resepi dikemaskini!':'✓ Resepi disimpan!','ok');
   }catch(e){
     showToast('Gagal simpan: '+e.message,'err');
-    if(btn){btn.disabled=false;btn.textContent=editId?'Kemaskini':'Simpan Resepi';}
+    if(btn){btn.disabled=false;btn.textContent=editId!==null&&editId!=='null'?'Kemaskini':'Simpan Resepi';}
   }
 }
 
@@ -2501,6 +2548,198 @@ async function nativeShare() {
   } catch(e) {
     downloadShareCard();
   }
+}
+
+
+// ══════════════════════════════════════════
+// ── SMART DUPLICATE DETECTOR (Claude AI)
+// ══════════════════════════════════════════
+
+// Similarity scoring — purely local, fast
+function calcSimilarity(titleA, tagsA, titleB, tagsB) {
+  const normA = titleA.toLowerCase().trim();
+  const normB = titleB.toLowerCase().trim();
+
+  let score = 0;
+
+  // ── Title similarity (Dice coefficient on words) ──
+  const wordsA = new Set(normA.split(/\s+/).filter(w => w.length > 2));
+  const wordsB = new Set(normB.split(/\s+/).filter(w => w.length > 2));
+  const commonWords = [...wordsA].filter(w => wordsB.has(w)).length;
+  const titleScore  = wordsA.size + wordsB.size > 0
+    ? (2 * commonWords) / (wordsA.size + wordsB.size)
+    : 0;
+  score += titleScore * 60; // 60% weight on title
+
+  // ── Exact title match bonus ──
+  if (normA === normB) score += 30;
+
+  // ── Tag overlap ──
+  const tagsSetA = new Set((tagsA||[]).map(t => t.toLowerCase()));
+  const tagsSetB = new Set((tagsB||[]).map(t => t.toLowerCase()));
+  const commonTags = [...tagsSetA].filter(t => tagsSetB.has(t)).length;
+  const tagScore   = tagsSetA.size + tagsSetB.size > 0
+    ? (2 * commonTags) / (tagsSetA.size + tagsSetB.size)
+    : 0;
+  score += tagScore * 40; // 40% weight on tags
+
+  return Math.min(100, Math.round(score));
+}
+
+// Find potential duplicates locally
+function findLocalDuplicates(title, tags, excludeId = null) {
+  const candidates = [];
+  for (const r of recipes) {
+    if (excludeId && String(r.id) === String(excludeId)) continue;
+    const score = calcSimilarity(title, tags, r.title, r.tags);
+    if (score >= 35) { // threshold: 35% similarity
+      candidates.push({ ...r, score });
+    }
+  }
+  return candidates.sort((a, b) => b.score - a.score).slice(0, 4);
+}
+
+// Call Claude AI to analyze duplicates
+async function analyzeWithAI(newTitle, newTags, candidates) {
+  const candidateList = candidates.map(r =>
+    `- "${r.title}" (tags: ${(r.tags||[]).join(', ')||'tiada'})`
+  ).join('\n');
+
+  const prompt = `Kau adalah pembantu memasak yang bijak.
+
+Pengguna ingin menyimpan resepi baru: "${newTitle}" (tags: ${newTags.join(', ')||'tiada'})
+
+Dalam koleksi mereka sudah ada resepi yang mungkin serupa:
+${candidateList}
+
+Berikan analisis ringkas dalam Bahasa Melayu (maksimum 2-3 ayat):
+1. Adakah resepi baru ini benar-benar duplikat atau hanya serupa?
+2. Kalau serupa, apa bezanya (cth: cara masak berbeza, bahan utama berbeza)?
+3. Patut save sebagai resepi baru atau tidak?
+
+Jawab dalam format: [DUPLIKAT/SERUPA/UNIK] — penjelasan ringkas.`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    if (!res.ok) throw new Error('AI request failed');
+    const data = await res.json();
+    return data.content?.[0]?.text || '';
+  } catch(e) {
+    return ''; // silent fail — show duplicates without AI msg
+  }
+}
+
+// Main: check duplicates before saving, show sheet if found
+async function checkDuplicatesBeforeSave(title, tags, onProceed, onCancel, editId=null) {
+  // Skip check if editing existing recipe
+  if (editId !== null && editId !== 'null') {
+    onProceed();
+    return;
+  }
+
+  const candidates = findLocalDuplicates(title, tags);
+  if (!candidates.length) {
+    onProceed(); // no duplicates — save directly
+    return;
+  }
+
+  // Show duplicate sheet
+  showDupSheet(title, tags, candidates, onProceed, onCancel);
+
+  // Fetch AI analysis in background
+  const aiMsg = await analyzeWithAI(title, tags, candidates);
+  if (aiMsg) updateDupAiMsg(aiMsg);
+}
+
+function showDupSheet(title, tags, candidates, onProceed, onCancel) {
+  const portal = document.getElementById('portal');
+  const existing = portal.innerHTML;
+
+  // Inject dup sheet on top of existing modal
+  const dupEl = document.createElement('div');
+  dupEl.id = 'dup-container';
+  dupEl.innerHTML = `
+    <div class="dup-overlay">
+      <div class="dup-sheet">
+        <div class="dup-handle"></div>
+        <div class="dup-header">
+          <div class="dup-icon">🔍</div>
+          <div class="dup-title">Resepi Serupa Dijumpai!</div>
+        </div>
+        <div class="dup-subtitle">
+          "${escH(title)}" nampak serupa dengan ${candidates.length} resepi dalam koleksi kau
+        </div>
+        <div class="dup-body">
+          <div class="dup-ai-msg" id="dup-ai-msg">
+            <span class="ai-icon">✨</span>
+            <span><div class="dup-loading"><div class="dup-loading-icon">🤔</div>AI sedang menganalisis...</div></span>
+          </div>
+          ${candidates.map(r => {
+            const matchTags  = (r.tags||[]).filter(t => (tags||[]).map(x=>x.toLowerCase()).includes(t.toLowerCase()));
+            const otherTags  = (r.tags||[]).filter(t => !matchTags.includes(t));
+            const thumbHtml  = r.thumbUrl
+              ? `<img src="${escA(r.thumbUrl)}" style="width:52px;height:52px;object-fit:cover;border-radius:10px">`
+              : `<div style="width:52px;height:52px;border-radius:10px;background:var(--yolk-soft);display:flex;align-items:center;justify-content:center;font-size:22px">🍽️</div>`;
+            return `
+            <div class="dup-card" onclick="closeDupAndScroll(${r.id})">
+              <div class="dup-card-thumb">${thumbHtml}</div>
+              <div class="dup-card-info">
+                <div class="dup-card-title">${escH(r.title)}</div>
+                <div class="dup-card-tags">
+                  ${matchTags.map(t => `<span class="dup-match-tag">🔴 ${escH(t)}</span>`).join('')}
+                  ${otherTags.slice(0,3).map(t => `<span class="dup-other-tag">${escH(t)}</span>`).join('')}
+                </div>
+              </div>
+              <div class="dup-score"><span>${r.score}%</span>serupa</div>
+            </div>`;
+          }).join('')}
+        </div>
+        <div class="dup-footer">
+          <button class="dup-btn-cancel" onclick="closeDupSheet(false)">Batal</button>
+          <button class="dup-btn-save" onclick="closeDupSheet(true)">💾 Tetap Simpan</button>
+        </div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(dupEl);
+
+  // Store callbacks
+  window._dupOnProceed = onProceed;
+  window._dupOnCancel  = onCancel;
+}
+
+function updateDupAiMsg(msg) {
+  const el = document.getElementById('dup-ai-msg');
+  if (!el) return;
+  // Parse verdict
+  const isUnique   = msg.includes('[UNIK]');
+  const isSimilar  = msg.includes('[SERUPA]');
+  const isDuplicate= msg.includes('[DUPLIKAT]');
+  const iconMap    = { '[UNIK]':'✅', '[SERUPA]':'⚠️', '[DUPLIKAT]':'🔴' };
+  const icon       = isDuplicate ? '🔴' : isSimilar ? '⚠️' : '✅';
+  el.innerHTML     = `<span class="ai-icon">${icon}</span><span>${escH(msg)}</span>`;
+}
+
+function closeDupSheet(proceed) {
+  const el = document.getElementById('dup-container');
+  if (el) el.remove();
+  if (proceed && window._dupOnProceed) window._dupOnProceed();
+  else if (!proceed && window._dupOnCancel) window._dupOnCancel();
+  window._dupOnProceed = null;
+  window._dupOnCancel  = null;
+}
+
+function closeDupAndScroll(id) {
+  closeDupSheet(false);
+  scrollToRecipe(id);
 }
 
 // ── INIT ──
