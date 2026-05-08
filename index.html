@@ -418,6 +418,43 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .dup-btn-save{flex:2;padding:13px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 .dup-btn-cancel{flex:1;padding:13px;border-radius:14px;border:1.5px solid var(--border);background:var(--card-bg);color:var(--text-mid);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 
+
+/* PASSCODE SCREEN */
+.passcode-screen{position:fixed;inset:0;background:var(--yolk);z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:30px}
+[data-theme="dark"] .passcode-screen{background:#2A2005}
+.pc-logo{margin-bottom:16px;filter:drop-shadow(0 4px 12px rgba(139,105,20,0.25))}
+.pc-brand{font-family:'Fredoka',sans-serif;font-size:28px;font-weight:700;
+  color:var(--text);margin-bottom:6px;letter-spacing:0.3px}
+[data-theme="dark"] .pc-brand{color:#F5E6C0}
+.pc-sub{font-size:13px;font-weight:600;color:var(--brown);margin-bottom:36px;
+  letter-spacing:0.5px}
+.pc-card{background:var(--cream);border-radius:24px;padding:28px 24px;
+  width:100%;max-width:340px;box-shadow:0 8px 32px rgba(139,105,20,0.2)}
+.pc-label{font-size:11px;font-weight:800;color:var(--text-light);
+  letter-spacing:1.5px;margin-bottom:10px;text-align:center}
+.pc-input-wrap{position:relative;margin-bottom:14px}
+.pc-input{width:100%;background:var(--surface);border:2px solid var(--border);
+  border-radius:14px;padding:14px 46px 14px 16px;font-size:16px;
+  font-family:'Nunito',sans-serif;color:var(--text);outline:none;
+  font-weight:700;letter-spacing:1px;transition:border-color 0.15s;
+  -webkit-appearance:none}
+.pc-input:focus{border-color:var(--yolk-deep)}
+.pc-input.error{border-color:var(--danger);animation:shake 0.4s ease}
+.pc-eye{position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:18px;color:var(--text-light)}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.pc-btn{width:100%;padding:14px;border-radius:14px;border:2px solid var(--yolk-deep);
+  background:var(--yolk);color:var(--text);font-size:15px;font-weight:700;
+  cursor:pointer;font-family:'Nunito',sans-serif;letter-spacing:0.3px;
+  transition:opacity 0.15s}
+.pc-btn:active{opacity:0.85}
+.pc-error{font-size:12px;font-weight:700;color:var(--danger);text-align:center;
+  margin-top:10px;min-height:20px}
+.pc-attempts{font-size:11px;font-weight:600;color:var(--text-light);
+  text-align:center;margin-top:8px}
+
 </style>
 </head>
 <body>
@@ -585,11 +622,26 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
       </div>
     </div>
     <div class="settings-section">
+      <div class="settings-section-title">KESELAMATAN</div>
+      <div class="settings-card">
+        <div class="settings-row">
+          <div class="settings-row-icon">🔒</div>
+          <div class="settings-row-body">
+            <div class="settings-row-title">Passcode Protection</div>
+            <div class="settings-row-sub">Session aktif selama 7 hari</div>
+          </div>
+          <div class="settings-row-action">
+            <button class="settings-row-btn danger" onclick="confirmLogout()">Log Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="settings-section">
       <div class="settings-section-title">TENTANG</div>
       <div class="settings-card">
         <div class="settings-row">
           <div class="settings-row-icon">🐣</div>
-          <div class="settings-row-body"><div class="settings-row-title">Hatch &amp; Batch</div><div class="settings-row-sub">v8.0 — Supabase backend edition</div></div>
+          <div class="settings-row-body"><div class="settings-row-title">Hatch &amp; Batch</div><div class="settings-row-sub">v8.0 — Supabase + Passcode edition</div></div>
         </div>
         <div class="settings-row">
           <div class="settings-row-icon">💾</div>
@@ -2742,6 +2794,144 @@ function closeDupAndScroll(id) {
   scrollToRecipe(id);
 }
 
+
+// ══════════════════════════════════════════
+// ── PASSCODE PROTECTION
+// ══════════════════════════════════════════
+const PC_HASH     = '064285ef00479a88cc32b13a507e2c03b96fbdfb0619fb6a38c2596aa1d18ef6';  // SHA-256 of passcode
+const PC_KEY      = 'hb_auth_v1';      // localStorage key
+const PC_EXPIRY   = 7 * 24 * 60 * 60 * 1000; // 7 days session
+let   pcAttempts  = 0;
+const PC_MAX_ATT  = 5;
+
+// Hash function using SubtleCrypto API
+async function sha256(str) {
+  const buf    = new TextEncoder().encode(str);
+  const digest = await crypto.subtle.digest('SHA-256', buf);
+  return Array.from(new Uint8Array(digest))
+    .map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+// Check if current session is valid
+function isAuthenticated() {
+  try {
+    const stored = localStorage.getItem(PC_KEY);
+    if (!stored) return false;
+    const { hash, expiry } = JSON.parse(stored);
+    if (Date.now() > expiry) {
+      localStorage.removeItem(PC_KEY);
+      return false;
+    }
+    return hash === PC_HASH;
+  } catch(e) { return false; }
+}
+
+// Show passcode screen
+function showPasscodeScreen() {
+  const screen = document.getElementById('passcode-screen');
+  const app    = document.getElementById('app');
+  if (screen) screen.style.display = 'flex';
+  if (app)    app.style.visibility = 'hidden';
+  // Apply dark mode to passcode screen too
+  if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+  setTimeout(() => document.getElementById('pc-input')?.focus(), 300);
+}
+
+// Hide passcode screen + show app
+function hidePasscodeScreen() {
+  const screen = document.getElementById('passcode-screen');
+  const app    = document.getElementById('app');
+  if (screen) {
+    screen.style.opacity = '0';
+    screen.style.transition = 'opacity 0.3s';
+    setTimeout(() => { screen.style.display = 'none'; }, 300);
+  }
+  if (app) app.style.visibility = 'visible';
+}
+
+// Verify passcode
+async function verifyPasscode() {
+  const input = document.getElementById('pc-input');
+  const errEl = document.getElementById('pc-error');
+  const attEl = document.getElementById('pc-attempts');
+  const val   = (input?.value || '').trim();
+
+  if (!val) {
+    errEl.textContent = 'Masukkan passcode dulu!';
+    input?.classList.add('error');
+    setTimeout(() => input?.classList.remove('error'), 400);
+    return;
+  }
+
+  // Rate limit
+  if (pcAttempts >= PC_MAX_ATT) {
+    errEl.textContent = '🔒 Terlalu banyak cubaan. Tunggu 30 saat.';
+    return;
+  }
+
+  const hash = await sha256(val);
+
+  if (hash === PC_HASH) {
+    // Correct — save session for 7 days
+    localStorage.setItem(PC_KEY, JSON.stringify({
+      hash,
+      expiry: Date.now() + PC_EXPIRY,
+    }));
+    pcAttempts = 0;
+    errEl.textContent = '';
+    attEl.textContent = '';
+    input.value = '';
+    hidePasscodeScreen();
+    init(); // start app
+  } else {
+    pcAttempts++;
+    input.value = '';
+    input.classList.add('error');
+    setTimeout(() => input.classList.remove('error'), 400);
+
+    const remaining = PC_MAX_ATT - pcAttempts;
+    errEl.textContent = '❌ Passcode salah!';
+    attEl.textContent = remaining > 0
+      ? `${remaining} cubaan lagi`
+      : '🔒 Cuba lagi dalam 30 saat';
+
+    if (pcAttempts >= PC_MAX_ATT) {
+      setTimeout(() => {
+        pcAttempts = 0;
+        errEl.textContent = '';
+        attEl.textContent = '';
+      }, 30000);
+    }
+    input.focus();
+  }
+}
+
+// Toggle password visibility
+function togglePcEye() {
+  const input = document.getElementById('pc-input');
+  const eye   = document.getElementById('pc-eye');
+  if (!input || !eye) return;
+  const isHidden = input.type === 'password';
+  input.type = isHidden ? 'text' : 'password';
+  eye.textContent = isHidden ? '🙈' : '👁';
+}
+
+// Logout (from settings)
+function logout() {
+  // Clear auth + realtime
+  localStorage.removeItem(PC_KEY);
+  rtIntentionalClose = true;
+  if(realtimeWs){ try{realtimeWs.close();}catch(e){} realtimeWs=null; }
+  clearTimeout(rtReconnectTimer);
+  clearInterval(rtHeartbeatTimer);
+  closeSettings();
+  showPasscodeScreen();
+}
+
+function confirmLogout(){
+  showConfirm('🔒','Log Out?','Kau perlu masuk semula dengan passcode.','Log Out', logout);
+}
+
 // ── INIT ──
 function init(){
   if(isDark)applyDark(true,false);
@@ -2757,7 +2947,55 @@ function init(){
   // start realtime connection
   connectRealtime();
 }
-init();
+
+// ── ENTRY POINT — check auth before init ──
+function startApp(){
+  if(isDark)applyDark(true,false);
+  if(isAuthenticated()){
+    hidePasscodeScreen();
+    init();
+  } else {
+    showPasscodeScreen();
+    // init() called after successful login
+  }
+}
+startApp();
 </script>
+
+<!-- PASSCODE SCREEN -->
+<div class="passcode-screen" id="passcode-screen" style="display:none">
+  <svg class="pc-logo" width="90" height="90" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="38" cy="56" rx="23" ry="14" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5"/>
+    <path d="M15 56 Q15 44 24 39 L28 41 L23 48 L18 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M61 56 Q61 44 52 39 L48 41 L53 48 L58 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M28 41 L32 36 L36 41 L40 35 L44 41 L48 41" stroke="#C4980A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <ellipse cx="38" cy="44" rx="13" ry="13" fill="#F5C842"/>
+    <ellipse cx="38" cy="29" rx="10.5" ry="10.5" fill="#F5C842"/>
+    <circle cx="34" cy="27" r="2.3" fill="#3D2C00"/><circle cx="34.7" cy="26.3" r="0.75" fill="white"/>
+    <circle cx="42" cy="27" r="2.3" fill="#3D2C00"/><circle cx="42.7" cy="26.3" r="0.75" fill="white"/>
+    <path d="M36 31 L38 34.5 L40 31 Z" fill="#E6B020"/>
+    <ellipse cx="26" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(-18 26 46)"/>
+    <ellipse cx="50" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(18 50 46)"/>
+    <ellipse cx="30.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+    <ellipse cx="45.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+    <path d="M35 19.5 Q38 13.5 41 19.5" stroke="#E6B020" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <ellipse cx="38" cy="56" rx="23" ry="14" fill="none" stroke="#C4980A" stroke-width="1.5"/>
+  </svg>
+  <div class="pc-brand">Hatch &amp; Batch</div>
+  <div class="pc-sub">koleksi video resepi kau ✨</div>
+  <div class="pc-card">
+    <div class="pc-label">MASUKKAN PASSCODE</div>
+    <div class="pc-input-wrap">
+      <input class="pc-input" id="pc-input" type="password"
+        placeholder="Passcode..." autocomplete="off" autocorrect="off"
+        onkeydown="if(event.key==='Enter')verifyPasscode()">
+      <button class="pc-eye" id="pc-eye" onclick="togglePcEye()" tabindex="-1">👁</button>
+    </div>
+    <button class="pc-btn" onclick="verifyPasscode()">🔓 Masuk</button>
+    <div class="pc-error" id="pc-error"></div>
+    <div class="pc-attempts" id="pc-attempts"></div>
+  </div>
+</div>
+
 </body>
 </html>
