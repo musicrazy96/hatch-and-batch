@@ -628,7 +628,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
           <div class="settings-row-icon">🔒</div>
           <div class="settings-row-body">
             <div class="settings-row-title">Passcode Protection</div>
-            <div class="settings-row-sub">Session aktif selama 7 hari</div>
+            <div class="settings-row-sub" id="session-status">Menyemak session...</div>
           </div>
           <div class="settings-row-action">
             <button class="settings-row-btn danger" onclick="confirmLogout()">Log Out</button>
@@ -684,6 +684,17 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
         onkeydown="if(event.key==='Enter')verifyPasscode()">
       <button class="pc-eye" id="pc-eye" onclick="togglePcEye()" tabindex="-1">👁</button>
     </div>
+    <!-- Remember Me -->
+    <label style="display:flex;align-items:center;gap:10px;margin-bottom:14px;cursor:pointer;user-select:none">
+      <div class="toggle" style="flex-shrink:0">
+        <input type="checkbox" id="pc-remember" checked>
+        <span class="toggle-slider"></span>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)">Ingat saya</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text-light)">Tak perlu masuk semula selama-lamanya</div>
+      </div>
+    </label>
     <button class="pc-btn" onclick="verifyPasscode()">🔓 Masuk</button>
     <div class="pc-error" id="pc-error"></div>
     <div class="pc-attempts" id="pc-attempts"></div>
@@ -2853,8 +2864,9 @@ function isAuthenticated() {
   try {
     const stored = localStorage.getItem(PC_KEY);
     if (!stored) return false;
-    const { hash, expiry } = JSON.parse(stored);
-    if (Date.now() > expiry) {
+    const { hash, expiry, rememberMe } = JSON.parse(stored);
+    // null expiry = permanent (Remember Me checked)
+    if (expiry !== null && expiry !== undefined && Date.now() > expiry) {
       localStorage.removeItem(PC_KEY);
       return false;
     }
@@ -2913,10 +2925,12 @@ async function verifyPasscode() {
   const hash = await sha256(val);
 
   if (hash === PC_HASH) {
-    // Correct — save session for 7 days
+    // Correct — save session
+    const rememberMe = document.getElementById('pc-remember')?.checked ?? true;
     localStorage.setItem(PC_KEY, JSON.stringify({
       hash,
-      expiry: Date.now() + PC_EXPIRY,
+      expiry: rememberMe ? null : Date.now() + PC_EXPIRY, // null = permanent
+      rememberMe,
     }));
     pcAttempts = 0;
     errEl.textContent = '';
