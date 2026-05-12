@@ -655,6 +655,42 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 <div id="portal"></div>
 <div id="compress-overlay" style="display:none"></div>
 
+<!-- PASSCODE SCREEN -->
+<div class="passcode-screen" id="passcode-screen" style="display:none">
+  <svg class="pc-logo" width="90" height="90" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <ellipse cx="38" cy="56" rx="23" ry="14" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5"/>
+    <path d="M15 56 Q15 44 24 39 L28 41 L23 48 L18 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M61 56 Q61 44 52 39 L48 41 L53 48 L58 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
+    <path d="M28 41 L32 36 L36 41 L40 35 L44 41 L48 41" stroke="#C4980A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <ellipse cx="38" cy="44" rx="13" ry="13" fill="#F5C842"/>
+    <ellipse cx="38" cy="29" rx="10.5" ry="10.5" fill="#F5C842"/>
+    <circle cx="34" cy="27" r="2.3" fill="#3D2C00"/><circle cx="34.7" cy="26.3" r="0.75" fill="white"/>
+    <circle cx="42" cy="27" r="2.3" fill="#3D2C00"/><circle cx="42.7" cy="26.3" r="0.75" fill="white"/>
+    <path d="M36 31 L38 34.5 L40 31 Z" fill="#E6B020"/>
+    <ellipse cx="26" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(-18 26 46)"/>
+    <ellipse cx="50" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(18 50 46)"/>
+    <ellipse cx="30.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+    <ellipse cx="45.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
+    <path d="M35 19.5 Q38 13.5 41 19.5" stroke="#E6B020" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+    <ellipse cx="38" cy="56" rx="23" ry="14" fill="none" stroke="#C4980A" stroke-width="1.5"/>
+  </svg>
+  <div class="pc-brand">Hatch &amp; Batch</div>
+  <div class="pc-sub">koleksi video resepi kau ✨</div>
+  <div class="pc-card">
+    <div class="pc-label">MASUKKAN PASSCODE</div>
+    <div class="pc-input-wrap">
+      <input class="pc-input" id="pc-input" type="password"
+        placeholder="Passcode..." autocomplete="off" autocorrect="off"
+        onkeydown="if(event.key==='Enter')verifyPasscode()">
+      <button class="pc-eye" id="pc-eye" onclick="togglePcEye()" tabindex="-1">👁</button>
+    </div>
+    <button class="pc-btn" onclick="verifyPasscode()">🔓 Masuk</button>
+    <div class="pc-error" id="pc-error"></div>
+    <div class="pc-attempts" id="pc-attempts"></div>
+  </div>
+</div>
+
+
 <script>
 // ── SUPABASE CONFIG ──
 const SB_URL   = 'https://bygjubptglhnxeuxqzet.supabase.co';
@@ -2830,11 +2866,16 @@ function isAuthenticated() {
 function showPasscodeScreen() {
   const screen = document.getElementById('passcode-screen');
   const app    = document.getElementById('app');
-  if (screen) screen.style.display = 'flex';
-  if (app)    app.style.visibility = 'hidden';
-  // Apply dark mode to passcode screen too
+  // Apply dark mode first
   if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
-  setTimeout(() => document.getElementById('pc-input')?.focus(), 300);
+  // Show screen BEFORE hiding app to prevent blank flash
+  if (screen) {
+    screen.style.display = 'flex';
+    screen.style.opacity = '1';
+  }
+  // Hide app after screen is visible
+  if (app) app.style.visibility = 'hidden';
+  setTimeout(() => document.getElementById('pc-input')?.focus(), 400);
 }
 
 // Hide passcode screen + show app
@@ -2959,43 +3000,8 @@ function startApp(){
     // init() called after successful login
   }
 }
-startApp();
+document.addEventListener("DOMContentLoaded", startApp);
 </script>
-
-<!-- PASSCODE SCREEN -->
-<div class="passcode-screen" id="passcode-screen" style="display:none">
-  <svg class="pc-logo" width="90" height="90" viewBox="0 0 76 76" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <ellipse cx="38" cy="56" rx="23" ry="14" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5"/>
-    <path d="M15 56 Q15 44 24 39 L28 41 L23 48 L18 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M61 56 Q61 44 52 39 L48 41 L53 48 L58 48 Z" fill="#FFF8DC" stroke="#C4980A" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M28 41 L32 36 L36 41 L40 35 L44 41 L48 41" stroke="#C4980A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
-    <ellipse cx="38" cy="44" rx="13" ry="13" fill="#F5C842"/>
-    <ellipse cx="38" cy="29" rx="10.5" ry="10.5" fill="#F5C842"/>
-    <circle cx="34" cy="27" r="2.3" fill="#3D2C00"/><circle cx="34.7" cy="26.3" r="0.75" fill="white"/>
-    <circle cx="42" cy="27" r="2.3" fill="#3D2C00"/><circle cx="42.7" cy="26.3" r="0.75" fill="white"/>
-    <path d="M36 31 L38 34.5 L40 31 Z" fill="#E6B020"/>
-    <ellipse cx="26" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(-18 26 46)"/>
-    <ellipse cx="50" cy="46" rx="5.5" ry="7.5" fill="#E6B020" transform="rotate(18 50 46)"/>
-    <ellipse cx="30.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
-    <ellipse cx="45.5" cy="30" rx="3" ry="2" fill="#FFB6A0" opacity="0.65"/>
-    <path d="M35 19.5 Q38 13.5 41 19.5" stroke="#E6B020" stroke-width="2.2" stroke-linecap="round" fill="none"/>
-    <ellipse cx="38" cy="56" rx="23" ry="14" fill="none" stroke="#C4980A" stroke-width="1.5"/>
-  </svg>
-  <div class="pc-brand">Hatch &amp; Batch</div>
-  <div class="pc-sub">koleksi video resepi kau ✨</div>
-  <div class="pc-card">
-    <div class="pc-label">MASUKKAN PASSCODE</div>
-    <div class="pc-input-wrap">
-      <input class="pc-input" id="pc-input" type="password"
-        placeholder="Passcode..." autocomplete="off" autocorrect="off"
-        onkeydown="if(event.key==='Enter')verifyPasscode()">
-      <button class="pc-eye" id="pc-eye" onclick="togglePcEye()" tabindex="-1">👁</button>
-    </div>
-    <button class="pc-btn" onclick="verifyPasscode()">🔓 Masuk</button>
-    <div class="pc-error" id="pc-error"></div>
-    <div class="pc-attempts" id="pc-attempts"></div>
-  </div>
-</div>
 
 </body>
 </html>
