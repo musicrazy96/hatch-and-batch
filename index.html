@@ -455,6 +455,49 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .pc-attempts{font-size:11px;font-weight:600;color:var(--text-light);
   text-align:center;margin-top:8px}
 
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;gap:0;padding:14px 14px 0;flex-shrink:0}
+.cat-tab{flex:1;padding:10px 6px;border:1.5px solid var(--border);background:var(--card-bg);
+  cursor:pointer;font-family:'Fredoka',sans-serif;font-size:13px;font-weight:600;
+  color:var(--text-mid);transition:all 0.18s;display:flex;flex-direction:column;
+  align-items:center;gap:3px;position:relative}
+.cat-tab:first-child{border-radius:14px 0 0 14px}
+.cat-tab:last-child{border-radius:0 14px 14px 0}
+.cat-tab:not(:first-child){border-left:none}
+.cat-tab.active{background:var(--yolk);color:var(--text);border-color:var(--yolk-deep);z-index:1}
+.cat-tab:hover:not(.active){background:var(--yolk-soft);color:var(--text)}
+.cat-tab-icon{font-size:20px;line-height:1}
+.cat-tab-label{font-size:10px;font-weight:700;letter-spacing:0.3px}
+.cat-tab-count{font-size:9px;font-weight:800;color:var(--text-light);
+  background:var(--border);border-radius:20px;padding:1px 6px;min-width:18px;
+  text-align:center}
+.cat-tab.active .cat-tab-count{background:rgba(0,0,0,0.15);color:var(--text)}
+/* Category badge on card */
+.cat-badge{position:absolute;top:8px;left:8px;border-radius:8px;padding:3px 8px;
+  font-size:10px;font-weight:700;z-index:2;pointer-events:none;
+  display:flex;align-items:center;gap:3px}
+.cat-badge.food{background:rgba(245,200,66,0.92);color:#3D2C00}
+.cat-badge.beverages{background:rgba(74,144,217,0.92);color:#fff}
+.cat-badge.western{background:rgba(82,183,136,0.92);color:#fff}
+.cat-badge.misc{background:rgba(156,106,222,0.92);color:#fff}
+/* Category picker in modal */
+.cat-picker{display:flex;gap:8px;margin-bottom:4px}
+.cat-pick-btn{flex:1;padding:10px 6px;border-radius:12px;border:1.5px solid var(--border);
+  background:var(--card-bg);cursor:pointer;font-family:'Nunito',sans-serif;
+  transition:all 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cat-pick-btn:hover{border-color:var(--yolk-deep);background:var(--yolk-soft)}
+.cat-pick-icon{font-size:22px;line-height:1}
+.cat-pick-label{font-size:11px;font-weight:700;color:var(--text-mid)}
+.cat-pick-btn.sel-food{background:#FEF3C0;border-color:var(--yolk-deep);border-width:2px}
+.cat-pick-btn.sel-food .cat-pick-label{color:#3D2C00}
+.cat-pick-btn.sel-beverages{background:#E3F0FC;border-color:#4A90D9;border-width:2px}
+.cat-pick-btn.sel-beverages .cat-pick-label{color:#1A3A5C}
+.cat-pick-btn.sel-western{background:#D8F3DC;border-color:#52B788;border-width:2px}
+.cat-pick-btn.sel-western .cat-pick-label{color:#1A3A2A}
+.cat-pick-btn.sel-misc{background:#F0E8FC;border-color:#9C6ADE;border-width:2px}
+.cat-pick-btn.sel-misc .cat-pick-label{color:#3D1A5C}
+
 </style>
 </head>
 <body>
@@ -528,6 +571,35 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
     </select>
     <button class="fav-filter-btn" id="fav-filter-btn" onclick="toggleFavFilter()">⭐ Favourite</button>
   </div>
+  <!-- CATEGORY TABS -->
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab active" data-cat="" onclick="setCat(this,'')">
+      <span class="cat-tab-icon">🍽️</span>
+      <span class="cat-tab-label">Semua</span>
+      <span class="cat-tab-count" id="cnt-all">0</span>
+    </button>
+    <button class="cat-tab" data-cat="food" onclick="setCat(this,'food')">
+      <span class="cat-tab-icon">🥘</span>
+      <span class="cat-tab-label">Food</span>
+      <span class="cat-tab-count" id="cnt-food">0</span>
+    </button>
+    <button class="cat-tab" data-cat="beverages" onclick="setCat(this,'beverages')">
+      <span class="cat-tab-icon">🥤</span>
+      <span class="cat-tab-label">Beverages</span>
+      <span class="cat-tab-count" id="cnt-beverages">0</span>
+    </button>
+    <button class="cat-tab" data-cat="western" onclick="setCat(this,'western')">
+      <span class="cat-tab-icon">🍝</span>
+      <span class="cat-tab-label">Western</span>
+      <span class="cat-tab-count" id="cnt-western">0</span>
+    </button>
+    <button class="cat-tab" data-cat="misc" onclick="setCat(this,'misc')">
+      <span class="cat-tab-icon">🥗</span>
+      <span class="cat-tab-label">Misc</span>
+      <span class="cat-tab-count" id="cnt-misc">0</span>
+    </button>
+  </div>
+
   <div id="tag-cloud" class="tag-cloud"></div>
   <div class="sec-lbl" id="sec-lbl">SEMUA RESEPI</div>
   <div class="list" id="list"></div>
@@ -796,6 +868,7 @@ async function upsertRecipe(r) {
     video_url:    videoUrl,
     video_name:   r.videoName || '',
     thumb_url:    thumbUrl,
+    category:     r.category || '',
     fav:          r.fav || false,
     created_at:   r.createdAt,
     edited_at:    new Date().toISOString(),
@@ -979,10 +1052,11 @@ function getSorted(arr) {
     const mq = !q ||
       r.title.toLowerCase().includes(q) ||
       (r.tags||[]).some(t=>t.toLowerCase().includes(q)) ||
-      (r.notes||'').toLowerCase().includes(q);  // ← search in notes too
-    const mt = !activeTag || (r.tags||[]).includes(activeTag);
-    const mf = !favOnly || r.fav;
-    return mq && mt && mf;
+      (r.notes||'').toLowerCase().includes(q);
+    const mt  = !activeTag     || (r.tags||[]).includes(activeTag);
+    const mf  = !favOnly       || r.fav;
+    const mc  = !activeCategory|| (r.category||'') === activeCategory;
+    return mq && mt && mf && mc;
   });
   if(sort==='az')       f.sort((a,b)=>a.title.localeCompare(b.title));
   else if(sort==='za')    f.sort((a,b)=>b.title.localeCompare(a.title));
@@ -1058,6 +1132,7 @@ function renderStats() {
   document.getElementById('s-total').textContent = recipes.length;
   document.getElementById('s-fav').textContent   = recipes.filter(r=>r.fav).length;
   document.getElementById('s-tags').textContent  = allTags().length;
+  updateCatCounts();
 }
 function renderCloud() {
   const all=allTags(), el=document.getElementById('tag-cloud');
@@ -1125,6 +1200,11 @@ function renderList() {
     } else if(driveUrl){
       pbHtml=`<div class="platform-badge pb-drive"><div class="db-dot"></div>Drive</div>`;
     }
+    // ── CATEGORY BADGE ──
+    const catInfo = r.category && CATS[r.category];
+    const catBadge = catInfo
+      ? `<div class="cat-badge ${r.category}">${catInfo.icon} ${catInfo.label}</div>`
+      : '';
 
     // ── MEDIA ELEMENT ──
     // Priority: thumbnail > Supabase video (inline) > placeholder
@@ -1179,6 +1259,7 @@ function renderList() {
     return`<div class="card${isActive?' active':''}${isNew?' new-card':''}" id="card-${r.id}">
       <div class="vid-wrap">
         ${mediaEl}
+        ${catBadge}
         ${pbHtml}
         ${playOverlay}
         <button class="fav-star"
@@ -1405,6 +1486,24 @@ function showModal(editId=null){
         <div class="field">
           <label>NAMA MASAKAN *</label>
           <input id="m-title" placeholder="cth: Gulai Ikan Kembung" value="${isEdit&&r?escA(r.title):''}" maxlength="80">
+        </div>
+        <div class="field">
+          <label>KATEGORI</label>
+          <div class="cat-picker" id="cat-picker">
+            ${['food','beverages','western','misc'].map(cat=>{
+              const info=CATS[cat];
+              const isSel=isEdit&&r&&r.category===cat;
+              return`<button type="button" class="cat-pick-btn${isSel?' sel-'+cat:''}"
+                data-cat="${cat}" onclick="selectModalCat(this,'${cat}')">
+                <span class="cat-pick-icon">${info.icon}</span>
+                <span class="cat-pick-label">${info.label}</span>
+              </button>`;
+            }).join('')}
+          </div>
+          <input type="hidden" id="m-category" value="${isEdit&&r?escA(r.category||''):''}">
+          <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-top:4px">
+            ${isEdit&&r&&r.category?`Kategori semasa: ${CATS[r.category]?.icon||''} ${CATS[r.category]?.label||r.category}`:'Pilih kategori untuk senang cari nanti'}
+          </div>
         </div>
         <div class="field">
           <label>TAG — Enter atau koma untuk tambah</label>
@@ -1699,6 +1798,21 @@ function onPlatformUrlChange(){
   }
 }
 
+function selectModalCat(el, cat) {
+  // Clear all selections
+  document.querySelectorAll('.cat-pick-btn').forEach(b => {
+    b.className = 'cat-pick-btn';
+  });
+  // Toggle — click same again to deselect
+  const hiddenInput = document.getElementById('m-category');
+  if (hiddenInput?.value === cat) {
+    if (hiddenInput) hiddenInput.value = '';
+  } else {
+    el.classList.add('sel-' + cat);
+    if (hiddenInput) hiddenInput.value = cat;
+  }
+}
+
 function closeModal(){document.getElementById('portal').innerHTML='';pTags=[];pVideo=null;pThumb=null;}
 
 // ── TAG HELPERS ──
@@ -1739,6 +1853,7 @@ async function _doSaveActual(editId, title, url){
     const now=new Date().toISOString();
     const platformUrlVal=(document.getElementById('platform-url-input')?.value||'').trim();
     const existing=editId!==null&&editId!=='null'?recipes.find(x=>x.id===editId):null;
+    const catVal = document.getElementById('m-category')?.value || existing?.category || '';
     const recipe={
       id:          editId!==null&&editId!=='null' ? editId : getNextId(),
       title,
@@ -1751,6 +1866,7 @@ async function _doSaveActual(editId, title, url){
       thumbUrl:    pThumb?.source==='existing' ? pThumb.data : (existing?.thumbUrl||''),
       _thumbBase64:(pThumb && pThumb.source!=='existing') ? pThumb.data : null,
       _videoBase64: pVideo ? pVideo.data : null,
+      category:    catVal,
       fav:         existing?.fav||false,
       createdAt:   existing?.createdAt||now,
       editedAt:    now,
@@ -2326,6 +2442,7 @@ function mapDbRecipe(r) {
     videoUrl:    r.video_url || '',
     videoName:   r.video_name || '',
     thumbUrl:    r.thumb_url || '',
+    category:    r.category || '',
     fav:         r.fav || false,
     viewCount:   r.view_count || 0,
     createdAt:   r.created_at,
@@ -2655,7 +2772,7 @@ async function nativeShare() {
 // ══════════════════════════════════════════
 
 // Similarity scoring — purely local, fast
-function calcSimilarity(titleA, tagsA, titleB, tagsB) {
+function calcSimilarity(titleA, tagsA, titleB, tagsB, catA='', catB='') {
   const normA = titleA.toLowerCase().trim();
   const normB = titleB.toLowerCase().trim();
 
@@ -2682,6 +2799,8 @@ function calcSimilarity(titleA, tagsA, titleB, tagsB) {
     : 0;
   score += tagScore * 40; // 40% weight on tags
 
+  // Same category = small boost
+  if (catA && catB && catA === catB) score += 5;
   return Math.min(100, Math.round(score));
 }
 
@@ -2690,7 +2809,7 @@ function findLocalDuplicates(title, tags, excludeId = null) {
   const candidates = [];
   for (const r of recipes) {
     if (excludeId && String(r.id) === String(excludeId)) continue;
-    const score = calcSimilarity(title, tags, r.title, r.tags);
+    const score = calcSimilarity(title, tags, r.title, r.tags, r.category||'', r.category||'');
     if (score >= 35) { // threshold: 35% similarity
       candidates.push({ ...r, score });
     }
@@ -2985,6 +3104,44 @@ function logout() {
 
 function confirmLogout(){
   showConfirm('🔒','Log Out?','Kau perlu masuk semula dengan passcode.','Log Out', logout);
+}
+
+
+// ══════════════════════════════════════════
+// ── CATEGORY SYSTEM
+// ══════════════════════════════════════════
+const CATS = {
+  food:      { icon:'🥘', label:'Food',      color:'#F5C842', desc:'Nasi, lauk, kuah, goreng' },
+  beverages: { icon:'🥤', label:'Beverages', color:'#4A90D9', desc:'Air, jus, teh, kopi, smoothie' },
+  western:   { icon:'🍝', label:'Western',   color:'#52B788', desc:'Pasta, burger, pizza, steak' },
+  misc:      { icon:'🥗', label:'Misc',      color:'#9C6ADE', desc:'Salad, telur, snack, lain-lain' },
+};
+
+let activeCategory = ''; // '' = semua
+
+function setCat(el, cat) {
+  activeCategory = cat;
+  curPage = 1;
+  // Update active tab
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  // Update section label
+  const secLbl = document.getElementById('sec-lbl');
+  if (secLbl) secLbl.textContent = cat ? CATS[cat].label.toUpperCase() : 'SEMUA RESEPI';
+  // Reset tag filter
+  activeTag = '';
+  renderCloud();
+  renderList();
+}
+
+function updateCatCounts() {
+  const counts = { food:0, beverages:0, western:0, misc:0 };
+  recipes.forEach(r => { if(r.category && counts[r.category]!==undefined) counts[r.category]++; });
+  document.getElementById('cnt-all').textContent       = recipes.length;
+  document.getElementById('cnt-food').textContent      = counts.food;
+  document.getElementById('cnt-beverages').textContent = counts.beverages;
+  document.getElementById('cnt-western').textContent   = counts.western;
+  document.getElementById('cnt-misc').textContent      = counts.misc;
 }
 
 // ── INIT ──
