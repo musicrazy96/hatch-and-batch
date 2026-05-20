@@ -1560,6 +1560,35 @@ function showModal(editId=null){
     </div>
   </div>`;
   document.getElementById('m-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+  // ── Cat picker event delegation (avoid onclick in template literal) ──
+  const catPicker = document.getElementById('cat-picker');
+  if(catPicker){
+    catPicker.addEventListener('click', e=>{
+      const btn = e.target.closest('[data-cat]');
+      if(!btn) return;
+      const cat = btn.dataset.cat;
+      // Clear all
+      catPicker.querySelectorAll('.cat-pick-btn').forEach(b=>{
+        b.className='cat-pick-btn';
+      });
+      // Toggle select
+      const hiddenInput = document.getElementById('m-category');
+      if(hiddenInput?.value === cat){
+        if(hiddenInput) hiddenInput.value='';
+      } else {
+        btn.classList.add('sel-'+cat);
+        if(hiddenInput) hiddenInput.value=cat;
+      }
+    });
+    // Pre-select if edit mode
+    const existingCat = document.getElementById('m-category')?.value;
+    if(existingCat){
+      const existingBtn = catPicker.querySelector(`[data-cat="${existingCat}"]`);
+      if(existingBtn) existingBtn.classList.add('sel-'+existingCat);
+    }
+  }
+
   renderMTags();renderSugs('');
   const tin=document.getElementById('tin');
   tin.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===','){e.preventDefault();addTag(tin.value);tin.value='';renderSugs('');}else if(e.key==='Backspace'&&!tin.value&&pTags.length){pTags.pop();renderMTags();}});
@@ -1829,31 +1858,35 @@ async function doSave(editId){
   if(!title){showToast('Isi nama masakan dulu!','err');return;}
   const raw=(document.getElementById('tin').value||'').trim();if(raw)addTag(raw);
   const url=(document.getElementById('m-url').value||'').trim();
+  // ── Capture category & platform URL BEFORE any async/modal changes ──
+  const capturedCat      = document.getElementById('m-category')?.value||'';
+  const capturedPlatform = document.getElementById('platform-url-input')?.value?.trim()||'';
 
   // ── DUPLICATE CHECK (new recipes only) ──
   if(editId===null||editId==='null'){
     await checkDuplicatesBeforeSave(
       title, [...pTags],
-      ()=>_doSaveActual(editId, title, url), // onProceed
+      ()=>_doSaveActual(editId, title, url, capturedCat, capturedPlatform), // onProceed
       ()=>{                                   // onCancel
         const btn=document.getElementById('save-btn');
         if(btn){btn.disabled=false;btn.textContent='Simpan Resepi';}
       },
       editId
     );
-    return; // wait for user decision
+    return;
   }
-  await _doSaveActual(editId, title, url);
+  await _doSaveActual(editId, title, url, capturedCat, capturedPlatform);
 }
 
-async function _doSaveActual(editId, title, url){
+async function _doSaveActual(editId, title, url, capturedCat='', capturedPlatform=''){
   const btn=document.getElementById('save-btn');
   if(btn){btn.disabled=true;btn.textContent='⏳ Menyimpan...';}
   try{
     const now=new Date().toISOString();
-    const platformUrlVal=(document.getElementById('platform-url-input')?.value||'').trim();
+    const platformUrlVal = capturedPlatform || (document.getElementById('platform-url-input')?.value||'').trim();
     const existing=editId!==null&&editId!=='null'?recipes.find(x=>x.id===editId):null;
-    const catVal = document.getElementById('m-category')?.value || existing?.category || '';
+    // Use captured value (modal may be closed by now) or fall back to DOM/existing
+    const catVal = capturedCat || document.getElementById('m-category')?.value || existing?.category || '';
     const recipe={
       id:          editId!==null&&editId!=='null' ? editId : getNextId(),
       title,
