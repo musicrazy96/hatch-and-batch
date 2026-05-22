@@ -32,7 +32,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 [data-theme="dark"] body{background:#111008}
 .app{width:100%;max-width:430px;margin:0 auto;background:var(--app-bg);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 /* TOPBAR */
-.topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:hidden;flex-shrink:0}
+.topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:visible;flex-shrink:0}
 [data-theme="dark"] .topbar{background:#2A2005}
 .tb-blob1{position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,0.12);border-radius:50%;pointer-events:none}
 .tb-blob2{position:absolute;bottom:-20px;left:-20px;width:80px;height:80px;background:rgba(255,255,255,0.08);border-radius:50%;pointer-events:none}
@@ -45,13 +45,16 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .topbar-actions{position:absolute;top:20px;right:18px;z-index:2;display:flex;gap:6px}
 .icon-btn{background:rgba(255,255,255,0.25);border:none;border-radius:10px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:background 0.15s}
 .icon-btn:hover{background:rgba(255,255,255,0.4)}
-.search-container{position:relative;z-index:1;margin-bottom:16px}
+.search-container{position:relative;z-index:999;margin-bottom:16px}
 .search-wrap{background:rgba(255,255,255,0.5);border-radius:16px;padding:11px 15px;display:flex;align-items:center;gap:10px;border:1.5px solid rgba(255,255,255,0.6)}
 .search-wrap input{background:transparent;border:none;outline:none;color:var(--text);font-size:14px;flex:1;font-family:'Nunito',sans-serif;font-weight:600}
 [data-theme="dark"] .search-wrap input{color:#F5E6C0}
 .search-wrap input::placeholder{color:var(--brown-light)}
 .clear-btn{background:none;border:none;color:var(--brown);font-size:20px;cursor:pointer;line-height:1;padding:0;display:none}
-.suggest-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 8px 24px var(--shadow);z-index:50;display:none}
+.suggest-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;
+  background:var(--card-bg);border:1.5px solid var(--border);border-radius:14px;
+  overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  z-index:999;display:none}
 .suggest-dropdown.open{display:block}
 .suggest-item{padding:11px 14px;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border-light);transition:background 0.12s}
 .suggest-item:last-child{border-bottom:none}
@@ -123,7 +126,14 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .vp-label{font-size:10px;font-weight:700;color:var(--text-light)}
 .drive-badge{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.92);border-radius:8px;padding:3px 9px;font-size:10px;font-weight:700;color:var(--brown);display:flex;align-items:center;gap:4px}
 .db-dot{width:6px;height:6px;border-radius:50%;background:var(--yolk-deep)}
-.fav-star{position:absolute;top:8px;right:8px;background:rgba(255,255,255,0.9);border:none;border-radius:50%;width:28px;height:28px;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform 0.2s;z-index:11;pointer-events:all}
+.fav-star{position:absolute;top:7px;right:7px;background:rgba(255,255,255,0.88);
+  border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform 0.2s,background 0.2s;z-index:5;
+  box-shadow:0 1px 3px rgba(0,0,0,0.12)}
+.fav-star:hover{transform:scale(1.18);background:rgba(255,255,255,1)}
+.fav-star svg{width:13px;height:13px;transition:all 0.2s}
+.fav-star.fav-active svg{filter:drop-shadow(0 1px 2px rgba(224,92,58,0.4))}
 .fav-star:hover{transform:scale(1.15)}
 .thumb-overlay{position:absolute;inset:0;background:rgba(61,44,0,0);transition:background 0.2s}
 .card.active .thumb-overlay{background:rgba(61,44,0,0.15)}
@@ -498,12 +508,16 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .cat-pick-btn.sel-misc{background:#F0E8FC;border-color:#9C6ADE;border-width:2px}
 .cat-pick-btn.sel-misc .cat-pick-label{color:#3D1A5C}
 
+
+/* Clip blobs inside topbar without hiding dropdown */
+.topbar-blobs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <div class="topbar">
-    <div class="tb-blob1"></div><div class="tb-blob2"></div>
+    <div class="topbar-blobs"><div class="tb-blob1"></div><div class="tb-blob2"></div></div>
     <div class="topbar-actions">
       <button class="icon-btn" id="dark-toggle-btn" onclick="toggleDark()" title="Dark mode">🌙</button>
       <button class="icon-btn" onclick="openSettings()">⚙️</button>
