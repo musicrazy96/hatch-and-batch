@@ -1658,7 +1658,7 @@ function showModal(editId=null){
               const info=CATS[cat];
               const isSel=isEdit&&r&&r.category===cat;
               return`<button type="button" class="cat-pick-btn${isSel?' sel-'+cat:''}"
-                data-cat="${cat}" onclick="selectModalCat(this,'${cat}')">
+                data-cat="${cat}">
                 <span class="cat-pick-icon">${info.icon}</span>
                 <span class="cat-pick-label">${info.label}</span>
               </button>`;
@@ -1725,30 +1725,30 @@ function showModal(editId=null){
   </div>`;
   document.getElementById('m-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
 
-  // ── Cat picker event delegation (avoid onclick in template literal) ──
+  // ── Cat picker event delegation ──
   const catPicker = document.getElementById('cat-picker');
   if(catPicker){
     catPicker.addEventListener('click', e=>{
       const btn = e.target.closest('[data-cat]');
       if(!btn) return;
       const cat = btn.dataset.cat;
-      // Clear all
+      // Clear all selections
       catPicker.querySelectorAll('.cat-pick-btn').forEach(b=>{
         b.className='cat-pick-btn';
       });
-      // Toggle select
+      // Toggle — click same to deselect
       const hiddenInput = document.getElementById('m-category');
       if(hiddenInput?.value === cat){
-        if(hiddenInput) hiddenInput.value='';
+        hiddenInput.value='';
       } else {
         btn.classList.add('sel-'+cat);
         if(hiddenInput) hiddenInput.value=cat;
       }
     });
-    // Pre-select if edit mode
+    // Pre-select existing category on edit
     const existingCat = document.getElementById('m-category')?.value;
     if(existingCat){
-      const existingBtn = catPicker.querySelector(`[data-cat="${existingCat}"]`);
+      const existingBtn = catPicker.querySelector('[data-cat="'+existingCat+'"]');
       if(existingBtn) existingBtn.classList.add('sel-'+existingCat);
     }
   }
