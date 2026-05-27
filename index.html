@@ -264,7 +264,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .btn-primary{flex:2;padding:13px;border-radius:14px;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif}
 .btn-full{width:100%;padding:14px;border-radius:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Nunito',sans-serif;border:2px solid var(--yolk-deep);background:var(--yolk);color:var(--text);margin-top:8px}
 /* SETTINGS */
-.settings-screen{position:fixed;inset:0;background:var(--app-bg);z-index:200;display:none;flex-direction:column;max-width:430px;margin:0 auto}
+.settings-screen{position:fixed;inset:0;background:var(--app-bg);z-index:1000;display:none;flex-direction:column;max-width:430px;margin:0 auto}
 .settings-screen.open{display:flex}
 .settings-header{background:var(--yolk);padding:20px 18px 18px;flex-shrink:0}
 [data-theme="dark"] .settings-header{background:#2A2005}
@@ -1654,15 +1654,18 @@ function showModal(editId=null){
         <div class="field">
           <label>KATEGORI</label>
           <div class="cat-picker" id="cat-picker">
-            ${['food','beverages','western','misc'].map(cat=>{
-              const info=CATS[cat];
-              const isSel=isEdit&&r&&r.category===cat;
-              return`<button type="button" class="cat-pick-btn${isSel?' sel-'+cat:''}"
-                data-cat="${cat}">
-                <span class="cat-pick-icon">${info.icon}</span>
-                <span class="cat-pick-label">${info.label}</span>
-              </button>`;
-            }).join('')}
+            ${(()=>{
+              const cats=['food','beverages','western','misc'];
+              return cats.map(function(cat){
+                const info=CATS[cat];
+                const isSel=isEdit&&r&&r.category===cat;
+                const selClass=isSel?' sel-'+cat:'';
+                return '<button type="button" class="cat-pick-btn'+selClass+'" data-cat="'+cat+'">'
+                  +'<span class="cat-pick-icon">'+info.icon+'</span>'
+                  +'<span class="cat-pick-label">'+info.label+'</span>'
+                  +'</button>';
+              }).join('');
+            })()}
           </div>
           <input type="hidden" id="m-category" value="${isEdit&&r?escA(r.category||''):''}">
           <div style="font-size:11px;font-weight:600;color:var(--text-light);margin-top:4px">
@@ -2135,7 +2138,14 @@ async function saveApiUrl(){
 }
 
 // ── SETTINGS ──
-function openSettings(){updateSettingsStatus();document.getElementById('settings-screen').classList.add('open');document.getElementById('dark-toggle-settings').checked=isDark;}
+function openSettings(){
+  updateSettingsStatus();
+  // Close search dropdown before opening settings
+  document.getElementById('suggest-drop')?.classList.remove('open');
+  document.getElementById('search').blur();
+  document.getElementById('settings-screen').classList.add('open');
+  document.getElementById('dark-toggle-settings').checked=isDark;
+}
 function closeSettings(){document.getElementById('settings-screen').classList.remove('open');}
 function updateSettingsStatus(){
   const last=localStorage.getItem('hatchbatch_last_sync');
