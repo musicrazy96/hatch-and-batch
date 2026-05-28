@@ -3614,21 +3614,27 @@ function renderCollectionsBar() {
   if (!bar) return;
   if (!collections.length) { bar.style.display = 'none'; return; }
   bar.style.display = 'flex';
-  bar.innerHTML = `<div class="coll-chip${activeCollection===''?' active':''}" onclick="setCollection('')">
-      <span class="coll-chip-icon">📚</span> Semua
-    </div>` +
-    collections.map(col => {
-      const count = recipes.filter(r=>(r.collections||[]).includes(col.id)).length;
-      return `<div class="coll-chip${activeCollection===col.id?' active':''}"
-        onclick="setCollection('${escA(col.id)}')">
-        <span class="coll-chip-icon">${col.icon}</span>
-        ${escH(col.name)}
-        <span class="coll-chip-count">${count}</span>
-      </div>`;
-    }).join('') +
-    `<div class="coll-chip" onclick="openCollectionsManager()" style="border-style:dashed">
-      <span class="coll-chip-icon">＋</span> Baru
-    </div>`;
+  const allChip = '<div class="coll-chip'+(activeCollection===''?' active':'')+'" data-coll="">'
+    +'<span class="coll-chip-icon">📚</span> Semua</div>';
+  const collChips = collections.map(col => {
+    const count = recipes.filter(r=>(r.collections||[]).includes(col.id)).length;
+    return '<div class="coll-chip'+(activeCollection===col.id?' active':'')+'" data-coll="'+col.id+'">'
+      +'<span class="coll-chip-icon">'+col.icon+'</span>'
+      +escH(col.name)
+      +'<span class="coll-chip-count">'+count+'</span>'
+      +'</div>';
+  }).join('');
+  const newChip = '<div class="coll-chip" data-coll-new="1" style="border-style:dashed">'
+    +'<span class="coll-chip-icon">＋</span> Baru</div>';
+  bar.innerHTML = allChip + collChips + newChip;
+
+  // Event delegation — one listener handles all chips
+  bar.onclick = e => {
+    const chip = e.target.closest('[data-coll]');
+    if (chip) { setCollection(chip.dataset.coll); return; }
+    const newBtn = e.target.closest('[data-coll-new]');
+    if (newBtn) openCollectionsManager();
+  };
 }
 
 function setCollection(id) {
@@ -3651,28 +3657,28 @@ function openCollectionsManager() {
       </div>
       <div class="popup-body">
         <!-- Existing collections -->
-        ${collections.length ? `
-          <div style="font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:8px">SEMUA COLLECTION</div>
-          <div class="coll-list" id="coll-list">
-            ${collections.map(col=>{
+        ${(()=>{
+            if(!collections.length) return '';
+            const items = collections.map(col=>{
               const count=recipes.filter(r=>(r.collections||[]).includes(col.id)).length;
-              return`<div class="coll-item">
-                <span class="coll-item-icon">${col.icon}</span>
-                <div class="coll-item-info">
-                  <div class="coll-item-name">${escH(col.name)}</div>
-                  <div class="coll-item-count">${count} resepi</div>
-                </div>
-                <button class="coll-item-del" onclick="deleteCollection('${escA(col.id)}')">🗑️</button>
-              </div>`;
-            }).join('')}
-          </div>` : ''}
+              return '<div class="coll-item">'
+                +'<span class="coll-item-icon">'+col.icon+'</span>'
+                +'<div class="coll-item-info">'
+                +'<div class="coll-item-name">'+escH(col.name)+'</div>'
+                +'<div class="coll-item-count">'+count+' resepi</div>'
+                +'</div>'
+                +'<button class="coll-item-del" data-del-coll="'+col.id+'">🗑️</button>'
+                +'</div>';
+            }).join('');
+            return '<div style="font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:8px">SEMUA COLLECTION</div>'
+              +'<div class="coll-list" id="coll-del-list">'+items+'</div>';
+          })()}
         <!-- Create new -->
         <div style="font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:8px">BUAT COLLECTION BARU</div>
         <input class="coll-input" id="coll-name-input" placeholder="Nama collection (cth: Resepi Raya)..." maxlength="30">
         <div style="font-size:10px;font-weight:800;color:var(--text-light);letter-spacing:1.2px;margin-bottom:8px">PILIH ICON</div>
         <div class="coll-emoji-row" id="coll-emoji-row">
-          ${EMOJIS.map((e,i)=>`<button class="coll-emoji-btn${i===0?' active':''}"
-            onclick="selectCollEmoji(this,'${e}')">${e}</button>`).join('')}
+          ${(()=>EMOJIS.map((e,i)=>'<button class="coll-emoji-btn'+(i===0?' active':'')+'" data-emoji="'+e+'">'+e+'</button>').join(''))()}
         </div>
       </div>
       <div class="popup-footer">
@@ -3684,6 +3690,28 @@ function openCollectionsManager() {
     </div>
   </div>`;
   document.getElementById('pp-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closePopup();});
+
+  // Delete collection delegation
+  const delList = document.getElementById('coll-del-list');
+  if(delList){
+    delList.addEventListener('click', e=>{
+      const btn = e.target.closest('[data-del-coll]');
+      if(btn) deleteCollection(btn.dataset.delColl);
+    });
+  }
+  // Emoji picker delegation
+  const emojiRow = document.getElementById('coll-emoji-row');
+  if(emojiRow){
+    // Pre-select first emoji
+    window._selectedCollEmoji = EMOJIS[0];
+    emojiRow.addEventListener('click', e=>{
+      const btn = e.target.closest('[data-emoji]');
+      if(!btn) return;
+      emojiRow.querySelectorAll('.coll-emoji-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      window._selectedCollEmoji = btn.dataset.emoji;
+    });
+  }
 }
 
 function selectCollEmoji(el, emoji) {
@@ -3726,35 +3754,37 @@ async function addToCollection(recipeId) {
   const r = recipes.find(x=>x.id===recipeId);
   if (!r) return;
 
-  document.getElementById('portal').innerHTML=`<div class="popup-overlay" id="pp-ov">
-    <div class="popup-sheet">
-      <div class="popup-handle"></div>
-      <div class="popup-header">
-        <div class="popup-title">📁 Tambah ke Collection</div>
-        <button class="popup-close" onclick="closePopup()">×</button>
-      </div>
-      <div class="popup-body">
-        <div class="note-recipe-name">📌 ${escH(r.title)}</div>
-        <div class="coll-list">
-          ${collections.map(col=>{
-            const inColl=(r.collections||[]).includes(col.id);
-            return`<div class="coll-item" style="cursor:pointer;${inColl?'border-color:var(--yolk-deep);background:var(--yolk-soft)':''}"
-              onclick="toggleRecipeCollection(${recipeId},'${escA(col.id)}')">
-              <span class="coll-item-icon">${col.icon}</span>
-              <div class="coll-item-info">
-                <div class="coll-item-name">${escH(col.name)}</div>
-                <div class="coll-item-count">${inColl?'✅ Dah ada':'Tap untuk tambah'}</div>
-              </div>
-            </div>`;
-          }).join('')}
-        </div>
-      </div>
-      <div class="popup-footer">
-        <button class="btn-full" onclick="closePopup()">Selesai</button>
-      </div>
-    </div>
-  </div>`;
+  const collItemsHtml = collections.map(col=>{
+    const inColl=(r.collections||[]).includes(col.id);
+    return '<div class="coll-item" data-toggle-coll="'+col.id+'" style="cursor:pointer;'
+      +(inColl?'border-color:var(--yolk-deep);background:var(--yolk-soft)':'')+'">'
+      +'<span class="coll-item-icon">'+col.icon+'</span>'
+      +'<div class="coll-item-info">'
+      +'<div class="coll-item-name">'+escH(col.name)+'</div>'
+      +'<div class="coll-item-count">'+(inColl?'✅ Dah ada':'Tap untuk tambah')+'</div>'
+      +'</div></div>';
+  }).join('');
+
+  document.getElementById('portal').innerHTML='<div class="popup-overlay" id="pp-ov">'
+    +'<div class="popup-sheet">'
+    +'<div class="popup-handle"></div>'
+    +'<div class="popup-header"><div class="popup-title">📁 Tambah ke Collection</div>'
+    +'<button class="popup-close" onclick="closePopup()">×</button></div>'
+    +'<div class="popup-body">'
+    +'<div class="note-recipe-name">📌 '+escH(r.title)+'</div>'
+    +'<div class="coll-list" id="coll-toggle-list">'+collItemsHtml+'</div>'
+    +'</div>'
+    +'<div class="popup-footer"><button class="btn-full" onclick="closePopup()">Selesai</button></div>'
+    +'</div></div>';
   document.getElementById('pp-ov').addEventListener('click',e=>{if(e.target===e.currentTarget)closePopup();});
+  // Event delegation for collection items
+  const collList = document.getElementById('coll-toggle-list');
+  if(collList){
+    collList.addEventListener('click', e=>{
+      const item = e.target.closest('[data-toggle-coll]');
+      if(item) toggleRecipeCollection(recipeId, item.dataset.toggleColl);
+    });
+  }
 }
 
 async function toggleRecipeCollection(recipeId, collId) {
