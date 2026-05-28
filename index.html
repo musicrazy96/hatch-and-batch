@@ -1420,7 +1420,7 @@ function renderList() {
         </button>
         ${clickArea}
       </div>
-      <div class="card-body" onclick="${inlineVideoShown?'toggleCard(event,'+r.id+')':''}">
+      <div class="card-body" ${inlineVideoShown?'data-toggle-card="'+r.id+'"':''}>
         <div class="card-title">
           ${escH(r.title)}
           ${similarCount>0?`<span class="similar-badge" onclick="openSimilar(null,${r.id})">~${similarCount} serupa</span>`:''}
@@ -1431,7 +1431,7 @@ function renderList() {
           ${r.rating?renderRatingStars(r):''}
         </div>
         <div class="tag-row">
-          ${(r.tags||[]).map(t=>`<span class="tag" onclick="filterByTag(event,'${escA(t)}')">${escH(t)}</span>`).join('')}
+          ${(r.tags||[]).map(t=>'<span class="tag" data-filter-tag="'+escA(t)+'">'+escH(t)+'</span>').join('')}
           ${r.notes?'<span class="tag" style="background:var(--beige);border-color:var(--beige2)">📝</span>':''}
           ${searchQ&&r.notes&&r.notes.toLowerCase().includes(searchQ.toLowerCase())?'<span class="notes-match">📝 dalam nota</span>':''}
         </div>
@@ -1523,7 +1523,7 @@ function openSimilar(e, id) {
       <div class="popup-body">
         <div class="note-recipe-name">📌 ${escH(r.title)}</div>
         ${similar.length?`<div class="similar-list">${similar.map(s=>`
-          <div class="similar-card" onclick="closePopupAndScroll(${s.id})">
+          <div class="similar-card" data-scroll-id="${s.id}">
             ${s.thumbUrl?`<img class="similar-thumb" src="${escA(s.thumbUrl)}" style="width:44px;height:44px;border-radius:10px;object-fit:cover;flex-shrink:0">`:`<div class="similar-thumb">🍽️</div>`}
             <div class="similar-info">
               <div class="similar-title">${escH(s.title)}</div>
@@ -2015,7 +2015,7 @@ function closeModal(){document.getElementById('portal').innerHTML='';pTags=[];pV
 function addTag(v){const t=v.trim().replace(/,+$/,'').toLowerCase().trim();if(t&&!pTags.includes(t)&&pTags.length<20)pTags.push(t);renderMTags();}
 function renderMTags(){const el=document.getElementById('tchips');if(!el)return;el.innerHTML=pTags.map((t,i)=>`<span class="ti-tag">${escH(t)}<span class="ti-rm" onclick="rmTag(${i})">×</span></span>`).join('');}
 function rmTag(i){pTags.splice(i,1);renderMTags();}
-function renderSugs(q){const el=document.getElementById('tsugs');if(!el)return;const ex=allTags().filter(t=>!pTags.includes(t)&&(!q||t.includes(q.toLowerCase()))).slice(0,10);el.innerHTML=ex.map(t=>`<span class="tsug" onclick="addSug('${escA(t)}')">${escH(t)}</span>`).join('');}
+function renderSugs(q){const el=document.getElementById('tsugs');if(!el)return;const ex=allTags().filter(t=>!pTags.includes(t)&&(!q||t.includes(q.toLowerCase()))).slice(0,10);el.innerHTML=ex.map(t=>'<span class="tsug" data-sug="'+escA(t)+'">'+escH(t)+'</span>').join('');}
 function addSug(t){if(!pTags.includes(t))pTags.push(t);renderMTags();renderSugs(document.getElementById('tin')?.value||'');}
 async function doPaste(fid){try{const t=await navigator.clipboard.readText();const el=document.getElementById(fid);if(el)el.value=t;}catch(e){showToast('Paste manual ya','warn');}return Promise.resolve();}
 
@@ -2188,6 +2188,23 @@ function closeConfirm(){document.getElementById('portal').innerHTML='';}
 
 // ── GLOBAL CLICK — close active card ──
 document.addEventListener('click',e=>{
+  // Card body toggle (for inline video cards)
+  const cardBodyToggle = e.target.closest('[data-toggle-card]');
+  if(cardBodyToggle){ toggleCard(e, Number(cardBodyToggle.dataset.toggleCard)); return; }
+
+  // Tag chip filter
+  const tagChip = e.target.closest('[data-filter-tag]');
+  if(tagChip){ filterByTag(e, tagChip.dataset.filterTag); return; }
+
+  // Tag suggestion
+  const sugChip = e.target.closest('[data-sug]');
+  if(sugChip){ addSug(sugChip.dataset.sug); return; }
+
+  // Similar card scroll
+  const simCard = e.target.closest('[data-scroll-id]');
+  if(simCard){ closePopupAndScroll(Number(simCard.dataset.scrollId)); return; }
+
+  // Close active card
   if(activeCardId&&!e.target.closest(`#card-${activeCardId}`)){
     const prev=document.getElementById(`card-${activeCardId}`);
     if(prev)prev.classList.remove('active');
