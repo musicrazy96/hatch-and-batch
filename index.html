@@ -3729,7 +3729,13 @@ function createCollection() {
   saveCollections();
   closePopup();
   renderCollectionsBar();
-  showToast(`✅ Collection "${name}" dibuat!`, 'ok');
+  showToast('✅ Collection "'+name+'" dibuat!', 'ok');
+  // If came from addToCollection, reopen it
+  if (window._pendingCollRecipeId) {
+    const pid = window._pendingCollRecipeId;
+    window._pendingCollRecipeId = null;
+    setTimeout(()=>addToCollection(pid), 300);
+  }
 }
 
 function deleteCollection(id) {
@@ -3748,7 +3754,10 @@ function deleteCollection(id) {
 
 async function addToCollection(recipeId) {
   if (!collections.length) {
-    showToast('Buat collection dulu dalam Collections bar!','warn');
+    // No collections yet — open manager to create one first
+    showToast('Buat collection baru dulu! 📁','warn');
+    window._pendingCollRecipeId = recipeId;
+    openCollectionsManager();
     return;
   }
   const r = recipes.find(x=>x.id===recipeId);
