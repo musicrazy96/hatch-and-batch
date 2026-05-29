@@ -630,6 +630,74 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
 .load-more-spinner.show{display:block}
 @keyframes spin{to{transform:rotate(360deg)}}
 
+
+/* TIMER AUTO-DETECT */
+.timer-chip{display:inline-flex;align-items:center;gap:5px;background:var(--yolk-soft);
+  border:1.5px solid var(--beige2);border-radius:20px;padding:4px 10px;
+  font-size:11px;font-weight:700;color:var(--brown);cursor:pointer;
+  transition:all 0.15s;margin:3px 2px}
+.timer-chip:hover{background:var(--yolk);border-color:var(--yolk-deep)}
+.timer-chip-icon{font-size:13px}
+.detected-timers{display:flex;flex-wrap:wrap;margin-bottom:12px}
+
+/* SHOPPING LIST */
+.shopping-overlay{position:fixed;inset:0;background:var(--app-bg);z-index:998;
+  display:none;flex-direction:column}
+.shopping-overlay.open{display:flex}
+.shopping-header{background:var(--yolk);padding:16px 18px;display:flex;
+  align-items:center;gap:12px;flex-shrink:0}
+[data-theme="dark"] .shopping-header{background:#2A2005}
+.shopping-back{background:rgba(255,255,255,0.25);border:none;border-radius:10px;
+  width:36px;height:36px;font-size:18px;cursor:pointer;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0}
+.shopping-title{font-family:'Fredoka',sans-serif;font-size:18px;font-weight:600;
+  color:var(--text);flex:1}
+[data-theme="dark"] .shopping-title{color:#F5E6C0}
+.shopping-body{flex:1;overflow-y:auto;padding:16px 18px 80px}
+.shopping-select-section{margin-bottom:18px}
+.shopping-select-label{font-size:11px;font-weight:800;color:var(--text-light);
+  letter-spacing:1.2px;margin-bottom:10px}
+.shopping-recipe-chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.shopping-recipe-chip{padding:7px 14px;border-radius:20px;border:1.5px solid var(--border);
+  background:var(--card-bg);font-size:12px;font-weight:700;color:var(--text-mid);
+  cursor:pointer;transition:all 0.15s;user-select:none}
+.shopping-recipe-chip.selected{background:var(--yolk);color:var(--text);
+  border-color:var(--yolk-deep)}
+.shopping-result{background:var(--surface);border-radius:16px;padding:16px;margin-top:4px}
+.shopping-category-title{font-size:12px;font-weight:800;color:var(--text-light);
+  letter-spacing:1px;margin:14px 0 8px;display:flex;align-items:center;gap:6px}
+.shopping-category-title:first-child{margin-top:0}
+.shopping-item{display:flex;align-items:center;gap:10px;padding:8px 0;
+  border-bottom:1px solid var(--border-light)}
+.shopping-item:last-child{border-bottom:none}
+.shopping-item-check{width:20px;height:20px;border-radius:6px;border:2px solid var(--border);
+  cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all 0.15s}
+.shopping-item-check.checked{background:var(--green);border-color:var(--green)}
+.shopping-item-text{font-size:14px;font-weight:600;color:var(--text);flex:1}
+.shopping-item-text.checked{text-decoration:line-through;color:var(--text-light)}
+.shopping-generating{text-align:center;padding:30px;color:var(--text-light)}
+.shopping-gen-icon{font-size:36px;margin-bottom:10px;animation:bounce 1s infinite}
+.shopping-gen-text{font-size:13px;font-weight:600}
+.shopping-fab{position:fixed;bottom:24px;right:24px;background:var(--green);
+  color:#fff;border:none;border-radius:50%;width:52px;height:52px;font-size:22px;
+  cursor:pointer;box-shadow:0 4px 16px rgba(82,183,136,0.45);z-index:999;
+  display:flex;align-items:center;justify-content:center}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* COOKING NOTES AI */
+.ai-tips-btn{display:flex;align-items:center;gap:6px;background:var(--blue-pale);
+  border:1.5px solid #4A90D9;border-radius:12px;padding:9px 14px;
+  font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;
+  width:100%;justify-content:center;margin-bottom:12px;transition:all 0.15s;
+  font-family:'Nunito',sans-serif}
+.ai-tips-btn:hover{background:#d0e8ff}
+.ai-tips-btn:disabled{opacity:0.6;cursor:not-allowed}
+.ai-tips-result{background:var(--blue-pale);border-radius:12px;padding:14px;
+  margin-bottom:12px;font-size:13px;font-weight:500;color:var(--text);
+  line-height:1.7;border:1.5px solid #4A90D9;display:none}
+.ai-tips-result.show{display:block}
+
 </style>
 </head>
 <body>
@@ -712,6 +780,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
       <option value="edited">✏️ Terbaru diedit</option>
     </select>
     <button class="fav-filter-btn" id="fav-filter-btn" onclick="toggleFavFilter()">⭐ Favourite</button>
+    <button class="fav-filter-btn" onclick="openShoppingList()" style="background:var(--green-pale);color:#2D6A4F;border-color:#52B788">🛒 List</button>
   </div>
   <!-- CATEGORY TABS -->
   <div class="cat-tabs" id="cat-tabs">
@@ -1494,6 +1563,10 @@ function openNotes(id) {
       <div class="popup-header"><div class="popup-title">📝 Nota</div><button class="popup-close" onclick="closePopup()">×</button></div>
       <div class="popup-body">
         <div class="note-recipe-name">📌 ${escH(r.title)}</div>
+        <button class="ai-tips-btn" id="ai-tips-btn" onclick="generateCookingTips(${id})">
+          ✨ AI Cooking Tips — jana tips untuk resepi ni
+        </button>
+        <div class="ai-tips-result" id="ai-tips-result"></div>
         <textarea class="note-textarea" id="note-ta" placeholder="Tip, ubahsuai, masa masak...">${escH(r.notes||'')}</textarea>
       </div>
       <div class="popup-footer"><div class="btn-row"><button class="btn-secondary" onclick="closePopup()">Batal</button><button class="btn-primary" onclick="saveNotePopup(${id})">💾 Simpan</button></div></div>
@@ -3508,15 +3581,29 @@ function openMasakMode(id) {
        </button>`
     : '';
 
+  // Detect timers from notes
+  const timerHtml = renderDetectedTimers(r.notes, id);
+
   body.innerHTML = `
     ${thumbHtml}
     ${tagsHtml}
+    ${timerHtml}
     ${notesHtml}
     ${playBtn}
     <div class="masak-rating-section">
       <div class="masak-rating-title">Macam mana resepi ni?</div>
       <div class="masak-rating-stars" id="masak-rating-stars"></div>
     </div>`;
+
+  // Timer chip delegation
+  body.addEventListener('click', e => {
+    const chip = e.target.closest('[data-timer-sec]');
+    if (!chip) return;
+    const secs = parseInt(chip.dataset.timerSec);
+    setTimer(secs);
+    startMasakTimer();
+    showToast('⏱️ Timer ' + chip.textContent.trim() + ' dimulakan!', 'ok');
+  });
 
   renderMasakRating(id);
   overlay.classList.add('open');
@@ -3892,6 +3979,248 @@ function checkShareTarget() {
   }
 }
 
+
+// ══════════════════════════════════════════
+// ── FEATURE 1: RECIPE TIMER AUTO-DETECT
+// ══════════════════════════════════════════
+
+// Detect time patterns in text
+function detectTimers(text) {
+  if (!text) return [];
+  const patterns = [
+    /(\d+)\s*(?:minit|min|minute[s]?)/gi,
+    /(\d+)\s*(?:jam|hour[s]?|hr[s]?)/gi,
+    /(\d+)\s*(?:saat|second[s]?|sec[s]?)/gi,
+  ];
+  const timers = [];
+  const seen = new Set();
+
+  patterns.forEach((pattern, type) => {
+    let match;
+    while ((match = pattern.exec(text)) !== null) {
+      const val = parseInt(match[1]);
+      let seconds = 0;
+      if (type === 0) seconds = val * 60;        // minit
+      else if (type === 1) seconds = val * 3600;  // jam
+      else seconds = val;                          // saat
+
+      const key = seconds + 's';
+      if (!seen.has(key) && seconds > 0 && seconds <= 7200) {
+        seen.add(key);
+        const label = type === 0 ? val + ' min'
+                    : type === 1 ? val + ' jam'
+                    : val + ' saat';
+        timers.push({ label, seconds, original: match[0] });
+      }
+    }
+  });
+  return timers.sort((a, b) => a.seconds - b.seconds);
+}
+
+// Render detected timers in Masak Mode
+function renderDetectedTimers(notes, recipeId) {
+  const timers = detectTimers(notes);
+  if (!timers.length) return '';
+
+  return '<div class="masak-section-title">⏱️ TIMER DETECTED</div>'
+    + '<div class="detected-timers">'
+    + timers.map(t =>
+        '<span class="timer-chip" data-timer-sec="' + t.seconds + '">'
+        + '<span class="timer-chip-icon">⏱️</span>'
+        + t.label
+        + '</span>'
+      ).join('')
+    + '</div>';
+}
+
+// ══════════════════════════════════════════
+// ── FEATURE 2: SHOPPING LIST GENERATOR
+// ══════════════════════════════════════════
+let selectedShoppingRecipes = new Set();
+let shoppingItems = [];
+
+function openShoppingList() {
+  selectedShoppingRecipes = new Set();
+  const overlay = document.getElementById('shopping-overlay');
+  if (overlay) overlay.classList.add('open');
+  renderShoppingChips();
+  document.getElementById('shopping-result').innerHTML = '';
+}
+
+function closeShoppingList() {
+  document.getElementById('shopping-overlay')?.classList.remove('open');
+}
+
+function renderShoppingChips() {
+  const wrap = document.getElementById('shopping-chips');
+  if (!wrap) return;
+  wrap.innerHTML = recipes.map(r =>
+    '<span class="shopping-recipe-chip" data-shop-id="' + r.id + '">'
+    + (r.thumbUrl ? '<img src="'+escA(r.thumbUrl)+'" style="width:16px;height:16px;border-radius:4px;object-fit:cover;vertical-align:middle;margin-right:4px">' : '')
+    + escH(r.title)
+    + '</span>'
+  ).join('');
+
+  // Event delegation
+  wrap.addEventListener('click', e => {
+    const chip = e.target.closest('[data-shop-id]');
+    if (!chip) return;
+    const id = Number(chip.dataset.shopId);
+    if (selectedShoppingRecipes.has(id)) {
+      selectedShoppingRecipes.delete(id);
+      chip.classList.remove('selected');
+    } else {
+      selectedShoppingRecipes.add(id);
+      chip.classList.add('selected');
+    }
+  });
+}
+
+async function generateShoppingList() {
+  if (!selectedShoppingRecipes.size) {
+    showToast('Pilih resepi dulu!', 'err'); return;
+  }
+  const btn = document.getElementById('shopping-gen-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Menjana...'; }
+
+  const resultEl = document.getElementById('shopping-result');
+  resultEl.innerHTML = '<div class="shopping-generating">'
+    + '<div class="shopping-gen-icon">🤔</div>'
+    + '<div class="shopping-gen-text">AI sedang susun bahan-bahan...</div>'
+    + '</div>';
+
+  const selected = [...selectedShoppingRecipes].map(id => recipes.find(r => r.id === id)).filter(Boolean);
+  const recipeDetails = selected.map(r =>
+    'Resepi: ' + r.title + '\nBahan/Tag: ' + (r.tags||[]).join(', ') + '\nNota: ' + (r.notes||'tiada')
+  ).join('\n\n');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 800,
+        messages: [{
+          role: 'user',
+          content: 'Berdasarkan resepi-resepi berikut, jana shopping list dalam Bahasa Melayu yang organized mengikut kategori (🥩 Daging & Protein, 🥬 Sayur-sayuran, 🧅 Rempah & Perencah, 🥫 Tin & Kering, 🧴 Lain-lain).'
+            + '\n\nFormat jawapan HANYA dalam JSON seperti ini, tiada teks lain:'
+            + '\n{"categories": [{"name": "🥩 Daging & Protein", "items": ["ayam 1kg", "ikan kembung 500g"]}, ...]}'
+            + '\n\nResepi:\n' + recipeDetails
+        }]
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    renderShoppingResult(parsed, selected);
+  } catch(e) {
+    // Fallback: generate basic list from tags
+    const allTags = [...new Set(selected.flatMap(r => r.tags||[]))];
+    const fallback = { categories: [{ name: '🛒 Bahan-bahan', items: allTags }] };
+    renderShoppingResult(fallback, selected);
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = '✨ Jana Semula'; }
+}
+
+function renderShoppingResult(data, selected) {
+  shoppingItems = [];
+  const resultEl = document.getElementById('shopping-result');
+  if (!resultEl) return;
+
+  let html = '<div class="shopping-result">'
+    + '<div style="font-size:12px;font-weight:700;color:var(--text-mid);margin-bottom:12px">'
+    + '📋 Shopping list untuk: ' + selected.map(r=>escH(r.title)).join(', ') + '</div>';
+
+  (data.categories || []).forEach(cat => {
+    html += '<div class="shopping-category-title">' + escH(cat.name) + '</div>';
+    (cat.items || []).forEach((item, i) => {
+      const idx = shoppingItems.length;
+      shoppingItems.push({ text: item, checked: false });
+      html += '<div class="shopping-item" data-item-idx="' + idx + '">'
+        + '<div class="shopping-item-check" data-check-idx="' + idx + '"></div>'
+        + '<div class="shopping-item-text">' + escH(item) + '</div>'
+        + '</div>';
+    });
+  });
+
+  html += '</div>';
+  resultEl.innerHTML = html;
+
+  // Check/uncheck delegation
+  resultEl.addEventListener('click', e => {
+    const check = e.target.closest('[data-check-idx]');
+    if (!check) return;
+    const idx = parseInt(check.dataset.checkIdx);
+    shoppingItems[idx].checked = !shoppingItems[idx].checked;
+    check.classList.toggle('checked', shoppingItems[idx].checked);
+    const textEl = check.nextElementSibling;
+    if (textEl) textEl.classList.toggle('checked', shoppingItems[idx].checked);
+  });
+}
+
+function shareShoppingList() {
+  if (!shoppingItems.length) { showToast('Jana list dulu!', 'warn'); return; }
+  const text = '🛒 *Shopping List — Hatch & Batch*\n\n'
+    + shoppingItems.map(item => (item.checked ? '✅ ' : '⬜ ') + item.text).join('\n');
+  if (navigator.share) {
+    navigator.share({ text }).catch(() => copyToClipboard(text));
+  } else {
+    copyToClipboard(text);
+  }
+}
+
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text)
+    .then(() => showToast('✅ Disalin! Paste ke WhatsApp', 'ok'))
+    .catch(() => showToast('Gagal copy', 'err'));
+}
+
+// ══════════════════════════════════════════
+// ── FEATURE 3: COOKING NOTES AI
+// ══════════════════════════════════════════
+async function generateCookingTips(recipeId) {
+  const r = recipes.find(x => x.id === recipeId);
+  if (!r) return;
+
+  const btn = document.getElementById('ai-tips-btn');
+  const result = document.getElementById('ai-tips-result');
+  if (!btn || !result) return;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ AI sedang berfikir...';
+  result.classList.remove('show');
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{
+          role: 'user',
+          content: 'Berikan 3-4 tips memasak yang praktikal dan berguna dalam Bahasa Melayu casual untuk resepi "'
+            + r.title + '" dengan bahan/tag: ' + (r.tags||[]).join(', ')
+            + '. Format: tips pendek, boleh terus guna. Jangan terlalu formal.'
+        }]
+      })
+    });
+    const data = await res.json();
+    const tips = data.content?.[0]?.text || 'Gagal jana tips.';
+    result.textContent = tips;
+    result.classList.add('show');
+    btn.textContent = '✨ Jana Tips Baru';
+  } catch(e) {
+    result.textContent = 'Gagal connect ke AI. Cuba lagi.';
+    result.classList.add('show');
+    btn.textContent = '✨ AI Cooking Tips';
+  }
+  btn.disabled = false;
+}
+
 // ── INIT ──
 function init(){
   if(isDark)applyDark(true,false);
@@ -3932,6 +4261,23 @@ function startApp(){
 document.addEventListener("DOMContentLoaded", startApp);
 </script>
 
+
+<!-- SHOPPING LIST -->
+<div class="shopping-overlay" id="shopping-overlay">
+  <div class="shopping-header">
+    <button class="shopping-back" onclick="closeShoppingList()">←</button>
+    <div class="shopping-title">🛒 Shopping List</div>
+    <button class="icon-btn" onclick="shareShoppingList()" title="Share">📤</button>
+  </div>
+  <div class="shopping-body" id="shopping-body">
+    <div class="shopping-select-section">
+      <div class="shopping-select-label">PILIH RESEPI (boleh pilih lebih 1)</div>
+      <div class="shopping-recipe-chips" id="shopping-chips"></div>
+      <button class="btn-full" id="shopping-gen-btn" onclick="generateShoppingList()" style="margin-top:4px">✨ Jana Shopping List</button>
+    </div>
+    <div id="shopping-result"></div>
+  </div>
+</div>
 
 <!-- MASAK MODE -->
 <div class="masak-overlay" id="masak-overlay">
