@@ -685,18 +685,7 @@ html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:v
   display:flex;align-items:center;justify-content:center}
 @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
 
-/* COOKING NOTES AI */
-.ai-tips-btn{display:flex;align-items:center;gap:6px;background:var(--blue-pale);
-  border:1.5px solid #4A90D9;border-radius:12px;padding:9px 14px;
-  font-size:12px;font-weight:700;color:var(--blue);cursor:pointer;
-  width:100%;justify-content:center;margin-bottom:12px;transition:all 0.15s;
-  font-family:'Nunito',sans-serif}
-.ai-tips-btn:hover{background:#d0e8ff}
-.ai-tips-btn:disabled{opacity:0.6;cursor:not-allowed}
-.ai-tips-result{background:var(--blue-pale);border-radius:12px;padding:14px;
-  margin-bottom:12px;font-size:13px;font-weight:500;color:var(--text);
-  line-height:1.7;border:1.5px solid #4A90D9;display:none}
-.ai-tips-result.show{display:block}
+/* Cooking Notes AI removed */
 
 </style>
 </head>
@@ -1563,10 +1552,7 @@ function openNotes(id) {
       <div class="popup-header"><div class="popup-title">📝 Nota</div><button class="popup-close" onclick="closePopup()">×</button></div>
       <div class="popup-body">
         <div class="note-recipe-name">📌 ${escH(r.title)}</div>
-        <button class="ai-tips-btn" id="ai-tips-btn" onclick="generateCookingTips(${id})">
-          ✨ AI Cooking Tips — jana tips untuk resepi ni
-        </button>
-        <div class="ai-tips-result" id="ai-tips-result"></div>
+
         <textarea class="note-textarea" id="note-ta" placeholder="Tip, ubahsuai, masa masak...">${escH(r.notes||'')}</textarea>
       </div>
       <div class="popup-footer"><div class="btn-row"><button class="btn-secondary" onclick="closePopup()">Batal</button><button class="btn-primary" onclick="saveNotePopup(${id})">💾 Simpan</button></div></div>
@@ -4191,82 +4177,6 @@ function copyToClipboard(text) {
 // ══════════════════════════════════════════
 // ── FEATURE 3: COOKING NOTES AI
 // ══════════════════════════════════════════
-async function generateCookingTips(recipeId) {
-  const r = recipes.find(x => x.id === recipeId);
-  if (!r) return;
-
-  const btn = document.getElementById('ai-tips-btn');
-  const result = document.getElementById('ai-tips-result');
-  if (!btn || !result) return;
-
-  btn.disabled = true;
-  btn.textContent = '⏳ AI sedang berfikir...';
-  result.classList.remove('show');
-
-  const prompt = 'Berikan 3-4 tips memasak yang praktikal dan berguna dalam Bahasa Melayu casual untuk resepi "'
-    + r.title + '" dengan bahan/tag: ' + (r.tags||[]).join(', ')
-    + '. Format: tips pendek pakai nombor (1. 2. 3.), boleh terus guna. Jangan terlalu formal. Maksimum 4 ayat pendek.';
-
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-
-    if (!res.ok) {
-      const errText = await res.text();
-      throw new Error('HTTP ' + res.status + ': ' + errText.slice(0, 100));
-    }
-
-    const data = await res.json();
-    const tips = data.content?.[0]?.text || '';
-
-    if (!tips) throw new Error('Empty response');
-
-    result.innerHTML = tips.split('\n').join('<br>');
-    result.classList.add('show');
-    btn.textContent = '✨ Jana Tips Baru';
-
-  } catch(e) {
-    console.error('Cooking tips error:', e);
-    // Fallback: generate basic tips locally without AI
-    const fallbackTips = generateLocalTips(r);
-    result.innerHTML = fallbackTips;
-    result.classList.add('show');
-    btn.textContent = '✨ Jana Tips Baru';
-  }
-  btn.disabled = false;
-}
-
-// Local fallback tips bila AI tak available
-function generateLocalTips(r) {
-  const tips = [];
-  const tags = (r.tags||[]).map(t=>t.toLowerCase());
-
-  if (tags.some(t=>['ayam','daging','ikan','udang','sotong'].some(k=>t.includes(k))))
-    tips.push('🔪 Pastikan protein dah perap sekurang-kurangnya 30 minit sebelum masak untuk rasa yang lebih meresap.');
-  if (tags.some(t=>['santan','lemak'].some(k=>t.includes(k))))
-    tips.push('🥥 Masukkan santan paling akhir dan kacau perlahan — jangan biar mendidih kuat supaya tak pecah minyak.');
-  if (tags.some(t=>['pedas','cili','sambal'].some(k=>t.includes(k))))
-    tips.push('🌶️ Tumis cili dengan api sederhana sampai naik minyak untuk rasa yang lebih wangi dan masak.');
-  if (tags.some(t=>['goreng','deep fry'].some(k=>t.includes(k))))
-    tips.push('🍳 Pastikan minyak betul-betul panas sebelum masukkan bahan — test dengan titik air kecil.');
-  if (tags.some(t=>['rebus','sup','kuah'].some(k=>t.includes(k))))
-    tips.push('🫕 Buang buih yang timbul semasa merebus untuk kuah yang lebih jernih dan sedap.');
-
-  if (!tips.length) {
-    tips.push('👨‍🍳 Sediakan semua bahan dulu sebelum mula masak (mise en place) — jimat masa dan kurang kelam kabut!');
-    tips.push('🔥 Kawal api — kebanyakan masakan Melayu sedap dengan api sederhana, bukan api besar.');
-    tips.push('🧂 Rasa dan adjust perasa sebelum hidang — setiap orang ada selera berbeza.');
-  }
-
-  return '<strong>💡 Tips untuk ' + escH(r.title) + ':</strong><br><br>' + tips.join('<br><br>');
-}
 
 // ── INIT ──
 function init(){
