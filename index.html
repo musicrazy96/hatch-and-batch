@@ -4116,10 +4116,20 @@ async function generateShoppingList() {
     const parsed = JSON.parse(clean);
     renderShoppingResult(parsed, selected);
   } catch(e) {
-    // Fallback: generate basic list from tags
+    console.error('Shopping list AI error:', e);
+    // Fallback: organize tags by simple keyword matching
     const allTags = [...new Set(selected.flatMap(r => r.tags||[]))];
-    const fallback = { categories: [{ name: '🛒 Bahan-bahan', items: allTags }] };
-    renderShoppingResult(fallback, selected);
+    const meat = allTags.filter(t=>['ayam','daging','ikan','udang','sotong','telur','kerang','ketam'].some(k=>t.toLowerCase().includes(k)));
+    const veg  = allTags.filter(t=>['sayur','kobis','bayam','kangkung','tomato','timun','carrot','lobak'].some(k=>t.toLowerCase().includes(k)));
+    const spice= allTags.filter(t=>['bawang','cili','serai','kunyit','halia','lengkuas','daun','rempah','lada'].some(k=>t.toLowerCase().includes(k)));
+    const other= allTags.filter(t=>!meat.includes(t)&&!veg.includes(t)&&!spice.includes(t));
+    const cats = [];
+    if(meat.length)  cats.push({name:'🥩 Daging & Protein', items: meat});
+    if(veg.length)   cats.push({name:'🥬 Sayur-sayuran', items: veg});
+    if(spice.length) cats.push({name:'🧅 Rempah & Perencah', items: spice});
+    if(other.length) cats.push({name:'🛒 Lain-lain', items: other});
+    if(!cats.length) cats.push({name:'🛒 Bahan-bahan', items: allTags.length?allTags:['Tambah tags pada resepi untuk shopping list yang lebih lengkap']});
+    renderShoppingResult({categories: cats}, selected);
   }
 
   if (btn) { btn.disabled = false; btn.textContent = '✨ Jana Semula'; }
@@ -4193,6 +4203,10 @@ async function generateCookingTips(recipeId) {
   btn.textContent = '⏳ AI sedang berfikir...';
   result.classList.remove('show');
 
+  const prompt = 'Berikan 3-4 tips memasak yang praktikal dan berguna dalam Bahasa Melayu casual untuk resepi "'
+    + r.title + '" dengan bahan/tag: ' + (r.tags||[]).join(', ')
+    + '. Format: tips pendek pakai nombor (1. 2. 3.), boleh terus guna. Jangan terlalu formal. Maksimum 4 ayat pendek.';
+
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -4200,25 +4214,58 @@ async function generateCookingTips(recipeId) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 400,
-        messages: [{
-          role: 'user',
-          content: 'Berikan 3-4 tips memasak yang praktikal dan berguna dalam Bahasa Melayu casual untuk resepi "'
-            + r.title + '" dengan bahan/tag: ' + (r.tags||[]).join(', ')
-            + '. Format: tips pendek, boleh terus guna. Jangan terlalu formal.'
-        }]
+        messages: [{ role: 'user', content: prompt }]
       })
     });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('HTTP ' + res.status + ': ' + errText.slice(0, 100));
+    }
+
     const data = await res.json();
-    const tips = data.content?.[0]?.text || 'Gagal jana tips.';
-    result.textContent = tips;
+    const tips = data.content?.[0]?.text || '';
+
+    if (!tips) throw new Error('Empty response');
+
+    result.innerHTML = tips.split('\n').join('<br>');
     result.classList.add('show');
     btn.textContent = '✨ Jana Tips Baru';
+
   } catch(e) {
-    result.textContent = 'Gagal connect ke AI. Cuba lagi.';
+    console.error('Cooking tips error:', e);
+    // Fallback: generate basic tips locally without AI
+    const fallbackTips = generateLocalTips(r);
+    result.innerHTML = fallbackTips;
     result.classList.add('show');
-    btn.textContent = '✨ AI Cooking Tips';
+    btn.textContent = '✨ Jana Tips Baru';
   }
   btn.disabled = false;
+}
+
+// Local fallback tips bila AI tak available
+function generateLocalTips(r) {
+  const tips = [];
+  const tags = (r.tags||[]).map(t=>t.toLowerCase());
+
+  if (tags.some(t=>['ayam','daging','ikan','udang','sotong'].some(k=>t.includes(k))))
+    tips.push('🔪 Pastikan protein dah perap sekurang-kurangnya 30 minit sebelum masak untuk rasa yang lebih meresap.');
+  if (tags.some(t=>['santan','lemak'].some(k=>t.includes(k))))
+    tips.push('🥥 Masukkan santan paling akhir dan kacau perlahan — jangan biar mendidih kuat supaya tak pecah minyak.');
+  if (tags.some(t=>['pedas','cili','sambal'].some(k=>t.includes(k))))
+    tips.push('🌶️ Tumis cili dengan api sederhana sampai naik minyak untuk rasa yang lebih wangi dan masak.');
+  if (tags.some(t=>['goreng','deep fry'].some(k=>t.includes(k))))
+    tips.push('🍳 Pastikan minyak betul-betul panas sebelum masukkan bahan — test dengan titik air kecil.');
+  if (tags.some(t=>['rebus','sup','kuah'].some(k=>t.includes(k))))
+    tips.push('🫕 Buang buih yang timbul semasa merebus untuk kuah yang lebih jernih dan sedap.');
+
+  if (!tips.length) {
+    tips.push('👨‍🍳 Sediakan semua bahan dulu sebelum mula masak (mise en place) — jimat masa dan kurang kelam kabut!');
+    tips.push('🔥 Kawal api — kebanyakan masakan Melayu sedap dengan api sederhana, bukan api besar.');
+    tips.push('🧂 Rasa dan adjust perasa sebelum hidang — setiap orang ada selera berbeza.');
+  }
+
+  return '<strong>💡 Tips untuk ' + escH(r.title) + ':</strong><br><br>' + tips.join('<br><br>');
 }
 
 // ── INIT ──
