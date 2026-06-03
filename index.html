@@ -35,7 +35,50 @@
   --blue-pale:#1A2535;--green-pale:#0D2318;
 }
 html,body{height:100%;background:#F0E8C8;font-family:'Nunito',sans-serif;color:var(--text)}
-[data-theme="dark"] body{background:#111008}
+[data-theme="dark"] html,
+[data-theme="dark"] body,
+[data-theme="dark"] .app,
+[data-theme="dark"] .list,
+[data-theme="dark"] .fab-area{background:#1A1508}
+[data-theme="dark"] .sec-lbl{color:#3D3318}
+[data-theme="dark"] html,[data-theme="dark"] body{background:#111008}
+[data-theme="dark"] .shopping-overlay,[data-theme="dark"] .masak-overlay{background:#1A1508}
+[data-theme="dark"] .shopping-header,[data-theme="dark"] .masak-header{background:#2A2005}
+[data-theme="dark"] .shopping-title,[data-theme="dark"] .masak-title{color:#F5E6C0}
+[data-theme="dark"] .cat-tab{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .cat-tab.active{background:#2A2005;color:#F5E6C0;border-color:#E6B020}
+[data-theme="dark"] .cat-tab:hover:not(.active){background:#2E2610}
+[data-theme="dark"] .coll-chip{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .coll-chip.active{background:#2A2005;color:#F5E6C0;border-color:#E6B020}
+[data-theme="dark"] .recently-chip{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .recently-name{color:#F5E6C0}
+[data-theme="dark"] .stat-card{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .stat-num{color:#F5E6C0}
+[data-theme="dark"] .tc{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .tc.active{background:#2A2005;color:#F5E6C0;border-color:#E6B020}
+[data-theme="dark"] .tc-more-btn{border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .sort-select{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .fav-filter-btn{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .fav-filter-btn.active{background:#2D1515;color:#FF8870;border-color:#FF6650}
+[data-theme="dark"] .sync-bar{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .pwa-banner{background:#2A2005;border-color:#E6B020}
+[data-theme="dark"] .offline-banner{background:#5C1010}
+[data-theme="dark"] .masak-notes{background:#221C09;color:#F5E6C0}
+[data-theme="dark"] .masak-rating-section{background:#221C09}
+[data-theme="dark"] .masak-rating-title{color:#8B7040}
+[data-theme="dark"] .shopping-result{background:#221C09}
+[data-theme="dark"] .shopping-item-text{color:#F5E6C0}
+[data-theme="dark"] .shopping-recipe-chip{background:#221C09;border-color:#3D3318;color:#8B7040}
+[data-theme="dark"] .shopping-recipe-chip.selected{background:#2A2005;color:#F5E6C0;border-color:#E6B020}
+[data-theme="dark"] .dup-sheet{background:#1A1508}
+[data-theme="dark"] .dup-card{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .confirm-box{background:#221C09}
+[data-theme="dark"] .coll-item{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .coll-input{background:#221C09;border-color:#3D3318;color:#F5E6C0}
+[data-theme="dark"] .timer-chip{background:#221C09;border-color:#3D3318;color:#D4B86A}
+[data-theme="dark"] .cat-pick-btn{background:#221C09;border-color:#3D3318}
+[data-theme="dark"] .cat-pick-label{color:#8B7040}
+[data-theme="dark"] .notes-match{background:#2A2005;color:#D4B86A;border-color:#3D3318}
 .app{width:100%;max-width:430px;margin:0 auto;background:var(--app-bg);min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
 /* TOPBAR */
 .topbar{background:var(--yolk);padding:20px 18px 0;position:relative;overflow:visible;flex-shrink:0}
@@ -1228,6 +1271,9 @@ function showSkeleton() {
 function applyDark(on, save=true) {
   isDark = on;
   document.documentElement.setAttribute('data-theme', on ? 'dark' : 'light');
+  // Force background on html + body to prevent cream showing on overscroll/sides
+  document.documentElement.style.background = on ? '#111008' : '#F0E8C8';
+  document.body.style.background = on ? '#111008' : '#F0E8C8';
   document.getElementById('dark-toggle-btn').textContent = on ? '☀️' : '🌙';
   const ds = document.getElementById('dark-toggle-settings');
   if (ds) ds.checked = on;
@@ -4252,7 +4298,12 @@ function init(){
 
 // ── ENTRY POINT — check auth before init ──
 function startApp(){
-  if(isDark)applyDark(true,false);
+  // Apply background immediately to prevent flash of light color
+  if(isDark){
+    document.documentElement.style.background = '#111008';
+    document.body.style.background = '#111008';
+    applyDark(true,false);
+  }
   if(isAuthenticated()){
     hidePasscodeScreen();
     init();
