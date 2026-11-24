@@ -1,6 +1,6 @@
 // Hatch & Batch Service Worker
 // ⚠️ Update CACHE_VERSION setiap kali deploy baru!
-const CACHE_VERSION = 'v9.1-' + '20250529';
+const CACHE_VERSION = 'v10.0-' + '20261124';
 const CACHE_NAME    = 'hatch-batch-' + CACHE_VERSION;
 
 const STATIC_ASSETS = [
